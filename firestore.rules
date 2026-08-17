@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /users/{userId} {
+      allow read, create: if request.auth != null && request.auth.uid == userId;
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      // customerType is self-editable in v1 since no pricing hangs off it yet —
+      // revisit (e.g. restrict to admin) if/when business pricing is added.
+    }
+
+    match /orders/{orderId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || 
+         (request.auth.token.email != null && resource.data.customerEmail == request.auth.token.email) || 
+         request.auth.token.admin == true);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && request.auth.token.admin == true; // status transitions only
+      allow delete: if false;
+    }
+
+    match /storeSettings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}
