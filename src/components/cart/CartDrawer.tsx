@@ -52,6 +52,7 @@ import {
   Lock,
   Clock,
   ChevronLeft,
+  ArrowLeft,
   MapPinCheckInside,
 } from "lucide-react";
 import { formatContainerType, formatPrice } from "@/lib/utils";
@@ -387,16 +388,6 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
         <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-[#f9f9f9] p-6 rounded-none border-l border-[#c8d3d5]">
           <SheetHeader className="pb-4 border-b border-[#c8d3d5] pr-8">
             <div className="flex items-center gap-2 min-w-0">
-              {step !== "cart" && !orderSuccessId && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 mr-0.5 shrink-0 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                  onClick={() => setStep(step === "guest-form" && isAnonymous ? "account-choice" : "cart")}
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-              )}
               <ShoppingCart className="size-5 text-[#00A8BC] shrink-0" />
               <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider whitespace-nowrap text-[#0f4851]">
                 {step === "cart"
@@ -709,6 +700,18 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       Als Gast reservieren
                     </Button>
                   </div>
+
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep("cart")}
+                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 shadow-2xs"
+                    >
+                      <ArrowLeft className="size-4 text-[#00A8BC]" />
+                      <span>Zurück zum Warenkorb</span>
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -986,6 +989,16 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                           </span>
                         </>
                       )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep(isAnonymous ? "account-choice" : "cart")}
+                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 mt-2 shadow-2xs"
+                    >
+                      <ArrowLeft className="size-4 text-[#00A8BC]" />
+                      <span>{isAnonymous ? "Zurück zur Auswahl" : "Zurück zum Warenkorb"}</span>
                     </Button>
                   </form>
                 </div>
