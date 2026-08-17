@@ -45,6 +45,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const { clearCart } = useCart();
 
   const [activeTab, setActiveTab] = useState<"register" | "login">("login");
+  const [viewMode, setViewMode] = useState<"tabs" | "forgot_password">("tabs");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -77,6 +78,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   // Reset to overview mode whenever the modal opens
   React.useEffect(() => {
     if (open) {
+      setViewMode("tabs");
       setIsEditingProfile(false);
       setShowDeleteConfirm(false);
       setError(null);
@@ -200,6 +202,22 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       } else {
         setError(err.message || "Fehler beim Zurücksetzen des Passworts.");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileResetPassword = async () => {
+    if (!user?.email) return;
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      setLoading(true);
+      await resetPassword(user.email);
+      setSuccessMsg(`Link zum Zurücksetzen des Passworts wurde an ${user.email} gesendet! Bitte prüfe deinen Posteingang.`);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Fehler beim Senden der E-Mail zum Zurücksetzen.");
     } finally {
       setLoading(false);
     }
@@ -505,8 +523,20 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       </>
                     )}
                   </div>
-                  <div className="pt-2 border-t mt-3 flex justify-end">
-                    <Button variant="ghost" size="sm" onClick={handleEditProfile} className="h-8 text-xs font-medium">
+                  <div className="pt-2 border-t mt-3 flex items-center justify-between gap-2">
+                    {user?.email && !user.providerData.some((p) => p.providerId === "google.com") && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleProfileResetPassword}
+                        disabled={loading}
+                        className="h-8 text-xs font-semibold rounded-none border-[#c8d3d5] text-[#0f4851] hover:bg-[#eeeeee]"
+                      >
+                        Passwort ändern
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={handleEditProfile} className="h-8 text-xs font-medium ml-auto">
                       Profil bearbeiten
                     </Button>
                   </div>
@@ -542,72 +572,28 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
             )}
 
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full mt-2">
-              <TabsList className="grid w-full grid-cols-2 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
-                <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
-                  Anmelden
-                </TabsTrigger>
-                <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
-                  Neu registrieren
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="register" className="mt-4 space-y-4">
-                <div className="space-y-2">
-                  <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
-                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                    </svg>
-                    Mit Google fortfahren
-                  </Button>
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-[#c8d3d5]" />
-                  </div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-                    <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
-                  </div>
+            {viewMode === "forgot_password" ? (
+              <div className="space-y-4 pt-1">
+                <div className="text-left space-y-1">
+                  <h3 className="font-heading text-xl uppercase tracking-wider text-[#0f4851]">Passwort zurücksetzen</h3>
+                  <p className="text-xs text-[#505c5f]">
+                    Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen sicheren Link per E-Mail, mit dem Sie ein neues Passwort festlegen können.
+                  </p>
                 </div>
 
-                <form onSubmit={handleRegisterOrLink} className="space-y-3">
-                  
-                  {/* Name Input */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleResetPassword();
+                  }}
+                  className="space-y-3 pt-2"
+                >
                   <div className="space-y-1">
-                    <Label htmlFor="reg-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Vollständiger Name *</Label>
+                    <Label htmlFor="reset-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                      E-Mail-Adresse
+                    </Label>
                     <Input
-                      id="reg-name"
-                      type="text"
-                      placeholder="Max Mustermann"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      required
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
-                  </div>
-
-                  {/* Phone Input */}
-                  <div className="space-y-1">
-                    <Label htmlFor="reg-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Telefonnummer *</Label>
-                    <Input
-                      id="reg-phone"
-                      type="tel"
-                      placeholder="0170 1234567"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      required
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse *</Label>
-                    <Input
-                      id="reg-email"
+                      id="reset-email"
                       type="email"
                       placeholder="name@beispiel.de"
                       value={email}
@@ -617,194 +603,281 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="reg-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort *</Label>
-                    <Input
-                      id="reg-pass"
-                      type="password"
-                      placeholder="Mindestens 6 Zeichen"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
+                  <Button
+                    type="submit"
+                    className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs"
+                    disabled={loading}
+                  >
+                    {loading ? "Wird gesendet..." : "Link zum Zurücksetzen anfordern"}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full text-xs font-bold uppercase tracking-wider text-[#505c5f] hover:text-[#0f4851] rounded-none"
+                    onClick={() => {
+                      setViewMode("tabs");
+                      setError(null);
+                    }}
+                  >
+                    Zurück zum Login
+                  </Button>
+                </form>
+              </div>
+            ) : (
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full mt-2">
+                <TabsList className="grid w-full grid-cols-2 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
+                  <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
+                    Anmelden
+                  </TabsTrigger>
+                  <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
+                    Neu registrieren
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="register" className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      </svg>
+                      Mit Google fortfahren
+                    </Button>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-[#c8d3d5]" />
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                      <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
+                    </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="reg-pass-confirm" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort wiederholen *</Label>
-                    <Input
-                      id="reg-pass-confirm"
-                      type="password"
-                      placeholder="Mindestens 6 Zeichen"
-                      value={passwordConfirm}
-                      onChange={(e) => setPasswordConfirm(e.target.value)}
-                      required
-                      minLength={6}
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
-                  </div>
+                  <form onSubmit={handleRegisterOrLink} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse *</Label>
+                      <Input
+                        id="reg-email"
+                        type="email"
+                        placeholder="name@beispiel.de"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5 pt-1">
-                    <Label htmlFor="reg-customer-type" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Kundentyp</Label>
-                    <Select
-                      value={customerType}
-                      onValueChange={(val) => {
-                        if (val) setCustomerType(val as "private" | "business");
-                      }}
-                    >
-                      <SelectTrigger id="reg-customer-type" className="w-full bg-white h-9 text-xs font-medium rounded-none border-[#c8d3d5]">
-                        <SelectValue placeholder="Kundentyp wählen">
-                          {customerType === "business" ? "🏢 Geschäftskunde (Firma / Gastro)" : "👤 Privatkunde"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="rounded-none border-[#c8d3d5]">
-                        <SelectItem value="private" label="👤 Privatkunde" className="rounded-none">
-                          👤 Privatkunde
-                        </SelectItem>
-                        <SelectItem value="business" label="🏢 Geschäftskunde (Firma / Gastro)" className="rounded-none">
-                          🏢 Geschäftskunde (Firma / Gastro)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {customerType === "business" && (
-                    <div className="space-y-3 pt-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label htmlFor="reg-company" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Firmenname / Gastronomie *</Label>
+                        <Label htmlFor="reg-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort *</Label>
                         <Input
-                          id="reg-company"
-                          placeholder="Brauhaus GmbH"
-                          value={companyName}
-                          onChange={(e) => setCompanyName(e.target.value)}
+                          id="reg-pass"
+                          type="password"
+                          placeholder="Min. 6 Zeichen"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="reg-pass-confirm" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Wiederholen *</Label>
+                        <Input
+                          id="reg-pass-confirm"
+                          type="password"
+                          placeholder="Passwort wiederholen"
+                          value={passwordConfirm}
+                          onChange={(e) => setPasswordConfirm(e.target.value)}
+                          required
+                          minLength={6}
+                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="reg-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Vollständiger Name *</Label>
+                        <Input
+                          id="reg-name"
+                          placeholder="Max Mustermann"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
                           required
                           className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
                         />
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Rechnungsadresse *</Label>
-                        <div className="grid grid-cols-[2fr_1fr] gap-2">
-                          <Input
-                            placeholder="Straße"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                            required
-                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                          />
-                          <Input
-                            placeholder="Hausnr."
-                            value={houseNumber}
-                            onChange={(e) => setHouseNumber(e.target.value)}
-                            required
-                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                          />
-                        </div>
-                        <div className="grid grid-cols-[1fr_2fr] gap-2">
-                          <Input
-                            placeholder="PLZ"
-                            value={zipCode}
-                            onChange={(e) => setZipCode(e.target.value)}
-                            required
-                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                          />
-                          <Input
-                            placeholder="Ort"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            required
-                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                          />
-                        </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="reg-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Telefonnummer *</Label>
+                        <Input
+                          id="reg-phone"
+                          placeholder="0170 12345678"
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          required
+                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        />
                       </div>
                     </div>
-                  )}
 
-                  <div className="flex items-start space-x-2 pt-2">
-                    <input
-                      type="checkbox"
-                      id="agb"
-                      checked={agbAccepted}
-                      onChange={(e) => setAgbAccepted(e.target.checked)}
-                      className="mt-1 size-4 rounded-none border-[#c8d3d5] text-[#00A8BC] focus:ring-[#00A8BC]"
-                      required
-                    />
-                    <Label htmlFor="agb" className="text-xs text-[#505c5f] leading-tight">
-                      Ich habe die Allgemeinen Geschäftsbedingungen sowie die Datenschutzerklärung gelesen und akzeptiere diese. *
-                    </Label>
-                  </div>
-
-                  <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
-                    {loading ? "Wird verarbeitet..." : "Konto erstellen"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="login" className="mt-4 space-y-4">
-                <div className="space-y-2">
-                  <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
-                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                    </svg>
-                    Mit Google fortfahren
-                  </Button>
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-[#c8d3d5]" />
-                  </div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-                    <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
-                  </div>
-                </div>
-
-                <form onSubmit={handleLogin} className="space-y-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="name@beispiel.de"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="login-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort</Label>
-                      <button
-                        type="button"
-                        onClick={handleResetPassword}
-                        className="text-[10px] sm:text-xs text-[#00A8BC] hover:underline font-bold uppercase tracking-wider"
-                        disabled={loading}
-                      >
-                        Passwort vergessen?
-                      </button>
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-type" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Kundentyp</Label>
+                      <Select value={customerType} onValueChange={(v) => setCustomerType(v as any)}>
+                        <SelectTrigger id="reg-type" className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs">
+                          <SelectValue placeholder="Kundentyp auswählen" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-none border-[#c8d3d5]">
+                          <SelectItem value="private">Privatkunde</SelectItem>
+                          <SelectItem value="business">Geschäftskunde</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <Input
-                      id="login-pass"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
-                    />
+
+                    {customerType === "business" && (
+                      <div className="space-y-3 pt-2 border-t border-[#c8d3d5]">
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-company" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Firmenname *</Label>
+                          <Input
+                            id="reg-company"
+                            placeholder="Musterfirma GmbH"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            required
+                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Rechnungsadresse *</Label>
+                          <div className="grid grid-cols-[3fr_1fr] gap-2">
+                            <Input
+                              placeholder="Straße"
+                              value={street}
+                              onChange={(e) => setStreet(e.target.value)}
+                              required
+                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                            />
+                            <Input
+                              placeholder="Hausnr."
+                              value={houseNumber}
+                              onChange={(e) => setHouseNumber(e.target.value)}
+                              required
+                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                            />
+                          </div>
+                          <div className="grid grid-cols-[1fr_2fr] gap-2">
+                            <Input
+                              placeholder="PLZ"
+                              value={zipCode}
+                              onChange={(e) => setZipCode(e.target.value)}
+                              required
+                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                            />
+                            <Input
+                              placeholder="Ort"
+                              value={city}
+                              onChange={(e) => setCity(e.target.value)}
+                              required
+                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-start space-x-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="agb"
+                        checked={agbAccepted}
+                        onChange={(e) => setAgbAccepted(e.target.checked)}
+                        className="mt-1 size-4 rounded-none border-[#c8d3d5] text-[#00A8BC] focus:ring-[#00A8BC]"
+                        required
+                      />
+                      <Label htmlFor="agb" className="text-xs text-[#505c5f] leading-tight">
+                        Ich habe die Allgemeinen Geschäftsbedingungen sowie die Datenschutzerklärung gelesen und akzeptiere diese. *
+                      </Label>
+                    </div>
+
+                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
+                      {loading ? "Wird verarbeitet..." : "Konto erstellen"}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="login" className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      </svg>
+                      Mit Google fortfahren
+                    </Button>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-[#c8d3d5]" />
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                      <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
+                    </div>
                   </div>
 
-                  <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
-                    {loading ? "Anmeldung läuft..." : "Anmelden"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                  <form onSubmit={handleLogin} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="name@beispiel.de"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="login-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort</Label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setError(null);
+                            setSuccessMsg(null);
+                            setViewMode("forgot_password");
+                          }}
+                          className="text-[10px] sm:text-xs text-[#00A8BC] hover:underline font-bold uppercase tracking-wider"
+                          disabled={loading}
+                        >
+                          Passwort vergessen?
+                        </button>
+                      </div>
+                      <Input
+                        id="login-pass"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
+                      {loading ? "Anmeldung läuft..." : "Anmelden"}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
           </>
         )}
       </DialogContent>

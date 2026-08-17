@@ -8,16 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
-  const { loginWithEmailPassword } = useAuth();
+  const { loginWithEmailPassword, resetPassword } = useAuth();
   const router = useRouter();
+  const [viewMode, setViewMode] = useState<"login" | "forgot_password">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     try {
@@ -47,6 +50,30 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+    if (!email) {
+      setError("Bitte gib zuerst deine E-Mail-Adresse ein.");
+      return;
+    }
+    try {
+      setLoading(true);
+      await resetPassword(email);
+      setSuccessMsg("E-Mail zum Zurücksetzen gesendet! Bitte prüfe deinen Posteingang.");
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === "auth/user-not-found") {
+        setError("Diese E-Mail-Adresse ist nicht registriert.");
+      } else {
+        setError("Fehler beim Senden der E-Mail zum Zurücksetzen.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#f9f9f9]">
       <div className="w-full max-w-md space-y-8 rounded-none bg-white p-8 border border-[#c8d3d5] shadow-xs">
@@ -54,22 +81,34 @@ export default function LoginPage() {
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-xs font-bold uppercase tracking-widest mb-2">
             Verwaltung
           </div>
-          <h2 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851]">Admin Login</h2>
+          <h2 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851]">
+            {viewMode === "forgot_password" ? "Passwort vergessen" : "Admin Login"}
+          </h2>
           <p className="text-xs font-medium uppercase tracking-wider text-[#505c5f]">
-            Bitte melde dich an, um auf das Dashboard zuzugreifen.
+            {viewMode === "forgot_password"
+              ? "Wir senden dir einen Link zur Passwortänderung."
+              : "Bitte melde dich an, um auf das Dashboard zuzugreifen."}
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-6">
-          {error && (
-            <div className="rounded-none bg-red-50 border border-red-200 p-4 text-xs font-semibold text-red-700">
-              {error}
-            </div>
-          )}
-          
-          <div className="space-y-4">
+        {error && (
+          <div className="rounded-none bg-red-50 border border-red-200 p-4 text-xs font-semibold text-red-700">
+            {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="rounded-none bg-emerald-50 border border-emerald-200 p-4 text-xs font-semibold text-emerald-800">
+            {successMsg}
+          </div>
+        )}
+
+        {viewMode === "forgot_password" ? (
+          <form onSubmit={handleResetPassword} className="mt-8 space-y-6">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail Adresse</Label>
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                E-Mail-Adresse
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -82,30 +121,87 @@ export default function LoginPage() {
                 className="bg-white rounded-none border-[#c8d3d5] h-10 text-xs"
               />
             </div>
-            
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                className="bg-white rounded-none border-[#c8d3d5] h-10 text-xs"
-              />
-            </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-11 shadow-xs"
-            disabled={loading}
-          >
-            {loading ? "Anmeldung läuft..." : "Anmelden"}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-11 shadow-xs"
+              disabled={loading}
+            >
+              {loading ? "Wird gesendet..." : "Link anfordern"}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full text-xs font-bold uppercase tracking-wider text-[#505c5f] hover:text-[#0f4851] rounded-none"
+              onClick={() => {
+                setViewMode("login");
+                setError(null);
+                setSuccessMsg(null);
+              }}
+            >
+              Zurück zum Login
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleLogin} className="mt-8 space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  E-Mail Adresse
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  placeholder="info@rottmersleber-brauerei.de"
+                  className="bg-white rounded-none border-[#c8d3d5] h-10 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                    Passwort
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewMode("forgot_password");
+                      setError(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="text-[10px] sm:text-xs text-[#00A8BC] hover:underline font-bold uppercase tracking-wider"
+                  >
+                    Passwort vergessen?
+                  </button>
+                </div>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className="bg-white rounded-none border-[#c8d3d5] h-10 text-xs"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-11 shadow-xs"
+              disabled={loading}
+            >
+              {loading ? "Anmeldung läuft..." : "Anmelden"}
+            </Button>
+          </form>
+        )}
       </div>
     </div>
   );
