@@ -579,14 +579,15 @@ function VariantRow({
 
   return (
     <div
-      className={`p-3 rounded-none border transition-all ${
+      className={`p-3.5 rounded-none border transition-all space-y-3 ${
         isVarActive
           ? "bg-white border-[#c8d3d5]"
           : "bg-[#f9f9f9] border-dashed border-[#c8d3d5] opacity-75"
       }`}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_95px_95px_auto_auto] gap-3 items-end">
-        <div className="grid gap-1.5">
+      {/* Top Row: Gebinde-Typ + Status + Delete */}
+      <div className="flex items-end gap-2.5">
+        <div className="flex-1 min-w-0 grid gap-1.5">
           <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Gebinde-Typ</Label>
           <Select
             value={variant.type}
@@ -596,7 +597,7 @@ function VariantRow({
               }
             }}
           >
-            <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] h-9">
+            <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs">
               <SelectValue>{variant.type ? formatContainerType(variant.type) : "Wähle Gebinde..."}</SelectValue>
             </SelectTrigger>
             <SelectContent className="rounded-none border-[#c8d3d5]">
@@ -609,6 +610,36 @@ function VariantRow({
           </Select>
         </div>
 
+        <div className="shrink-0 grid gap-1.5">
+          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f] text-center">Status</Label>
+          <label className="flex items-center justify-center gap-1.5 h-9 px-2.5 bg-white border border-[#c8d3d5] cursor-pointer hover:bg-[#f9f9f9] select-none shadow-2xs">
+            <input
+              type="checkbox"
+              checked={isVarActive}
+              onChange={(e) => updateVariant(index, "isActive", e.target.checked)}
+              className="size-3.5 accent-[#0f4851] rounded-none cursor-pointer"
+            />
+            <span className={`text-xs font-semibold ${isVarActive ? "text-emerald-700" : "text-[#505c5f]"}`}>
+              {isVarActive ? "Aktiv" : "Inaktiv"}
+            </span>
+          </label>
+        </div>
+
+        <div className="shrink-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 text-[#505c5f] hover:text-red-600 hover:bg-red-50 rounded-none shrink-0"
+            onClick={() => removeVariant(index)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Bottom Row: Preis & Pfand */}
+      <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-[#f0f0f0]">
         <div className="grid gap-1.5">
           <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Preis (€)</Label>
           <Input
@@ -649,32 +680,6 @@ function VariantRow({
               setDepositStr(centsToDisplay(cents));
             }}
           />
-        </div>
-
-        <div className="grid gap-1.5">
-          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f] text-center">Status</Label>
-          <label className="flex items-center justify-center gap-1.5 h-9 px-2.5 bg-white border border-[#c8d3d5] cursor-pointer hover:bg-[#f9f9f9] select-none shadow-2xs">
-            <input
-              type="checkbox"
-              checked={isVarActive}
-              onChange={(e) => updateVariant(index, "isActive", e.target.checked)}
-              className="size-3.5 accent-[#0f4851] rounded-none cursor-pointer"
-            />
-            <span className={`text-xs font-semibold ${isVarActive ? "text-emerald-700" : "text-[#505c5f]"}`}>
-              {isVarActive ? "Aktiv" : "Inaktiv"}
-            </span>
-          </label>
-        </div>
-
-        <div className="flex items-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 text-[#505c5f] hover:text-red-600 hover:bg-red-50 rounded-none shrink-0"
-            onClick={() => removeVariant(index)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
         </div>
       </div>
     </div>
