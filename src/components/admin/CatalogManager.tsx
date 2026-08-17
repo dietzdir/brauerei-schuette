@@ -231,8 +231,8 @@ export function CatalogManager() {
                       {prod.image ? (
                         <img src={prod.image} alt={prod.name} className="size-14 rounded-none object-cover border border-[#c8d3d5]" />
                       ) : (
-                        <div className="size-14 rounded-none bg-[#f9f9f9] border border-[#c8d3d5] flex items-center justify-center text-[#505c5f]">
-                          <ImageIcon className="size-6" />
+                        <div className="size-14 rounded-none bg-[#f4f6f7] border border-[#c8d3d5] flex items-center justify-center p-1 overflow-hidden shrink-0">
+                          <img src="/images/schuette-logo.jpg" alt="Brauerei Schütte" className="w-full h-full object-contain opacity-75" />
                         </div>
                       )}
                       <div>

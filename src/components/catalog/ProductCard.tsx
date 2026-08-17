@@ -60,74 +60,60 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-200 border border-[#c8d3d5] hover:border-[#0f4851] bg-white rounded-none group shadow-xs p-0 gap-0">
-      {/* Product Image Header */}
-      {product.image && (
-        <div className="relative w-full aspect-16/9 bg-[#f9f9f9] overflow-hidden border-b border-[#c8d3d5] shrink-0">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-            {product.badge && (
-              <Badge
-                variant="secondary"
-                className="bg-[#00A8BC] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
-              >
-                <Hop className="size-3 mr-1 inline" />
-                {product.badge}
-              </Badge>
-            )}
-
-            {product.alcohol && (
-              <Badge variant="outline" className="text-[11px] font-bold bg-white text-[#0f4851] border-[#c8d3d5] rounded-none">
-                {product.alcohol.includes("%") ? product.alcohol : `${product.alcohol} % vol.`}
-              </Badge>
-            )}
-          </div>
-
-          {product.isAiGenerated && (
-            <div className="absolute bottom-2.5 right-2.5 z-10 pointer-events-none">
-              <span className="inline-flex items-center gap-1 bg-black/65 backdrop-blur-xs text-white/95 text-[10px] font-medium px-2 py-0.5 rounded-none border border-white/20 shadow-xs select-none">
-                <Sparkles className="size-2.5 text-amber-300 shrink-0" />
-                <span>KI-Symbolbild</span>
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <CardHeader className="p-4 pb-2 space-y-1 shrink-0 min-h-[4.5rem]">
-        {!product.image && (
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {product.badge && (
-                <Badge
-                  variant="secondary"
-                  className="bg-[#00A8BC] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none"
-                >
-                  <Hop className="size-3 mr-1 inline" />
-                  {product.badge}
-                </Badge>
-              )}
-
-              {product.alcohol && (
-                <Badge variant="outline" className="text-[11px] font-semibold text-[#505c5f] border-[#c8d3d5] rounded-none">
-                  {product.alcohol.includes("%") ? product.alcohol : `${product.alcohol} % vol.`}
-                </Badge>
-              )}
-            </div>
-
-            <span className="text-[11px] text-[#505c5f] font-mono">
-              {activeVariant?.sku || ""}
-            </span>
+      {/* Product Image Header (Always 16:9 for uniform grid alignment) */}
+      <div className="relative w-full aspect-16/9 bg-[#f4f6f7] overflow-hidden border-b border-[#c8d3d5] shrink-0 flex items-center justify-center">
+        {product.image ? (
+          <>
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-[#f9fafb] to-[#edf1f2]">
+            <Image
+              src="/images/schuette-logo.jpg"
+              alt="Brauerei Schütte"
+              width={160}
+              height={90}
+              className="object-contain max-h-16 w-auto opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 filter grayscale-[20%]"
+            />
           </div>
         )}
 
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap z-10">
+          {product.badge && (
+            <Badge
+              variant="secondary"
+              className="bg-[#00A8BC] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
+            >
+              <Hop className="size-3 mr-1 inline" />
+              {product.badge}
+            </Badge>
+          )}
+
+          {product.alcohol && (
+            <Badge variant="outline" className="text-[11px] font-bold bg-white text-[#0f4851] border-[#c8d3d5] rounded-none">
+              {product.alcohol.includes("%") ? product.alcohol : `${product.alcohol} % vol.`}
+            </Badge>
+          )}
+        </div>
+
+        {product.image && product.isAiGenerated && (
+          <div className="absolute bottom-2.5 right-2.5 z-10 pointer-events-none">
+            <span className="inline-flex items-center gap-1 bg-black/65 backdrop-blur-xs text-white/95 text-[10px] font-medium px-2 py-0.5 rounded-none border border-white/20 shadow-xs select-none">
+              <Sparkles className="size-2.5 text-amber-300 shrink-0" />
+              <span>KI-Symbolbild</span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      <CardHeader className="p-4 pb-2 space-y-1 shrink-0 min-h-[4.5rem]">
         <CardTitle className="font-heading text-2xl tracking-wide uppercase text-[#0f4851]">
           {product.name}
         </CardTitle>
