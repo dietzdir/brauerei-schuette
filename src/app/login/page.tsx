@@ -21,14 +21,27 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await loginWithEmailPassword(email, password);
-      // Wait a moment for the session cookie to be set via syncSessionCookie
-      setTimeout(() => {
-        router.push("/admin");
-      }, 500);
+      const loggedInUser = await loginWithEmailPassword(email, password);
+      // Verify admin claim
+      const idTokenResult = await loggedInUser.getIdTokenResult(true);
+      if (!idTokenResult.claims.admin) {
+        setError("Dieses Konto besitzt keine Administrator-Rechte.");
+        setLoading(false);
+        return;
+      }
+      router.push("/admin");
     } catch (err: any) {
       console.error(err);
-      setError("Anmeldung fehlgeschlagen. Bitte überprüfe deine Daten.");
+      if (
+        err.code === "auth/invalid-credential" ||
+        err.code === "auth/user-not-found" ||
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-email"
+      ) {
+        setError("Ungültige E-Mail-Adresse oder falsches Passwort.");
+      } else {
+        setError("Anmeldung fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.");
+      }
     } finally {
       setLoading(false);
     }

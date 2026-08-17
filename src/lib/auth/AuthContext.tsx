@@ -131,19 +131,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const syncSessionCookie = async (currentUser: User) => {
+  const syncSessionCookie = async (currentUser: User): Promise<boolean> => {
     try {
       // Only mint session cookies for non-anonymous users to save backend calls,
       // as anonymous users will never be admins.
-      if (currentUser.isAnonymous) return;
-      const idToken = await currentUser.getIdToken();
-      await fetch("/api/auth/session", {
+      if (currentUser.isAnonymous) return false;
+      const idToken = await currentUser.getIdToken(true);
+      const res = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken })
       });
+      return res.ok;
     } catch (e) {
       console.error("Failed to sync session cookie", e);
+      return false;
     }
   };
 
@@ -187,6 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     setUser(userCredential.user);
     await syncProfile(userCredential.user);
+    await syncSessionCookie(userCredential.user);
     return userCredential.user;
   };
 
