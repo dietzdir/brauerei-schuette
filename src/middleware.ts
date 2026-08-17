@@ -2,21 +2,21 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify, importX509, decodeProtectedHeader } from 'jose';
 
-const PUBLIC_KEYS_URL = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/publicKeys';
+const GOOGLE_CERTS_URL =
+  'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
 
-// Cache the keys in memory to avoid fetching on every request
-let cachedKeys: Record<string, string> | null = null;
-let keysFetchedAt = 0;
+let cachedCerts: Record<string, string> | null = null;
+let certsFetchedAt = 0;
 
-async function getPublicKeys() {
+async function getGoogleCerts() {
   const now = Date.now();
   // Refresh cache every hour
-  if (!cachedKeys || now - keysFetchedAt > 3600 * 1000) {
-    const res = await fetch(PUBLIC_KEYS_URL);
-    cachedKeys = await res.json();
-    keysFetchedAt = now;
+  if (!cachedCerts || now - certsFetchedAt > 3600 * 1000) {
+    const res = await fetch(GOOGLE_CERTS_URL);
+    cachedCerts = await res.json();
+    certsFetchedAt = now;
   }
-  return cachedKeys;
+  return cachedCerts;
 }
 
 export async function middleware(request: NextRequest) {
@@ -32,16 +32,15 @@ export async function middleware(request: NextRequest) {
       const kid = header.kid;
       if (!kid) throw new Error("No kid found in JWT header");
 
-      const keys = await getPublicKeys();
-      const cert = keys![kid];
-      if (!cert) throw new Error("Public key not found for kid");
+      const certs = await getGoogleCerts();
+      const cert = certs![kid];
+      if (!cert) throw new Error("Public cert not found for kid");
 
       const publicKey = await importX509(cert, 'RS256');
-
       const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'brauerei-schuette';
-      
+
       const { payload } = await jwtVerify(sessionCookie, publicKey, {
-        issuer: `https://session.firebase.google.com/${projectId}`,
+        issuer: `https://securetoken.google.com/${projectId}`,
         audience: projectId,
         algorithms: ['RS256'],
       });
