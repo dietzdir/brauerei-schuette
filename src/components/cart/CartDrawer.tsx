@@ -676,10 +676,6 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" />
                         <span>Schnellere Nachbestellung ohne erneute Dateneingabe</span>
                       </li>
-                      <li className="flex items-center gap-2">
-                        <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" />
-                        <span>Exklusive Benachrichtigungen bei neuen Sondersuden</span>
-                      </li>
                     </ul>
 
                     <Button
