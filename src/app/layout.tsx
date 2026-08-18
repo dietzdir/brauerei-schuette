@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Anton, Fira_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/AuthContext";
@@ -28,6 +28,22 @@ export const metadata: Metadata = {
   title: "Handwerksbrauerei Schütte | Frisches Bier & Fassbrause",
   description:
     "Bestell-App der Handwerksbrauerei Schütte in Rottmersleben. Bestellen Sie frisches Börde Pils, Hell, Dunkel, Cold Pale Ale und Fassbrausen.",
+  applicationName: "Brauerei Schütte",
+  appleWebApp: {
+    capable: true,
+    title: "Brauerei Schütte",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0F4851",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
