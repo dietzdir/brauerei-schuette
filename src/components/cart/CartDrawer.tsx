@@ -430,7 +430,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
               {/* Pickup Date Confirmation Notice */}
               {confirmedPickupInfo && (
                 <div className="p-3.5 bg-white border border-[#c8d3d5] rounded-none flex items-start gap-2.5 text-xs text-[#1a1c1c]">
-                  <Calendar className="size-4 shrink-0 mt-0.5 text-[#00A8BC]" />
+                  <CalendarIcon className="size-4 shrink-0 mt-0.5 text-[#00A8BC]" />
                   <div>
                     <span className="font-bold uppercase tracking-wider text-[#505c5f]">Gewählter Abholtermin:</span>
                     <div className="font-bold text-sm text-[#0f4851] mt-0.5">{confirmedPickupInfo}</div>
