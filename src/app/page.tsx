@@ -40,7 +40,7 @@ export default function Home() {
   const regularHoursText = `${dayPluralCap} ${settings.regularOpenTime || "14:00"} – ${settings.regularCloseTime || "19:00"} Uhr`;
 
   const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 14);
+  maxDate.setDate(maxDate.getDate() + (settings.bannerLookaheadDays ?? 14));
   const maxDateStr = maxDate.toISOString().split("T")[0];
 
   const upcomingExceptions = (settings.exceptions || [])

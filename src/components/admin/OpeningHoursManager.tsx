@@ -71,6 +71,7 @@ export function OpeningHoursManager() {
   const [regularDayOfWeek, setRegularDayOfWeek] = useState<number>(5);
   const [regularOpenTime, setRegularOpenTime] = useState("14:00");
   const [regularCloseTime, setRegularCloseTime] = useState("19:00");
+  const [bannerLookaheadDays, setBannerLookaheadDays] = useState<number>(14);
 
   // Sheet State for Exception Create/Edit
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -88,6 +89,7 @@ export function OpeningHoursManager() {
       setRegularDayOfWeek(data.regularDayOfWeek ?? 5);
       setRegularOpenTime(data.regularOpenTime || "14:00");
       setRegularCloseTime(data.regularCloseTime || "19:00");
+      setBannerLookaheadDays(data.bannerLookaheadDays ?? 14);
       setLoading(false);
     });
 
@@ -125,6 +127,7 @@ export function OpeningHoursManager() {
         regularDayOfWeek,
         regularOpenTime,
         regularCloseTime,
+        bannerLookaheadDays,
       };
       await saveStoreSettings(updated);
       showSuccess("Reguläre Öffnungszeiten erfolgreich gespeichert!");
@@ -392,10 +395,37 @@ export function OpeningHoursManager() {
               Urlaub, Feiertage, Ausweichtermine oder Sonderverkäufe eintragen.
             </p>
           </div>
-          <Button onClick={openNewExceptionSheet} className="gap-2 shrink-0 bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs">
-            <Plus className="size-4" />
-            <span>Ausnahme hinzufügen</span>
-          </Button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2 border border-[#c8d3d5] p-1 bg-[#f9f9f9] rounded-none shadow-xs">
+              <Label htmlFor="lookahead" className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-[#505c5f] whitespace-nowrap pl-2">
+                Banner-Anzeige ab:
+              </Label>
+              <Input
+                id="lookahead"
+                type="number"
+                min="1"
+                max="90"
+                value={bannerLookaheadDays}
+                onChange={(e) => setBannerLookaheadDays(Number(e.target.value))}
+                onBlur={async () => {
+                   if (bannerLookaheadDays !== (settings.bannerLookaheadDays ?? 14)) {
+                     try {
+                       await saveStoreSettings({ ...settings, bannerLookaheadDays });
+                       showSuccess("Anzeigezeitraum gespeichert!");
+                     } catch (err: any) {
+                       setGlobalError("Fehler beim Speichern des Zeitraums.");
+                     }
+                   }
+                }}
+                className="w-14 h-7 text-xs rounded-none border-[#c8d3d5] bg-white text-center font-bold px-1"
+              />
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-[#505c5f] pr-2">Tagen vorher</span>
+            </div>
+            <Button onClick={openNewExceptionSheet} className="gap-2 shrink-0 bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs">
+              <Plus className="size-4" />
+              <span>Ausnahme hinzufügen</span>
+            </Button>
+          </div>
         </div>
 
         {(!settings.exceptions || settings.exceptions.length === 0) ? (

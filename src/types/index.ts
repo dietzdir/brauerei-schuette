@@ -75,6 +75,7 @@ export interface StoreSettings {
   regularCloseTime?: string; // "19:00"
   exceptions: OpeningHourException[];
   bannerNotice?: string; // Optional custom broadcast message
+  bannerLookaheadDays?: number; // Days to look ahead for displaying exceptions in the banner
 }
 
 export interface Order {

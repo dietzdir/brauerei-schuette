@@ -18,6 +18,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   regularCloseTime: "19:00",
   exceptions: [],
   bannerNotice: "",
+  bannerLookaheadDays: 14,
 };
 
 const SETTINGS_DOC_PATH = "storeSettings";
