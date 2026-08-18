@@ -126,6 +126,9 @@ service cloud.firestore {
      - Crate quick presets (`6er Kasten`, `12er`, `24er`) are strictly reserved for 0.75l beer bottles. 0.33l bottles and kegs render only the quantity stepper.
      - Use `GlassWater` as the category icon for soft drinks / Brausen (`Lemonade`).
 
+5. **Prevent Shadowing / Ghost Components**:
+   - When importing icons from `lucide-react` that share a name with a shadcn/UI component (e.g., `Calendar`), you MUST alias the icon upon import (`import { Calendar as CalendarIcon } from "lucide-react";`). Using the unaliased `<Calendar />` by mistake will render a massive, transparent interactive date picker instead of a small icon, completely breaking the layout.
+
 ### Verification
 
 After each mission, confirm `next build` succeeds, then use Antigravity's browser subagent to click through the flow you just built before marking the mission done (concrete checks are listed per mission below).
