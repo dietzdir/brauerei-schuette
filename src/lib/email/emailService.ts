@@ -230,6 +230,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<EmailSen
         },
         body: JSON.stringify({
           from: "Brauerei Schütte <bestellung@shop.rottmersleber-brauerei.de>",
+          reply_to: "Brauerei Schütte <info@rottmersleber-brauerei.de>",
           to: [email],
           subject: `Bestellbestätigung #${order.id.slice(0, 8).toUpperCase()} - Handwerksbrauerei Schütte`,
           html: htmlContent,
