@@ -195,7 +195,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<EmailSen
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "Brauerei Schütte <bestellung@rottmersleber-brauerei.de>",
+          from: "Brauerei Schütte <bestellung@shop.rottmersleber-brauerei.de>",
           to: [email],
           subject: `Bestellbestätigung #${order.id.slice(0, 8).toUpperCase()} - Handwerksbrauerei Schütte`,
           html: htmlContent,
