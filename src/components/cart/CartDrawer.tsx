@@ -963,24 +963,28 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     </div>
 
                     {/* Click & Reserve & JuSchG Legal Notices */}
-                    <div className="p-3 bg-[#eeeeee] border border-[#c8d3d5] rounded-none space-y-2 text-xs text-[#1a1c1c]">
-                      <div className="flex items-start gap-2">
-                        <ShieldCheck className="size-4 shrink-0 text-[#00A8BC] mt-0.5" />
-                        <div>
-                          <p className="font-bold text-[#0f4851] text-xs uppercase tracking-wider">
+                    <div className="p-3 bg-[#eeeeee] border border-[#c8d3d5] rounded-none space-y-2.5 text-xs text-[#1a1c1c]">
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-5 shrink-0 flex items-center justify-center pt-0.5">
+                          <ShieldCheck className="size-4 text-[#00A8BC]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-[#0f4851] text-xs uppercase tracking-wider leading-snug">
                             Unverbindliche Vorbestellung (Click & Reserve)
                           </p>
-                          <p className="text-[11px] text-[#505c5f] leading-tight mt-0.5">
+                          <p className="text-[11px] text-[#505c5f] leading-snug mt-0.5">
                             Es kommt kein Fernabsatzvertrag zustande. Sie zahlen erst bei Abholung vor Ort an der Ladenkasse (Bar oder EC-Karte).
                           </p>
                         </div>
                       </div>
-                      <div className="pt-1.5 border-t border-[#c8d3d5] flex items-start gap-2">
-                        <span className="font-black text-[10px] px-1.5 py-0.5 bg-[#0f4851] rounded-none text-white shrink-0">
-                          16+
-                        </span>
-                        <p className="text-[11px] text-[#505c5f] leading-tight">
-                          <strong>Jugendschutz:</strong> Abgabe von Bier nur an Personen ab 16 Jahren. Gesetzliche Altersprüfung erfolgt bei der Abholung.
+                      <div className="pt-2 border-t border-[#c8d3d5] flex items-start gap-2.5">
+                        <div className="w-5 shrink-0 flex items-center justify-center pt-0.5">
+                          <span className="font-bold text-[9px] px-1 py-0.5 bg-[#0f4851] rounded-none text-white leading-none">
+                            16+
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#505c5f] leading-snug flex-1 min-w-0">
+                          <strong className="text-[#0f4851]">Jugendschutz:</strong> Abgabe von Bier nur an Personen ab 16 Jahren. Gesetzliche Altersprüfung erfolgt bei der Abholung.
                         </p>
                       </div>
                     </div>
