@@ -7,7 +7,6 @@ export const size = {
 };
 export const contentType = "image/png";
 
-// Image generation
 export default function AppleIcon() {
   return new ImageResponse(
     (
@@ -35,55 +34,31 @@ export default function AppleIcon() {
           }}
         />
 
-        {/* Crisp Hop Cone SVG */}
+        {/* Lucide Beer Icon in High-Resolution Vector */}
         <svg
-          width="106"
-          height="106"
+          width="104"
+          height="104"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#2dd4bf"
-          strokeWidth="1.6"
+          stroke="#ffffff"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          {/* Stem */}
-          <path d="M12 2v2.5" stroke="#2dd4bf" strokeWidth="2" />
-          {/* Hop Scales / Blätter */}
+          {/* Handle */}
+          <path d="M17 11h1a3 3 0 0 1 0 6h-1" stroke="#2dd4bf" strokeWidth="2" />
+          {/* Glass Inner Beer Lines */}
+          <path d="M9 12v6" stroke="#f59e0b" strokeWidth="1.6" />
+          <path d="M13 12v6" stroke="#f59e0b" strokeWidth="1.6" />
+          {/* Foam / Schaumkrone */}
           <path
-            d="M12 4.5c3 1.2 4.8 3.6 2.4 7.2-2.4 3.6-2.4 3.6-2.4 3.6s0 0-2.4-3.6c-2.4-3.6-.6-6 2.4-7.2z"
-            fill="#00A8BC"
-            fillOpacity="0.75"
-            stroke="#2dd4bf"
-          />
-          <path
-            d="M7.2 8.8c-2.4 1.8-3 4.8 0 7.2 2.4 1.8 3.6 1.8 3.6 1.8s-1.2-2.4-1.8-4.8c-.6-2.4-.6-3.6-1.8-4.2z"
-            fill="#00A8BC"
-            fillOpacity="0.55"
-            stroke="#2dd4bf"
-          />
-          <path
-            d="M16.8 8.8c2.4 1.8 3 4.8 0 7.2-2.4 1.8-3.6 1.8-3.6 1.8s1.2-2.4 1.8-4.8c.6-2.4.6-3.6 1.8-4.2z"
-            fill="#00A8BC"
-            fillOpacity="0.55"
-            stroke="#2dd4bf"
-          />
-          <path
-            d="M9.6 14.5c-2.4 1.8-2.4 4.2 0 6 1.8 1.2 2.4 1.2 2.4 1.2s-.6-1.8-1.2-3.6c-.6-1.8-.6-3-1.2-3.6z"
-            fill="#00A8BC"
-            fillOpacity="0.4"
-            stroke="#2dd4bf"
-          />
-          <path
-            d="M14.4 14.5c2.4 1.8 2.4 4.2 0 6-1.8 1.2-2.4 1.2-2.4 1.2s.6-1.8 1.2-3.6c.6-1.8.6-3 1.2-3.6z"
-            fill="#00A8BC"
-            fillOpacity="0.4"
-            stroke="#2dd4bf"
-          />
-          <path
-            d="M12 18.5c1.2 1 1.8 2.5 0 3.8-1.8-1.3-1.2-2.8 0-3.8z"
+            d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 3 11 3s2 .5 3 .5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"
             fill="#ffffff"
-            stroke="#2dd4bf"
+            stroke="#ffffff"
+            strokeWidth="1.6"
           />
+          {/* Glass Mug Body */}
+          <path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" stroke="#ffffff" strokeWidth="1.8" />
         </svg>
       </div>
     ),

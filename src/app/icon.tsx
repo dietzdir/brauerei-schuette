@@ -1,13 +1,12 @@
 import { ImageResponse } from "next/og";
 
-// Image metadata
+// Image metadata for Browser Tab Favicon
 export const size = {
   width: 32,
   height: 32,
 };
 export const contentType = "image/png";
 
-// Image generation
 export default function Icon() {
   return new ImageResponse(
     (
@@ -22,25 +21,31 @@ export default function Icon() {
           borderRadius: "6px",
         }}
       >
+        {/* Lucide Beer Icon */}
         <svg
           width="22"
           height="22"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#2dd4bf"
+          stroke="#ffffff"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          {/* Stem */}
-          <path d="M12 2v2" stroke="#2dd4bf" strokeWidth="2.5" />
-          {/* Hop Scales */}
-          <path d="M12 4c2.5 1 4 3 2 6-2 3-2 3-2 3s0 0-2-3c-2-3-.5-5 2-6z" fill="#00A8BC" fillOpacity="0.6" stroke="#2dd4bf" />
-          <path d="M8 8c-2 1.5-2.5 4 0 6 2 1.5 3 1.5 3 1.5s-1-2-1.5-4c-.5-2-.5-3-1.5-3.5z" fill="#00A8BC" fillOpacity="0.4" stroke="#2dd4bf" />
-          <path d="M16 8c2 1.5 2.5 4 0 6-2 1.5-3 1.5-3 1.5s1-2 1.5-4c.5-2 .5-3 1.5-3.5z" fill="#00A8BC" fillOpacity="0.4" stroke="#2dd4bf" />
-          <path d="M10 13c-2 1.5-2 3.5 0 5 1.5 1 2 1 2 1s-.5-1.5-1-3c-.5-1.5-.5-2.5-1-3z" fill="#00A8BC" fillOpacity="0.3" stroke="#2dd4bf" />
-          <path d="M14 13c2 1.5 2 3.5 0 5-1.5 1-2 1-2 1s.5-1.5 1-3c.5-1.5.5-2.5 1-3z" fill="#00A8BC" fillOpacity="0.3" stroke="#2dd4bf" />
-          <path d="M12 17c1 .8 1.5 2 0 3-1.5-1-1-2.2 0-3z" fill="#ffffff" stroke="#2dd4bf" />
+          {/* Handle */}
+          <path d="M17 11h1a3 3 0 0 1 0 6h-1" stroke="#2dd4bf" strokeWidth="2.2" />
+          {/* Glass Inner Beer Lines */}
+          <path d="M9 12v6" stroke="#f59e0b" strokeWidth="1.8" />
+          <path d="M13 12v6" stroke="#f59e0b" strokeWidth="1.8" />
+          {/* Foam / Schaumkrone */}
+          <path
+            d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 3 11 3s2 .5 3 .5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"
+            fill="#ffffff"
+            stroke="#ffffff"
+            strokeWidth="1.8"
+          />
+          {/* Glass Mug Body */}
+          <path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" stroke="#ffffff" strokeWidth="2" />
         </svg>
       </div>
     ),
