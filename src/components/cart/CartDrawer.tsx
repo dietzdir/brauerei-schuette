@@ -545,39 +545,61 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       items.map((item) => (
                         <div
                           key={item.id}
-                          className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs flex items-center justify-between gap-3"
+                          className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5"
                         >
-                          <div className="space-y-1 flex-1 min-w-0">
-                            <h4 className="font-heading text-base tracking-wide uppercase truncate text-[#0f4851]">
-                              {item.productName}
-                            </h4>
-                            <p className="text-xs text-[#505c5f] font-medium">
-                              {formatContainerType(item.variantType)}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="font-bold text-[#1a1c1c]">
-                                {formatPrice(item.unitPrice)}
-                              </span>
+                          {/* Row 1: Full Product Title + Delete Button */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
+                                {item.productName}
+                              </h4>
+                              <p className="text-xs text-[#505c5f] font-medium mt-0.5">
+                                {formatContainerType(item.variantType)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                              onClick={() => removeItem(item.id)}
+                              title="Artikel entfernen"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          </div>
+
+                          {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
+                          <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
+                            <div className="flex flex-col">
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-bold text-sm text-[#1a1c1c]">
+                                  {formatPrice(item.unitPrice * item.quantity)}
+                                </span>
+                                {item.quantity > 1 && (
+                                  <span className="text-[11px] text-[#505c5f]">
+                                    ({formatPrice(item.unitPrice)} / Stk.)
+                                  </span>
+                                )}
+                              </div>
                               {item.depositPrice ? (
-                                <span className="text-[11px] text-[#505c5f]">
-                                  (+ {formatPrice(item.depositPrice)} Pfand)
+                                <span className="text-[11px] text-[#00A8BC] font-medium">
+                                  + {formatPrice(item.depositPrice * item.quantity)} Pfand
                                 </span>
                               ) : null}
                             </div>
-                          </div>
 
-                          {/* Quantity controls */}
-                          <div className="flex items-center gap-2">
+                            {/* Quantity controls */}
                             <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                title="Menge verringern"
                               >
                                 <Minus className="size-3" />
                               </Button>
-                              <span className="w-8 text-center text-xs font-bold">
+                              <span className="w-7 text-center text-xs font-bold text-[#0f4851]">
                                 {item.quantity}
                               </span>
                               <Button
@@ -585,19 +607,11 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                 size="icon"
                                 className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                title="Menge erhöhen"
                               >
                                 <Plus className="size-3" />
                               </Button>
                             </div>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 rounded-none text-destructive hover:bg-destructive/10"
-                              onClick={() => removeItem(item.id)}
-                            >
-                              <Trash2 className="size-3.5" />
-                            </Button>
                           </div>
                         </div>
                       ))
@@ -620,9 +634,9 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         )}
                       </div>
 
-                      <div className="flex justify-between items-baseline font-bold pt-1 border-t border-[#c8d3d5]">
-                        <span className="text-xs uppercase tracking-wider text-[#505c5f]">Gesamtbetrag (inkl. Pfand):</span>
-                        <span className="font-heading text-2xl text-[#0f4851]">
+                      <div className="flex justify-between items-baseline font-bold pt-2 border-t border-[#c8d3d5] gap-2">
+                        <span className="text-xs uppercase tracking-wider text-[#505c5f] min-w-0">Gesamtbetrag (inkl. Pfand):</span>
+                        <span className="font-heading text-2xl text-[#0f4851] shrink-0 text-right">
                           {formatPrice(grandTotalCents)}
                         </span>
                       </div>
