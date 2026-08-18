@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       {
         productId: "test-pils",
         productName: "Börde Pils",
-        variantType: "0.75l bottle (6-crate)",
+        variantType: "0.75l bottle",
         quantity: 1,
         unitPrice: 450,
         depositPrice: 100,
