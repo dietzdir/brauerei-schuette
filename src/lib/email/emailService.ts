@@ -188,6 +188,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<EmailSen
   // If RESEND_API_KEY is configured, send live email
   if (process.env.RESEND_API_KEY) {
     try {
+      console.log(`[Resend] Sende Bestellbestätigung für #${order.id} an ${email}...`);
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -204,19 +205,30 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<EmailSen
 
       if (res.ok) {
         const data = await res.json();
+        console.log(`[Resend] E-Mail erfolgreich versendet. Message-ID: ${data.id}`);
         return { success: true, messageId: data.id };
       } else {
-        const errData = await res.json();
-        console.warn("Resend API error:", errData);
+        const errData = await res.json().catch(() => ({}));
+        console.error(`[Resend] Fehler beim E-Mail-Versand (HTTP ${res.status}):`, JSON.stringify(errData));
+        return {
+          success: false,
+          error: `Resend API Fehler (${res.status}): ${errData.message || JSON.stringify(errData)}`,
+        };
       }
     } catch (e: any) {
-      console.warn("Could not dispatch via Resend:", e?.message);
+      console.error("[Resend] Unerwarteter Netzwerk-/Verbindungsfehler:", e?.message);
+      return { success: false, error: e?.message };
     }
+  } else {
+    console.warn(
+      "⚠️ [Resend] RESEND_API_KEY ist in den Umgebungsvariablen (Vercel / .env.local) nicht gesetzt! E-Mail-Versand wird im Simulationsmodus ausgeführt."
+    );
   }
 
   // Development / fallback logging
   console.log("=================================================");
-  console.log(`[E-MAIL BESTÄTIGUNG GESENDET AN: ${email}]`);
+  console.log(`[E-MAIL SIMULATION] Keine Live-Mail versendet, da RESEND_API_KEY fehlt.`);
+  console.log(`Empfänger: ${email}`);
   console.log(`Betreff: Bestellbestätigung #${order.id.slice(0, 8).toUpperCase()} - Brauerei Schütte`);
   console.log(`Kunde: ${order.customerName} (${order.customerPhone || "Keine Tel."})`);
   console.log(`Gesamtsumme: ${formatPrice(order.grandTotalCents || 0)}`);
@@ -224,6 +236,6 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<EmailSen
 
   return {
     success: true,
-    previewText: `Bestellbestätigung an ${email} erfolgreich generiert.`,
+    previewText: `Bestellbestätigung an ${email} generiert (Simulationsmodus ohne API-Key).`,
   };
 }
