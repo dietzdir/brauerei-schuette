@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot, doc, updateDoc, orderBy } from "firebase/firestore";
+import dynamic from "next/dynamic";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Order } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,28 @@ import { useRouter } from "next/navigation";
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { Phone, Mail, MapPin, Building, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CatalogManager } from "@/components/admin/CatalogManager";
-import { OpeningHoursManager } from "@/components/admin/OpeningHoursManager";
+
+const CatalogManager = dynamic(
+  () => import("@/components/admin/CatalogManager").then((mod) => mod.CatalogManager),
+  {
+    loading: () => (
+      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Lade Katalog-Manager…</p>
+      </div>
+    ),
+  }
+);
+
+const OpeningHoursManager = dynamic(
+  () => import("@/components/admin/OpeningHoursManager").then((mod) => mod.OpeningHoursManager),
+  {
+    loading: () => (
+      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Lade Öffnungszeiten-Manager…</p>
+      </div>
+    ),
+  }
+);
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -85,7 +106,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f9f9f9]">
-        <p className="font-heading uppercase tracking-wider text-lg text-[#0f4851]">Lade Bestellungen...</p>
+        <p className="font-heading uppercase tracking-wider text-lg text-[#0f4851]">Lade Bestellungen…</p>
       </div>
     );
   }
@@ -108,9 +129,9 @@ export default function AdminDashboard() {
 
         <Tabs defaultValue="orders" className="w-full">
           <TabsList className="mb-6 grid w-full max-w-lg grid-cols-3 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
-            <TabsTrigger value="orders" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">Bestellungen</TabsTrigger>
-            <TabsTrigger value="catalog" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">Katalog</TabsTrigger>
-            <TabsTrigger value="hours" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">Öffnungszeiten</TabsTrigger>
+            <TabsTrigger value="orders" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Bestellungen</TabsTrigger>
+            <TabsTrigger value="catalog" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Katalog</TabsTrigger>
+            <TabsTrigger value="hours" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Öffnungszeiten</TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-6">
@@ -131,7 +152,7 @@ export default function AdminDashboard() {
                     }`}>
                       {order.status === "pending" ? "OFFEN" : order.status === "ready" ? "ABHOLBEREIT" : "ABGESCHLOSSEN"}
                     </span>
-                    <span className="text-[11px] font-bold text-[#505c5f]">
+                    <span className="text-[11px] font-bold text-[#505c5f] tabular-nums">
                       {new Date(order.createdAt.toMillis()).toLocaleString("de-DE")}
                     </span>
                   </div>
@@ -142,21 +163,21 @@ export default function AdminDashboard() {
                     
                     {order.pickupDate && (
                       <div className="mb-3 p-3 rounded-none bg-[#f9f9f9] border border-[#c8d3d5] flex items-center gap-2 text-xs font-bold text-[#0f4851]">
-                        <Calendar className="size-4 text-[#00A8BC] shrink-0" />
-                        <span>Abholung: {order.pickupDate} {order.pickupTime ? `(${order.pickupTime})` : ""}</span>
+                        <Calendar className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
+                        <span className="tabular-nums">Abholung: {order.pickupDate} {order.pickupTime ? `(${order.pickupTime})` : ""}</span>
                       </div>
                     )}
 
                     <div className="space-y-2 rounded-none bg-[#f9f9f9] p-3 text-xs text-[#505c5f] border border-[#c8d3d5]">
                       {order.companyName && (
                         <div className="flex items-start gap-2 font-semibold text-[#1a1c1c]">
-                          <Building className="mt-0.5 size-4 shrink-0 text-[#00A8BC]" />
+                          <Building className="mt-0.5 size-4 shrink-0 text-[#00A8BC]" aria-hidden="true" />
                           <span>{order.companyName}</span>
                         </div>
                       )}
                       {(order.street || order.city) && (
                         <div className="flex items-start gap-2">
-                          <MapPin className="mt-0.5 size-4 shrink-0 text-[#00A8BC]" />
+                          <MapPin className="mt-0.5 size-4 shrink-0 text-[#00A8BC]" aria-hidden="true" />
                           <span>
                             {order.street} {order.houseNumber}
                             <br />
@@ -166,15 +187,15 @@ export default function AdminDashboard() {
                       )}
                       {order.customerPhone && (
                         <div className="flex items-center gap-2">
-                          <Phone className="size-4 shrink-0 text-[#00A8BC]" />
-                          <a href={`tel:${order.customerPhone}`} className="text-[#00A8BC] hover:underline font-bold">
+                          <Phone className="size-4 shrink-0 text-[#00A8BC]" aria-hidden="true" />
+                          <a href={`tel:${order.customerPhone}`} className="text-[#00A8BC] hover:underline font-bold tabular-nums">
                             {order.customerPhone}
                           </a>
                         </div>
                       )}
                       {order.customerEmail && (
                         <div className="flex items-center gap-2">
-                          <Mail className="size-4 shrink-0 text-[#00A8BC]" />
+                          <Mail className="size-4 shrink-0 text-[#00A8BC]" aria-hidden="true" />
                           <a href={generateMailtoLink(order)} className="text-[#00A8BC] hover:underline font-bold break-all">
                             {order.customerEmail}
                           </a>
@@ -189,7 +210,7 @@ export default function AdminDashboard() {
                       {order.items.map((item, idx) => (
                         <li key={idx} className="flex justify-between border-b border-[#c8d3d5] pb-1 last:border-0">
                           <span>{item.quantity}x {item.productName} <span className="text-[10px] text-[#505c5f]">({formatContainerType(item.variantType)})</span></span>
-                          <span className="font-bold text-[#0f4851]">{formatPrice(item.unitPrice * item.quantity)}</span>
+                          <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(item.unitPrice * item.quantity)}</span>
                         </li>
                       ))}
                     </ul>
@@ -239,4 +260,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 

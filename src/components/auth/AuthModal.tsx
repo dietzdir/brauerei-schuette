@@ -627,18 +627,18 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             ) : (
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full mt-2">
                 <TabsList className="grid w-full grid-cols-2 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
-                  <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
+                  <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors duration-150">
                     Anmelden
                   </TabsTrigger>
-                  <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-all">
+                  <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors duration-150">
                     Neu registrieren
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="register" className="mt-4 space-y-4">
                   <div className="space-y-2">
-                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
-                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
+                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee] transition-colors duration-150" onClick={handleGoogleLogin} disabled={loading}>
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -662,7 +662,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse *</Label>
                       <Input
                         id="reg-email"
+                        name="email"
                         type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        spellCheck={false}
                         placeholder="name@beispiel.de"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -676,7 +680,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         <Label htmlFor="reg-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort *</Label>
                         <Input
                           id="reg-pass"
+                          name="new-password"
                           type="password"
+                          autoComplete="new-password"
                           placeholder="Min. 6 Zeichen"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -689,7 +695,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         <Label htmlFor="reg-pass-confirm" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Wiederholen *</Label>
                         <Input
                           id="reg-pass-confirm"
+                          name="new-password-confirm"
                           type="password"
+                          autoComplete="new-password"
                           placeholder="Passwort wiederholen"
                           value={passwordConfirm}
                           onChange={(e) => setPasswordConfirm(e.target.value)}
@@ -705,6 +713,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         <Label htmlFor="reg-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Vollständiger Name *</Label>
                         <Input
                           id="reg-name"
+                          name="name"
+                          autoComplete="name"
                           placeholder="Max Mustermann"
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
@@ -716,11 +726,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         <Label htmlFor="reg-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Telefonnummer *</Label>
                         <Input
                           id="reg-phone"
+                          name="tel"
+                          type="tel"
+                          autoComplete="tel"
+                          inputMode="tel"
                           placeholder="0170 12345678"
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           required
-                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs tabular-nums"
                         />
                       </div>
                     </div>
@@ -744,6 +758,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           <Label htmlFor="reg-company" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Firmenname *</Label>
                           <Input
                             id="reg-company"
+                            name="organization"
+                            autoComplete="organization"
                             placeholder="Musterfirma GmbH"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
@@ -755,6 +771,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Rechnungsadresse *</Label>
                           <div className="grid grid-cols-[3fr_1fr] gap-2">
                             <Input
+                              name="address-line1"
+                              autoComplete="street-address"
                               placeholder="Straße"
                               value={street}
                               onChange={(e) => setStreet(e.target.value)}
@@ -762,6 +780,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                               className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
                             />
                             <Input
+                              name="house-number"
+                              autoComplete="address-line2"
                               placeholder="Hausnr."
                               value={houseNumber}
                               onChange={(e) => setHouseNumber(e.target.value)}
@@ -771,13 +791,18 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           </div>
                           <div className="grid grid-cols-[1fr_2fr] gap-2">
                             <Input
+                              name="postal-code"
+                              autoComplete="postal-code"
+                              inputMode="numeric"
                               placeholder="PLZ"
                               value={zipCode}
                               onChange={(e) => setZipCode(e.target.value)}
                               required
-                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs tabular-nums"
                             />
                             <Input
+                              name="address-level2"
+                              autoComplete="address-level2"
                               placeholder="Ort"
                               value={city}
                               onChange={(e) => setCity(e.target.value)}
@@ -803,16 +828,16 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       </Label>
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
-                      {loading ? "Wird verarbeitet..." : "Konto erstellen"}
+                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150" disabled={loading}>
+                      {loading ? "Wird verarbeitet…" : "Konto erstellen"}
                     </Button>
                   </form>
                 </TabsContent>
 
                 <TabsContent value="login" className="mt-4 space-y-4">
                   <div className="space-y-2">
-                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee]" onClick={handleGoogleLogin} disabled={loading}>
-                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
+                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee] transition-colors duration-150" onClick={handleGoogleLogin} disabled={loading}>
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -836,7 +861,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse</Label>
                       <Input
                         id="login-email"
+                        name="email"
                         type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        spellCheck={false}
                         placeholder="name@beispiel.de"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -863,7 +892,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       </div>
                       <Input
                         id="login-pass"
+                        name="current-password"
                         type="password"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -871,8 +902,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       />
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs" disabled={loading}>
-                      {loading ? "Anmeldung läuft..." : "Anmelden"}
+                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150" disabled={loading}>
+                      {loading ? "Anmeldung läuft…" : "Anmelden"}
                     </Button>
                   </form>
                 </TabsContent>

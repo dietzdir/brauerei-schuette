@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { collection, query, onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { query, onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase/config";
+import { getProductsCollection } from "@/lib/firebase/converters";
 import { Product, ProductVariant, ContainerType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,14 +69,16 @@ export function CatalogManager() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, "products"));
-    const unsub = onSnapshot(q, (snap) => {
-      const data: Product[] = [];
-      snap.forEach(d => data.push({ id: d.id, ...d.data() } as Product));
-      setProducts(data);
+    const unsubscribe = onSnapshot(getProductsCollection(db), (snapshot) => {
+      const fetched: Product[] = snapshot.docs.map((docSnap) => docSnap.data());
+      setProducts(fetched);
+      setLoading(false);
+    }, (err) => {
+      console.error("Error fetching catalog products:", err);
       setLoading(false);
     });
-    return () => unsub();
+
+    return () => unsubscribe();
   }, []);
 
   const handleOpenNew = () => {
@@ -211,7 +214,7 @@ export function CatalogManager() {
       </div>
 
       {loading ? (
-        <p className="font-heading uppercase text-sm text-[#0f4851]">Lade Katalog...</p>
+        <p className="font-heading uppercase text-sm text-[#0f4851]">Lade Katalog…</p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {products.map(prod => {
@@ -219,7 +222,7 @@ export function CatalogManager() {
             return (
               <div 
                 key={prod.id} 
-                className={`rounded-none border p-5 shadow-xs flex flex-col justify-between transition-all ${
+                className={`rounded-none border p-5 shadow-xs flex flex-col justify-between transition-[opacity,border-color,background-color] duration-150 ${
                   isProdActive 
                     ? "bg-white border-[#c8d3d5]" 
                     : "bg-[#f9f9f9] border-dashed border-[#c8d3d5] opacity-75"
@@ -252,7 +255,7 @@ export function CatalogManager() {
                             </span>
                           )}
                           {prod.alcohol && (
-                            <span className="text-[9px] bg-[#eeeeee] text-[#0f4851] px-2 py-0.5 rounded-none font-bold border border-[#c8d3d5]">
+                            <span className="text-[9px] bg-[#eeeeee] text-[#0f4851] px-2 py-0.5 rounded-none font-bold border border-[#c8d3d5] tabular-nums">
                               {prod.alcohol.includes("%") ? prod.alcohol : `${prod.alcohol} % vol.`}
                             </span>
                           )}
@@ -295,7 +298,7 @@ export function CatalogManager() {
                               </span>
                             )}
                           </span>
-                          <span className="font-bold text-[#0f4851]">{formatPrice(v.price)}</span>
+                          <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(v.price)}</span>
                         </li>
                       );
                     })}
@@ -306,10 +309,10 @@ export function CatalogManager() {
               
               <div className="flex gap-2 mt-4 pt-4 border-t border-[#c8d3d5]">
                 <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee] h-8" onClick={() => handleEdit(prod)}>
-                  <Pencil className="size-3 text-[#00A8BC]" /> Bearbeiten
+                  <Pencil className="size-3 text-[#00A8BC]" aria-hidden="true" /> Bearbeiten
                 </Button>
-                <Button variant="destructive" size="icon" className="shrink-0 rounded-none h-8 w-8" onClick={() => handleDelete(prod.id)}>
-                  <Trash2 className="size-3.5" />
+                <Button variant="destructive" size="icon" aria-label={`Produkt ${prod.name} löschen`} className="shrink-0 rounded-none h-8 w-8" onClick={() => handleDelete(prod.id)}>
+                  <Trash2 className="size-3.5" aria-hidden="true" />
                 </Button>
               </div>
               </div>
@@ -579,7 +582,7 @@ function VariantRow({
 
   return (
     <div
-      className={`p-3.5 rounded-none border transition-all space-y-3 ${
+      className={`p-3.5 rounded-none border transition-[opacity,border-color,background-color] duration-150 space-y-3 ${
         isVarActive
           ? "bg-white border-[#c8d3d5]"
           : "bg-[#f9f9f9] border-dashed border-[#c8d3d5] opacity-75"

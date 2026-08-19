@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, ViewTransition } from "react";
 import Image from "next/image";
 import { Product, ProductVariant } from "@/types";
 import { useCart } from "@/lib/cart/CartContext";
@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatContainerType, formatPrice, formatBasePrice } from "@/lib/utils";
-import { Beer, Hop, Plus, Minus, Check, Info, Droplets, Sparkles } from "lucide-react";
+import { Hop, Plus, Minus, Check, Info, Droplets, Sparkles } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -59,20 +59,22 @@ export function ProductCard({ product }: ProductCardProps) {
     : null;
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-all duration-200 border border-[#c8d3d5] hover:border-[#0f4851] bg-white rounded-none group shadow-xs p-0 gap-0">
+    <Card className="flex flex-col h-full overflow-hidden transition-[border-color,box-shadow] duration-200 border border-[#c8d3d5] hover:border-[#0f4851] bg-white rounded-none group shadow-xs p-0 gap-0">
       {/* Product Image Header (Always 16:9 for uniform grid alignment) */}
       <div className="relative w-full aspect-16/9 bg-[#f4f6f7] overflow-hidden border-b border-[#c8d3d5] shrink-0 flex items-center justify-center">
         {product.image ? (
-          <>
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-          </>
+          <ViewTransition name={`product-img-${product.id}`} share="morph">
+            <div className="relative w-full h-full">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+            </div>
+          </ViewTransition>
         ) : (
           <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-[#f9fafb] to-[#edf1f2]">
             <Image
@@ -80,7 +82,7 @@ export function ProductCard({ product }: ProductCardProps) {
               alt="Brauerei Schütte"
               width={160}
               height={90}
-              className="object-contain max-h-16 w-auto opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 filter grayscale-[20%]"
+              className="object-contain max-h-16 w-auto opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-[transform,opacity] duration-300 filter grayscale-[20%]"
             />
           </div>
         )}
@@ -91,13 +93,13 @@ export function ProductCard({ product }: ProductCardProps) {
               variant="secondary"
               className="bg-[#00A8BC] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
             >
-              <Hop className="size-3 mr-1 inline" />
+              <Hop className="size-3 mr-1 inline" aria-hidden="true" />
               {product.badge}
             </Badge>
           )}
 
           {product.alcohol && (
-            <Badge variant="outline" className="text-[11px] font-bold bg-white text-[#0f4851] border-[#c8d3d5] rounded-none">
+            <Badge variant="outline" className="text-[11px] font-bold bg-white text-[#0f4851] border-[#c8d3d5] rounded-none tabular-nums">
               {product.alcohol.includes("%") ? product.alcohol : `${product.alcohol} % vol.`}
             </Badge>
           )}
@@ -106,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {product.image && product.isAiGenerated && (
           <div className="absolute bottom-2.5 right-2.5 z-10 pointer-events-none">
             <span className="inline-flex items-center gap-1 bg-black/65 backdrop-blur-xs text-white/95 text-[10px] font-medium px-2 py-0.5 rounded-none border border-white/20 shadow-xs select-none">
-              <Sparkles className="size-2.5 text-amber-300 shrink-0" />
+              <Sparkles className="size-2.5 text-amber-300 shrink-0" aria-hidden="true" />
               <span>KI-Symbolbild</span>
             </span>
           </div>
@@ -114,7 +116,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <CardHeader className="p-4 pb-2 space-y-1 shrink-0 min-h-[4.5rem]">
-        <CardTitle className="font-heading text-2xl tracking-wide uppercase text-[#0f4851]">
+        <CardTitle className="font-heading text-2xl tracking-wide uppercase text-[#0f4851] text-pretty">
           {product.name}
         </CardTitle>
 
@@ -135,7 +137,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {product.color && (
             <div className="flex items-center gap-1.5 text-[11px] text-[#505c5f] font-medium pt-1">
-              <Droplets className="size-3.5 text-[#00A8BC] shrink-0" />
+              <Droplets className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
               <span>Farbe: {product.color}</span>
             </div>
           )}
@@ -146,19 +148,19 @@ export function ProductCard({ product }: ProductCardProps) {
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-[#505c5f] block">Einzelpreis</span>
               {activeVariant && (
-                <span className="text-[11px] text-[#505c5f] font-medium">
+                <span className="text-[11px] text-[#505c5f] font-medium tabular-nums">
                   {formatBasePrice(activeVariant.price, activeVariant.type)}
                 </span>
               )}
             </div>
-            <span className="font-heading text-3xl tracking-wide text-[#0f4851]">
+            <span className="font-heading text-3xl tracking-wide text-[#0f4851] tabular-nums">
               {formattedPrice}
             </span>
           </div>
 
           {/* Container Select */}
           <div className="space-y-1">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f] block">
+            <label htmlFor={`variant-select-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f] block">
               Gebinde / Größe:
             </label>
             <Select
@@ -169,7 +171,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 }
               }}
             >
-              <SelectTrigger className="w-full bg-white h-9 text-xs rounded-none border-[#c8d3d5]">
+              <SelectTrigger id={`variant-select-${product.id}`} className="w-full bg-white h-9 text-xs rounded-none border-[#c8d3d5]">
                 <SelectValue placeholder="Gebinde wählen">
                   {formatContainerType(selectedVariantType)}
                 </SelectValue>
@@ -180,11 +182,11 @@ export function ProductCard({ product }: ProductCardProps) {
                     <div className="flex justify-between w-full gap-4 items-center">
                       <div>
                         <span className="font-medium">{formatContainerType(v.type)}</span>
-                        <span className="text-[10px] text-[#505c5f] ml-1.5">
+                        <span className="text-[10px] text-[#505c5f] ml-1.5 tabular-nums">
                           ({formatBasePrice(v.price, v.type)})
                         </span>
                       </div>
-                      <span className="font-bold text-[#0f4851] ml-2">
+                      <span className="font-bold text-[#0f4851] ml-2 tabular-nums">
                         {formatPrice(v.price)}
                       </span>
                     </div>
@@ -197,11 +199,11 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Quantity Stepper & Presets */}
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f]">
+              <label htmlFor={`quantity-input-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f]">
                 Bestellmenge:
               </label>
               {quantity > 1 && activeVariant && (
-                <span className="text-[11px] font-bold text-[#00A8BC]">
+                <span className="text-[11px] font-bold text-[#00A8BC] tabular-nums">
                   Summe: {formatPrice(activeVariant.price * quantity)}
                 </span>
               )}
@@ -213,32 +215,37 @@ export function ProductCard({ product }: ProductCardProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
+                  aria-label={`Menge für ${product.name} verringern`}
                   className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee]"
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
                   disabled={quantity <= 1}
                 >
-                  <Minus className="size-3.5" />
+                  <Minus className="size-3.5" aria-hidden="true" />
                 </Button>
                 <input
+                  id={`quantity-input-${product.id}`}
                   type="number"
+                  inputMode="numeric"
                   min="1"
                   max="999"
                   value={quantity}
+                  aria-label={`Menge für ${product.name}`}
                   onChange={(e) => {
                     const val = parseInt(e.target.value, 10);
                     if (!isNaN(val) && val >= 1) setQuantity(val);
                     else if (e.target.value === "") setQuantity(1);
                   }}
-                  className="w-12 text-center text-xs font-bold bg-transparent outline-none py-1.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-12 text-center text-xs font-bold bg-transparent outline-none py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
+                  aria-label={`Menge für ${product.name} erhöhen`}
                   className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee]"
                   onClick={() => setQuantity((prev) => prev + 1)}
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-3.5" aria-hidden="true" />
                 </Button>
               </div>
 
@@ -251,8 +258,9 @@ export function ProductCard({ product }: ProductCardProps) {
                       type="button"
                       variant={quantity === cnt ? "default" : "outline"}
                       size="sm"
+                      aria-label={`${cnt} Stück (${cnt === 6 ? "6er Kasten" : `${cnt}er`}) auswählen`}
                       onClick={() => setQuantity(cnt)}
-                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase ${
+                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase tabular-nums ${
                         quantity === cnt ? "bg-[#0f4851] text-white" : "border-[#c8d3d5] text-[#0f4851]"
                       }`}
                     >
@@ -266,8 +274,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {depositText && (
             <div className="flex items-center gap-1 text-[11px] text-[#505c5f] pt-0.5 font-medium">
-              <Info className="size-3 text-[#00A8BC] shrink-0" />
-              <span>{depositText}</span>
+              <Info className="size-3 text-[#00A8BC] shrink-0" aria-hidden="true" />
+              <span className="tabular-nums">{depositText}</span>
             </div>
           )}
 
@@ -299,7 +307,8 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardFooter className="pt-2 border-t border-[#c8d3d5] bg-[#f9f9f9]">
         <Button
           onClick={handleAddToCart}
-          className={`w-full font-bold uppercase tracking-wider transition-all h-10 rounded-none shadow-xs ${
+          aria-label={justAdded ? `${quantity}x ${product.name} im Warenkorb` : `${quantity}x ${product.name} in den Warenkorb legen`}
+          className={`w-full font-bold uppercase tracking-wider transition-colors duration-150 h-10 rounded-none shadow-xs ${
             justAdded
               ? "bg-[#0f4851] text-white"
               : "bg-[#00a8bc] hover:bg-[#0092a4] text-white"
@@ -308,13 +317,13 @@ export function ProductCard({ product }: ProductCardProps) {
         >
           {justAdded ? (
             <>
-              <Check className="size-4 mr-1.5" />
-              {quantity}x Im Warenkorb
+              <Check className="size-4 mr-1.5" aria-hidden="true" />
+              <span className="tabular-nums">{quantity}x Im Warenkorb</span>
             </>
           ) : (
             <>
-              <Plus className="size-4 mr-1.5" />
-              {quantity > 1 ? `${quantity}x In den Warenkorb` : "In den Warenkorb"}
+              <Plus className="size-4 mr-1.5" aria-hidden="true" />
+              <span className="tabular-nums">{quantity > 1 ? `${quantity}x In den Warenkorb` : "In den Warenkorb"}</span>
             </>
           )}
         </Button>

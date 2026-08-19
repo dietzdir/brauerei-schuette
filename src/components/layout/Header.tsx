@@ -61,7 +61,7 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             {profile?.photoURL ? (
               <img src={profile.photoURL} alt="Profile" className="size-4 rounded-none shrink-0" />
             ) : (
-              <User className="size-3.5 text-[#505c5f] shrink-0" />
+              <User className="size-3.5 text-[#505c5f] shrink-0" aria-hidden="true" />
             )}
             <span className="hidden sm:inline max-w-[150px] md:max-w-[200px] truncate">
               {displayName}
@@ -79,7 +79,7 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             aria-label="Bestellhistorie öffnen"
             className="flex items-center gap-1.5 text-xs h-9 px-2.5 sm:px-3 bg-white border-[#c8d3d5] hover:bg-[#f3f3f3] rounded-none font-medium text-[#1a1c1c]"
           >
-            <History className="size-3.5 text-[#505c5f]" />
+            <History className="size-3.5 text-[#505c5f]" aria-hidden="true" />
             <span className="hidden md:inline uppercase tracking-wider font-semibold text-[11px]">Bestellungen</span>
           </Button>
 
@@ -88,12 +88,12 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             size="sm"
             onClick={onOpenCart}
             aria-label="Warenkorb öffnen"
-            className="relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-all"
+            className="relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-colors duration-150"
           >
-            <ShoppingCart className="size-4" />
+            <ShoppingCart className="size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Warenkorb</span>
             {totalCount > 0 && (
-              <span className="inline-flex items-center justify-center size-5 text-[11px] font-black rounded-none bg-[#0f4851] text-white ml-0.5 animate-in zoom-in-75 duration-200">
+              <span className="inline-flex items-center justify-center size-5 text-[11px] font-black rounded-none bg-[#0f4851] text-white ml-0.5 animate-in zoom-in-75 duration-200 tabular-nums">
                 {totalCount}
               </span>
             )}

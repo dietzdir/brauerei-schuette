@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ViewTransition } from "react";
 import { Order } from "@/types";
 import { useCart } from "@/lib/cart/CartContext";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -535,7 +535,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                   <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-1">
                     {items.length === 0 ? (
                       <div className="text-center py-12 text-[#505c5f] space-y-3">
-                        <ShoppingBag className="size-12 mx-auto text-[#c8d3d5]" />
+                        <ShoppingBag className="size-12 mx-auto text-[#c8d3d5]" aria-hidden="true" />
                         <p className="font-heading text-lg uppercase tracking-wide text-[#0f4851]">Ihr Warenkorb ist leer</p>
                         <p className="text-xs">
                           Fügen Sie Sorten und Gebinde aus unserem Sortiment hinzu.
@@ -543,77 +543,81 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       </div>
                     ) : (
                       items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5"
-                        >
-                          {/* Row 1: Full Product Title + Delete Button */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
-                                {item.productName}
-                              </h4>
-                              <p className="text-xs text-[#505c5f] font-medium mt-0.5">
-                                {formatContainerType(item.variantType)}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
-                              onClick={() => removeItem(item.id)}
-                              title="Artikel entfernen"
-                            >
-                              <Trash2 className="size-3.5" />
-                            </Button>
-                          </div>
-
-                          {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
-                          <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
-                            <div className="flex flex-col">
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="font-bold text-sm text-[#1a1c1c]">
-                                  {formatPrice(item.unitPrice * item.quantity)}
-                                </span>
-                                {item.quantity > 1 && (
-                                  <span className="text-[11px] text-[#505c5f]">
-                                    ({formatPrice(item.unitPrice)} / Stk.)
-                                  </span>
-                                )}
+                        <ViewTransition key={item.id}>
+                          <div
+                            className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5"
+                          >
+                            {/* Row 1: Full Product Title + Delete Button */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
+                                  {item.productName}
+                                </h4>
+                                <p className="text-xs text-[#505c5f] font-medium mt-0.5">
+                                  {formatContainerType(item.variantType)}
+                                </p>
                               </div>
-                              {item.depositPrice ? (
-                                <span className="text-[11px] text-[#00A8BC] font-medium">
-                                  + {formatPrice(item.depositPrice * item.quantity)} Pfand
-                                </span>
-                              ) : null}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                                onClick={() => removeItem(item.id)}
+                                aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
+                                title="Artikel entfernen"
+                              >
+                                <Trash2 className="size-3.5" aria-hidden="true" />
+                              </Button>
                             </div>
 
-                            {/* Quantity controls */}
-                            <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                title="Menge verringern"
-                              >
-                                <Minus className="size-3" />
-                              </Button>
-                              <span className="w-7 text-center text-xs font-bold text-[#0f4851]">
-                                {item.quantity}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                title="Menge erhöhen"
-                              >
-                                <Plus className="size-3" />
-                              </Button>
+                            {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
+                            <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
+                              <div className="flex flex-col">
+                                <div className="flex items-baseline gap-1.5">
+                                  <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
+                                    {formatPrice(item.unitPrice * item.quantity)}
+                                  </span>
+                                  {item.quantity > 1 && (
+                                    <span className="text-[11px] text-[#505c5f] tabular-nums">
+                                      ({formatPrice(item.unitPrice)} / Stk.)
+                                    </span>
+                                  )}
+                                </div>
+                                {item.depositPrice ? (
+                                  <span className="text-[11px] text-[#00A8BC] font-medium tabular-nums">
+                                    + {formatPrice(item.depositPrice * item.quantity)} Pfand
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {/* Quantity controls */}
+                              <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                  aria-label={`Menge für ${item.productName} verringern`}
+                                  title="Menge verringern"
+                                >
+                                  <Minus className="size-3" aria-hidden="true" />
+                                </Button>
+                                <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                  aria-label={`Menge für ${item.productName} erhöhen`}
+                                  title="Menge erhöhen"
+                                >
+                                  <Plus className="size-3" aria-hidden="true" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </ViewTransition>
                       ))
                     )}
                   </div>
@@ -624,29 +628,29 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       <div className="space-y-1.5 text-xs text-[#505c5f]">
                         <div className="flex justify-between">
                           <span>Zwischensumme Artikel:</span>
-                          <span className="font-bold text-[#1a1c1c]">{formatPrice(itemsTotalCents)}</span>
+                          <span className="font-bold text-[#1a1c1c] tabular-nums">{formatPrice(itemsTotalCents)}</span>
                         </div>
                         {depositTotalCents > 0 && (
                           <div className="flex justify-between text-[#00A8BC]">
                             <span>Pfand (Flaschen / Gebinde):</span>
-                            <span className="font-bold">+ {formatPrice(depositTotalCents)}</span>
+                            <span className="font-bold tabular-nums">+ {formatPrice(depositTotalCents)}</span>
                           </div>
                         )}
                       </div>
 
                       <div className="flex justify-between items-baseline font-bold pt-2 border-t border-[#c8d3d5] gap-2">
                         <span className="text-xs uppercase tracking-wider text-[#505c5f] min-w-0">Gesamtbetrag (inkl. Pfand):</span>
-                        <span className="font-heading text-2xl text-[#0f4851] shrink-0 text-right">
+                        <span className="font-heading text-2xl text-[#0f4851] shrink-0 text-right tabular-nums">
                           {formatPrice(grandTotalCents)}
                         </span>
                       </div>
 
                       <Button
                         onClick={handleProceedToCheckout}
-                        className="w-full py-6 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs"
+                        className="w-full py-6 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
                       >
                         <span>Zur Reservierung</span>
-                        <ArrowRight className="size-4" />
+                        <ArrowRight className="size-4" aria-hidden="true" />
                       </Button>
                     </div>
                   )}
@@ -661,7 +665,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 rounded-none bg-[#0f4851] text-white">
-                          <Hop className="size-4 text-[#00A8BC]" />
+                          <Hop className="size-4 text-[#00A8BC]" aria-hidden="true" />
                         </div>
                         <h4 className="font-heading uppercase tracking-wide text-base text-[#0f4851]">
                           Mit Kundenkonto bestellen (Empfohlen)
@@ -674,20 +678,20 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
                     <ul className="space-y-1.5 text-xs text-[#505c5f] pt-1">
                       <li className="flex items-center gap-2">
-                        <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" />
+                        <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
                         <span>Bestellhistorie & Abholstatus jederzeit einsehen</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" />
+                        <ShieldCheck className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
                         <span>Schnellere Nachbestellung ohne erneute Dateneingabe</span>
                       </li>
                     </ul>
 
                     <Button
                       onClick={() => setAuthModalOpen(true)}
-                      className="w-full font-bold uppercase tracking-wider text-xs h-10 bg-[#0f4851] text-white hover:bg-[#174e56] rounded-none mt-2 shadow-xs"
+                      className="w-full font-bold uppercase tracking-wider text-xs h-10 bg-[#0f4851] text-white hover:bg-[#174e56] rounded-none mt-2 shadow-xs transition-colors duration-150"
                     >
-                      <UserPlus className="size-4 mr-2 text-[#00A8BC]" />
+                      <UserPlus className="size-4 mr-2 text-[#00A8BC]" aria-hidden="true" />
                       Konto anlegen oder Anmelden
                     </Button>
                   </div>
@@ -696,7 +700,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                   <div className="p-4 rounded-none border border-[#c8d3d5] bg-white space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 rounded-none bg-[#eeeeee] text-[#505c5f]">
-                        <UserIcon className="size-4" />
+                        <UserIcon className="size-4" aria-hidden="true" />
                       </div>
                       <h4 className="font-heading uppercase tracking-wide text-base text-[#1a1c1c]">
                         Als Gast fortfahren
@@ -709,7 +713,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <Button
                       variant="outline"
                       onClick={() => setStep("guest-form")}
-                      className="w-full font-bold uppercase tracking-wider text-xs h-10 border-[#c8d3d5] rounded-none text-[#0f4851] hover:bg-[#eeeeee]"
+                      className="w-full font-bold uppercase tracking-wider text-xs h-10 border-[#c8d3d5] rounded-none text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150"
                     >
                       Als Gast reservieren
                     </Button>
@@ -720,9 +724,9 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       type="button"
                       variant="outline"
                       onClick={() => setStep("cart")}
-                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 shadow-2xs"
+                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 shadow-2xs transition-colors duration-150"
                     >
-                      <ArrowLeft className="size-4 text-[#00A8BC]" />
+                      <ArrowLeft className="size-4 text-[#00A8BC]" aria-hidden="true" />
                       <span>Zurück zum Warenkorb</span>
                     </Button>
                   </div>
@@ -733,15 +737,15 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
               {step === "guest-form" && (
                 <div className="flex-1 overflow-y-auto py-2 space-y-4 pr-1">
                   {error && (
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-center gap-2 text-xs text-destructive">
-                      <AlertCircle className="size-4 shrink-0" />
+                    <div role="alert" aria-live="polite" className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-center gap-2 text-xs text-destructive">
+                      <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                       <span>{error}</span>
                     </div>
                   )}
 
                   {!isAnonymous && (
                     <div className="p-3 bg-white border border-[#00A8BC] rounded-none flex items-center gap-2 text-sm text-[#0f4851] font-medium shadow-2xs">
-                      <UserCheck className="size-4 text-[#00A8BC] shrink-0" />
+                      <UserCheck className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
                       <span>Angemeldet als <strong>{user?.email}</strong></span>
                     </div>
                   )}
@@ -750,11 +754,13 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     {/* Name */}
                     <div className="space-y-1.5">
                       <Label htmlFor="checkout-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f] flex items-center gap-1.5">
-                        <UserIcon className="size-3.5 text-[#505c5f]" />
+                        <UserIcon className="size-3.5 text-[#505c5f]" aria-hidden="true" />
                         <span>Vollständiger Name des Bestellers *</span>
                       </Label>
                       <Input
                         id="checkout-name"
+                        name="name"
+                        autoComplete="name"
                         placeholder="z. B. Max Mustermann"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
@@ -766,12 +772,16 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     {/* Email */}
                     <div className="space-y-1.5">
                       <Label htmlFor="checkout-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f] flex items-center gap-1.5">
-                        <Mail className="size-3.5 text-[#505c5f]" />
+                        <Mail className="size-3.5 text-[#505c5f]" aria-hidden="true" />
                         <span>E-Mail-Adresse für Bestätigung *</span>
                       </Label>
                       <Input
                         id="checkout-email"
+                        name="email"
                         type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        spellCheck={false}
                         placeholder="z. B. max.mustermann@beispiel.de"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
@@ -786,17 +796,20 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     {/* Phone */}
                     <div className="space-y-1.5">
                       <Label htmlFor="checkout-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f] flex items-center gap-1.5">
-                        <Phone className="size-3.5 text-[#505c5f]" />
+                        <Phone className="size-3.5 text-[#505c5f]" aria-hidden="true" />
                         <span>Telefonnummer (für Rückfragen / Abholung) *</span>
                       </Label>
                       <Input
                         id="checkout-phone"
+                        name="tel"
                         type="tel"
+                        autoComplete="tel"
+                        inputMode="tel"
                         placeholder="z. B. 0170 1234567 oder 039204 1234"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
                         required
-                        className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]"
+                        className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c] tabular-nums"
                       />
                     </div>
 
@@ -804,7 +817,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <div className="space-y-1.5">
                       <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f] flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
-                          <CalendarIcon className="size-3.5 text-[#00A8BC]" />
+                          <CalendarIcon className="size-3.5 text-[#00A8BC]" aria-hidden="true" />
                           <span>Gewünschter Abholtermin *</span>
                         </span>
                         {pickupSlots.find(s => s.dateStr === selectedPickupSlotDate)?.isSpecial && (
@@ -816,18 +829,19 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       
                       {pickupSlots.length === 0 ? (
                         <div className="p-3 bg-white border border-[#c8d3d5] rounded-none text-sm text-[#505c5f]">
-                          Lade verfügbare Abholtermine...
+                          Lade verfügbare Abholtermine…
                         </div>
                       ) : (
                         <div className="flex flex-col gap-1.5">
                           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                             <PopoverTrigger
+                              aria-label="Abholtermin wählen"
                               className={cn(
                                 "flex w-full items-center justify-start rounded-none border border-[#c8d3d5] bg-white px-3 py-2 text-sm font-medium shadow-2xs transition-colors hover:bg-[#eeeeee] outline-none select-none h-10 cursor-pointer text-[#1a1c1c]",
                                 !selectedPickupSlotDate && "text-[#505c5f]"
                               )}
                             >
-                              <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-[#00A8BC]" />
+                              <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-[#00A8BC]" aria-hidden="true" />
                               <span className="truncate">
                                 {pickupSlots.find(s => s.dateStr === (selectedPickupSlotDate || pickupSlots[0]?.dateStr))?.formattedDate || "Datum wählen"}
                               </span>
@@ -861,9 +875,9 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                             if (!currentSlot) return null;
                             return (
                               <div className="p-2.5 bg-white rounded-none border border-[#c8d3d5] flex items-start gap-2.5 text-sm text-[#1a1c1c] shadow-2xs">
-                                <Clock className="size-4 mt-0.5 shrink-0 text-[#00A8BC]" />
+                                <Clock className="size-4 mt-0.5 shrink-0 text-[#00A8BC]" aria-hidden="true" />
                                 <div className="flex flex-col gap-0.5">
-                                  <span className="font-bold text-sm text-[#0f4851]">Abholzeit: {currentSlot.timeRange}</span>
+                                  <span className="font-bold text-sm text-[#0f4851] tabular-nums">Abholzeit: {currentSlot.timeRange}</span>
                                   {currentSlot.note && <span className="text-xs text-[#505c5f]">{currentSlot.note}</span>}
                                 </div>
                               </div>
@@ -872,7 +886,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         </div>
                       )}
                       <p className="text-xs text-[#505c5f] flex items-center gap-1.5 font-medium">
-                        <MapPinCheckInside className="size-3.5 text-[#00A8BC] shrink-0" />
+                        <MapPinCheckInside className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
                         <span>Abholung im Werksverkauf: Zum Siekweg 2, 39343 Rottmersleben</span>
                       </p>
                     </div>
@@ -910,6 +924,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                           </Label>
                           <Input
                             id="checkout-company"
+                            name="organization"
+                            autoComplete="organization"
                             placeholder="z. B. Gasthof Bördeblick GmbH"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
@@ -920,21 +936,21 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         <div className="grid grid-cols-[1fr_100px] gap-2">
                           <div className="space-y-1.5">
                             <Label htmlFor="checkout-street" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Straße *</Label>
-                            <Input id="checkout-street" value={street} onChange={(e) => setStreet(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
+                            <Input id="checkout-street" name="address-line1" autoComplete="street-address" value={street} onChange={(e) => setStreet(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor="checkout-hnr" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Hausnr. *</Label>
-                            <Input id="checkout-hnr" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
+                            <Input id="checkout-hnr" name="house-number" autoComplete="address-line2" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
                           </div>
                         </div>
                         <div className="grid grid-cols-[100px_1fr] gap-2">
                           <div className="space-y-1.5">
                             <Label htmlFor="checkout-zip" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">PLZ *</Label>
-                            <Input id="checkout-zip" value={zipCode} onChange={(e) => setZipCode(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
+                            <Input id="checkout-zip" name="postal-code" autoComplete="postal-code" inputMode="numeric" value={zipCode} onChange={(e) => setZipCode(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c] tabular-nums" />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor="checkout-city" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Ort *</Label>
-                            <Input id="checkout-city" value={city} onChange={(e) => setCity(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
+                            <Input id="checkout-city" name="address-level2" autoComplete="address-level2" value={city} onChange={(e) => setCity(e.target.value)} required className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium text-[#1a1c1c]" />
                           </div>
                         </div>
                       </div>
@@ -946,17 +962,17 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <div className="space-y-1.5 text-xs text-[#505c5f] bg-white p-3.5 rounded-none border border-[#c8d3d5]">
                       <div className="flex justify-between">
                         <span>Zwischensumme Artikel:</span>
-                        <span className="font-bold text-[#1a1c1c]">{formatPrice(itemsTotalCents)}</span>
+                        <span className="font-bold text-[#1a1c1c] tabular-nums">{formatPrice(itemsTotalCents)}</span>
                       </div>
                       {depositTotalCents > 0 && (
                         <div className="flex justify-between text-[#00A8BC]">
                           <span>Pfand (Flaschen / Gebinde):</span>
-                          <span className="font-bold">+ {formatPrice(depositTotalCents)}</span>
+                          <span className="font-bold tabular-nums">+ {formatPrice(depositTotalCents)}</span>
                         </div>
                       )}
                       <div className="flex justify-between items-baseline font-bold pt-2 border-t border-[#c8d3d5] text-[#1a1c1c]">
                         <span className="text-xs uppercase tracking-wider text-[#505c5f]">Gesamtbetrag:</span>
-                        <span className="font-heading text-2xl text-[#0f4851]">
+                        <span className="font-heading text-2xl text-[#0f4851] tabular-nums">
                           {formatPrice(grandTotalCents)}
                         </span>
                       </div>
@@ -966,7 +982,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <div className="p-3 bg-[#eeeeee] border border-[#c8d3d5] rounded-none space-y-2.5 text-xs text-[#1a1c1c]">
                       <div className="flex items-start gap-2.5">
                         <div className="w-5 shrink-0 flex items-center justify-center pt-0.5">
-                          <ShieldCheck className="size-4 text-[#00A8BC]" />
+                          <ShieldCheck className="size-4 text-[#00A8BC]" aria-hidden="true" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-[#0f4851] text-xs uppercase tracking-wider leading-snug">
@@ -991,13 +1007,13 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
                     <Button
                       type="submit"
-                      className="w-full py-6 text-sm font-bold uppercase tracking-wider mt-2 flex flex-col items-center justify-center gap-0.5 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs"
+                      className="w-full py-6 text-sm font-bold uppercase tracking-wider mt-2 flex flex-col items-center justify-center gap-0.5 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
                       disabled={isSubmitting || items.length === 0}
                     >
                       {isSubmitting ? (
                         <div className="flex items-center">
-                          <Loader2 className="size-4 mr-2 animate-spin" />
-                          <span>Reservierung wird übermittelt...</span>
+                          <Loader2 className="size-4 mr-2 animate-spin" aria-hidden="true" />
+                          <span>Reservierung wird übermittelt…</span>
                         </div>
                       ) : (
                         <>
@@ -1013,9 +1029,9 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       type="button"
                       variant="outline"
                       onClick={() => setStep(isAnonymous ? "account-choice" : "cart")}
-                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 mt-2 shadow-2xs"
+                      className="w-full font-bold uppercase tracking-wider text-xs h-11 border-[#c8d3d5] bg-white rounded-none text-[#0f4851] hover:bg-[#eeeeee] flex items-center justify-center gap-2 mt-2 shadow-2xs transition-colors duration-150"
                     >
-                      <ArrowLeft className="size-4 text-[#00A8BC]" />
+                      <ArrowLeft className="size-4 text-[#00A8BC]" aria-hidden="true" />
                       <span>{isAnonymous ? "Zurück zur Auswahl" : "Zurück zum Warenkorb"}</span>
                     </Button>
                   </form>

@@ -81,61 +81,73 @@ export async function createOrderAction(
     }
 
     // Server-side price, deposit and product validation
+    // Parallel server-side price, deposit and product validation (eliminating async waterfalls)
     const validatedOrderItems: OrderItem[] = [];
 
-    for (const item of items) {
-      if (item.quantity <= 0) {
-        return { success: false, error: "Ungültige Bestellmenge." };
-      }
-
-      let productData: Product | null = null;
-
-      // Authoritative live catalog lookup from Firestore
-      try {
-        const productDoc = await adminDb.collection("products").doc(item.productId).get();
-        if (productDoc.exists) {
-          productData = { id: productDoc.id, ...(productDoc.data() as Omit<Product, "id">) };
+    const itemValidationResults = await Promise.all(
+      items.map(async (item) => {
+        if (item.quantity <= 0) {
+          return { error: "Ungültige Bestellmenge." };
         }
-      } catch (err) {
-        console.warn("Firestore product lookup error, checking fallback:", err);
-      }
 
-      // Fallback only if not found in Firestore
-      if (!productData) {
-        const fallback = initialProducts.find(
-          (p) =>
-            p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === item.productId ||
-            p.name === item.productId
-        );
-        if (fallback) {
-          productData = { ...fallback, id: item.productId };
+        let productData: Product | null = null;
+
+        // Authoritative live catalog lookup from Firestore
+        try {
+          const productDoc = await adminDb.collection("products").doc(item.productId).get();
+          if (productDoc.exists) {
+            productData = { id: productDoc.id, ...(productDoc.data() as Omit<Product, "id">) };
+          }
+        } catch (err) {
+          console.warn("Firestore product lookup error, checking fallback:", err);
         }
-      }
 
-      if (!productData) {
-        return {
-          success: false,
-          error: `Produkt nicht gefunden (ID: ${item.productId}).`,
+        // Fallback only if not found in Firestore
+        if (!productData) {
+          const fallback = initialProducts.find(
+            (p) =>
+              p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === item.productId ||
+              p.name === item.productId
+          );
+          if (fallback) {
+            productData = { ...fallback, id: item.productId };
+          }
+        }
+
+        if (!productData) {
+          return {
+            error: `Produkt nicht gefunden (ID: ${item.productId}).`,
+          };
+        }
+
+        const variant = productData.variants?.find((v) => v.type === item.variantType);
+
+        if (!variant) {
+          return {
+            error: `Gebinde "${item.variantType}" für "${productData.name}" existiert nicht mehr.`,
+          };
+        }
+
+        const orderItem: OrderItem = {
+          productId: item.productId,
+          productName: productData.name,
+          variantType: variant.type,
+          quantity: item.quantity,
+          unitPrice: variant.price, // Trust ONLY server-verified price
+          depositPrice: variant.deposit || 0, // Server-verified deposit
         };
+
+        return { item: orderItem };
+      })
+    );
+
+    for (const res of itemValidationResults) {
+      if (res.error) {
+        return { success: false, error: res.error };
       }
-
-      const variant = productData.variants?.find((v) => v.type === item.variantType);
-
-      if (!variant) {
-        return {
-          success: false,
-          error: `Gebinde "${item.variantType}" für "${productData.name}" existiert nicht mehr.`,
-        };
+      if (res.item) {
+        validatedOrderItems.push(res.item);
       }
-
-      validatedOrderItems.push({
-        productId: item.productId,
-        productName: productData.name,
-        variantType: variant.type,
-        quantity: item.quantity,
-        unitPrice: variant.price, // Trust ONLY server-verified price
-        depositPrice: variant.deposit || 0, // Server-verified deposit
-      });
     }
 
     const itemsTotalCents = validatedOrderItems.reduce(
