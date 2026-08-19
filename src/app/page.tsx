@@ -17,10 +17,11 @@ import {
   getWeekdayPlural,
 } from "@/lib/openingHours";
 import { StoreSettings } from "@/types";
+import { useCart } from "@/lib/cart/CartContext";
 
 export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
+  const { isOpen: cartOpen, setIsOpen: setCartOpen } = useCart();
   const [ordersOpen, setOrdersOpen] = useState(false);
 
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);

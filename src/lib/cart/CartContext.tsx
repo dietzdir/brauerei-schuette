@@ -9,10 +9,15 @@ export interface CartItem extends OrderItem {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "id">) => void;
+  addItem: (item: Omit<CartItem, "id">, options?: { openDrawer?: boolean }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  openCart: () => void;
+  closeCart: () => void;
+  lastAddedItemId: string | null;
   totalCount: number;
   itemsTotalCents: number;
   depositTotalCents: number;
@@ -27,6 +32,9 @@ const CART_STORAGE_KEY = "brauerei_schuette_cart_v2";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [lastAddedItemId, setLastAddedItemId] = useState<string | null>(null);
+  const highlightTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -52,7 +60,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (item: Omit<CartItem, "id">) => {
+  const openCart = () => setIsOpen(true);
+  const closeCart = () => setIsOpen(false);
+
+  const addItem = (
+    item: Omit<CartItem, "id">,
+    options: { openDrawer?: boolean } = { openDrawer: true }
+  ) => {
     const id = `${item.productId}_${item.variantType}`;
     setItems((prev) => {
       const existingIndex = prev.findIndex((i) => i.id === id);
@@ -68,6 +82,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...item, id }];
     });
+
+    setLastAddedItemId(id);
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+    highlightTimeoutRef.current = setTimeout(() => {
+      setLastAddedItemId(null);
+    }, 4000);
+
+    if (options.openDrawer !== false) {
+      setIsOpen(true);
+    }
   };
 
   const removeItem = (id: string) => {
@@ -107,6 +133,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        isOpen,
+        setIsOpen,
+        openCart,
+        closeCart,
+        lastAddedItemId,
         totalCount,
         itemsTotalCents,
         depositTotalCents,

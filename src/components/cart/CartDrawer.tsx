@@ -65,8 +65,8 @@ import {
 } from "@/lib/openingHours";
 
 interface CartDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onOpenOrders: () => void;
 }
 
@@ -82,8 +82,14 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
     depositTotalCents,
     grandTotalCents,
     totalCount,
+    isOpen: contextIsOpen,
+    setIsOpen: contextSetIsOpen,
+    lastAddedItemId,
   } = useCart();
   const { user, profile, linkWithEmailPassword, updateProfileData } = useAuth();
+
+  const isDrawerOpen = open !== undefined ? open : contextIsOpen;
+  const handleOpenChange = onOpenChange !== undefined ? onOpenChange : contextSetIsOpen;
 
   const [step, setStep] = useState<CheckoutStep>("cart");
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -379,12 +385,12 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
     setLinkError(null);
     setPostPass("");
     setError(null);
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
+      <Sheet open={isDrawerOpen} onOpenChange={handleOpenChange}>
         <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-[#f9f9f9] p-6 rounded-none border-l border-[#c8d3d5]">
           <SheetHeader className="pb-4 border-b border-[#c8d3d5] pr-8">
             <div className="flex items-center gap-2 min-w-0">
@@ -532,7 +538,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
               {/* Step 1: Cart Items */}
               {step === "cart" && (
                 <>
-                  <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-1">
+                  <div className="flex-1 overflow-y-auto py-4 space-y-3 px-1.5">
                     {items.length === 0 ? (
                       <div className="text-center py-12 text-[#505c5f] space-y-3">
                         <ShoppingBag className="size-12 mx-auto text-[#c8d3d5]" aria-hidden="true" />
@@ -540,85 +546,97 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         <p className="text-xs">
                           Fügen Sie Sorten und Gebinde aus unserem Sortiment hinzu.
                         </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleOpenChange(false)}
+                          className="mt-2 text-xs font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150"
+                        >
+                          Sortiment durchstöbern
+                        </Button>
                       </div>
                     ) : (
-                      items.map((item) => (
-                        <ViewTransition key={item.id}>
-                          <div
-                            className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5"
-                          >
-                            {/* Row 1: Full Product Title + Delete Button */}
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
-                                  {item.productName}
-                                </h4>
-                                <p className="text-xs text-[#505c5f] font-medium mt-0.5">
-                                  {formatContainerType(item.variantType)}
-                                </p>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
-                                onClick={() => removeItem(item.id)}
-                                aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
-                                title="Artikel entfernen"
+                      items.map((item) => {
+                        const isHighlighted = item.id === lastAddedItemId;
+                        return (
+                          <ViewTransition key={item.id}>
+                            <div className={isHighlighted ? "rotating-glow-wrapper my-1" : ""}>
+                              <div
+                                className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5 relative"
                               >
-                                <Trash2 className="size-3.5" aria-hidden="true" />
-                              </Button>
-                            </div>
-
-                            {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
-                            <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
-                              <div className="flex flex-col">
-                                <div className="flex items-baseline gap-1.5">
-                                  <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
-                                    {formatPrice(item.unitPrice * item.quantity)}
-                                  </span>
-                                  {item.quantity > 1 && (
-                                    <span className="text-[11px] text-[#505c5f] tabular-nums">
-                                      ({formatPrice(item.unitPrice)} / Stk.)
-                                    </span>
-                                  )}
+                                {/* Row 1: Full Product Title + Delete Button */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
+                                      {item.productName}
+                                    </h4>
+                                    <p className="text-xs text-[#505c5f] font-medium mt-0.5">
+                                      {formatContainerType(item.variantType)}
+                                    </p>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                                    onClick={() => removeItem(item.id)}
+                                    aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
+                                    title="Artikel entfernen"
+                                  >
+                                    <Trash2 className="size-3.5" aria-hidden="true" />
+                                  </Button>
                                 </div>
-                                {item.depositPrice ? (
-                                  <span className="text-[11px] text-[#00A8BC] font-medium tabular-nums">
-                                    + {formatPrice(item.depositPrice * item.quantity)} Pfand
-                                  </span>
-                                ) : null}
-                              </div>
 
-                              {/* Quantity controls */}
-                              <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                  aria-label={`Menge für ${item.productName} verringern`}
-                                  title="Menge verringern"
-                                >
-                                  <Minus className="size-3" aria-hidden="true" />
-                                </Button>
-                                <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
-                                  {item.quantity}
-                                </span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                  aria-label={`Menge für ${item.productName} erhöhen`}
-                                  title="Menge erhöhen"
-                                >
-                                  <Plus className="size-3" aria-hidden="true" />
-                                </Button>
+                                {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
+                                <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
+                                  <div className="flex flex-col">
+                                    <div className="flex items-baseline gap-1.5">
+                                      <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
+                                        {formatPrice(item.unitPrice * item.quantity)}
+                                      </span>
+                                      {item.quantity > 1 && (
+                                        <span className="text-[11px] text-[#505c5f] tabular-nums">
+                                          ({formatPrice(item.unitPrice)} / Stk.)
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.depositPrice ? (
+                                      <span className="text-[11px] text-[#00A8BC] font-medium tabular-nums">
+                                        + {formatPrice(item.depositPrice * item.quantity)} Pfand
+                                      </span>
+                                    ) : null}
+                                  </div>
+
+                                  {/* Quantity controls */}
+                                  <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                      aria-label={`Menge für ${item.productName} verringern`}
+                                      title="Menge verringern"
+                                    >
+                                      <Minus className="size-3" aria-hidden="true" />
+                                    </Button>
+                                    <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
+                                      {item.quantity}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                      aria-label={`Menge für ${item.productName} erhöhen`}
+                                      title="Menge erhöhen"
+                                    >
+                                      <Plus className="size-3" aria-hidden="true" />
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </ViewTransition>
-                      ))
+                          </ViewTransition>
+                        );
+                      })
                     )}
                   </div>
 
@@ -645,13 +663,23 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         </span>
                       </div>
 
-                      <Button
-                        onClick={handleProceedToCheckout}
-                        className="w-full py-6 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
-                      >
-                        <span>Zur Reservierung</span>
-                        <ArrowRight className="size-4" aria-hidden="true" />
-                      </Button>
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          onClick={handleProceedToCheckout}
+                          className="w-full py-6 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
+                        >
+                          <span>Zur Reservierung</span>
+                          <ArrowRight className="size-4" aria-hidden="true" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => handleOpenChange(false)}
+                          className="w-full h-10 text-xs font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150"
+                        >
+                          Weiter einkaufen
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </>

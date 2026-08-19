@@ -32,13 +32,12 @@ test("complete brewery ordering flow with single bottle, quantity preset, accoun
     await sixPackPreset.click();
   }
 
-  // Click add to cart
+  // Click add to cart (this automatically opens the cart drawer)
   const addButton = boerdePilsCard.locator("button", { hasText: "Warenkorb" }).last();
   await addButton.click();
 
-  // 6. Open Cart from Header
-  const cartHeaderButton = page.locator("header").locator("button", { hasText: "Warenkorb" });
-  await cartHeaderButton.click();
+  // 6. Verify cart drawer opened automatically from adding item
+  await expect(page.locator("[role='dialog']").locator("text=Warenkorb").first()).toBeVisible({ timeout: 5000 });
 
   // 7. Verify deposit breakdown in cart
   await expect(page.locator("text=Zwischensumme Artikel:")).toBeVisible({ timeout: 5000 });

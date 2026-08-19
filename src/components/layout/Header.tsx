@@ -10,13 +10,15 @@ import { ShoppingCart, User, History } from "lucide-react";
 
 interface HeaderProps {
   onOpenAuth: () => void;
-  onOpenCart: () => void;
+  onOpenCart?: () => void;
   onOpenOrders: () => void;
 }
 
 export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
   const { user, profile } = useAuth();
-  const { totalCount } = useCart();
+  const { totalCount, openCart } = useCart();
+
+  const handleOpenCart = onOpenCart || openCart;
 
   const isAnonymous = user?.isAnonymous ?? true;
   const displayName = isAnonymous 
@@ -86,7 +88,7 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
           {/* Cart Trigger Button */}
           <Button
             size="sm"
-            onClick={onOpenCart}
+            onClick={handleOpenCart}
             aria-label="Warenkorb öffnen"
             className="relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-colors duration-150"
           >

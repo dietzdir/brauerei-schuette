@@ -45,9 +45,16 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await page.waitForTimeout(300);
     await page.locator("button[role='tab']", { hasText: "Alle" }).click();
 
-    // Add first product to cart
+    // Add first product to cart (automatically opens drawer)
     const addToCartBtn = page.locator("button", { hasText: "In den Warenkorb" }).first();
     await addToCartBtn.click();
+
+    // Verify drawer opened automatically
+    await expect(page.locator("[role='dialog']").locator("text=Warenkorb").first()).toBeVisible({ timeout: 5000 });
+
+    // Close drawer via 'Weiter einkaufen' button to continue browsing
+    const continueBtn = page.locator("button", { hasText: "Weiter einkaufen" });
+    await continueBtn.click();
 
     // Check cart counter in header
     const cartBadge = page.locator("header button").locator("span.bg-\\[\\#0f4851\\]");
@@ -57,20 +64,16 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
   test("3. Mobile Cart Drawer and complete Guest Checkout", async ({ page }) => {
     await page.goto("http://localhost:3000");
 
-    // Wait for products and add one to cart
+    // Wait for products and add one to cart (this automatically opens drawer)
     await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 15000 });
     await page.locator("button", { hasText: "In den Warenkorb" }).first().click();
 
-    // Open Cart Drawer
-    const cartHeaderBtn = page.locator("header").locator("button:has(svg.lucide-shopping-cart)");
-    await cartHeaderBtn.click();
-
-    // Cart Sheet should be visible
-    await expect(page.locator("[role='dialog']").locator("text=Warenkorb").first()).toBeVisible();
+    // Cart Sheet should be visible automatically
+    await expect(page.locator("[role='dialog']").locator("text=Warenkorb").first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator("text=Gesamtbetrag (inkl. Pfand):")).toBeVisible();
 
     // Step 1: Proceed to checkout
-    const proceedBtn = page.locator("button", { hasText: "Zur Reservierung" }).or(page.locator("button", { hasText: "Weiter" }));
+    const proceedBtn = page.getByRole("button", { name: "Zur Reservierung" });
     await proceedBtn.click();
 
     // Step 2: Choose Guest Checkout
