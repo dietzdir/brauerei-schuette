@@ -100,3 +100,8 @@ export interface Order {
   grandTotalCents?: number;
 }
 
+export interface AdminNote {
+  uid: string;          // matches the userId from users collection
+  notes: string;        // admin-only internal notes about this customer
+  updatedAt: any;       // Timestamp of last update
+}
