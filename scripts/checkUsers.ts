@@ -1,27 +1,25 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import * as path from "path";
-import * as fs from "fs";
+import { adminDb, adminAuth } from "../src/lib/firebase/admin";
 
-const serviceAccountPath = path.resolve(__dirname, "../serviceAccountKey.json");
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+async function checkUsers() {
+  const usersRef = adminDb.collection('users');
+  const snapshot = await usersRef.where('email', '==', 'dirkdietz22@gmail.com').get();
+  
+  if (snapshot.empty) {
+    console.log('No matching documents.');
+    return;
+  }
 
-const app = getApps().length === 0 ? initializeApp({
-  credential: cert(serviceAccount),
-}) : getApps()[0];
-
-const auth = getAuth(app);
-
-async function listEmailUsers(nextPageToken?: string) {
-  const result = await auth.listUsers(1000, nextPageToken);
-  result.users.forEach((u) => {
-    if (u.email || u.customClaims) {
-      console.log(`- Email: "${u.email}", UID: ${u.uid}, Claims: ${JSON.stringify(u.customClaims)}`);
-    }
+  snapshot.forEach(doc => {
+    console.log(doc.id, '=>', doc.data());
   });
-  if (result.pageToken) {
-    await listEmailUsers(result.pageToken);
+
+  // Also check Auth
+  try {
+    const authUser = await adminAuth.getUserByEmail('dirkdietz22@gmail.com');
+    console.log("Auth User:", authUser.toJSON());
+  } catch (e) {
+    console.log("Auth Error:", e);
   }
 }
 
-listEmailUsers().catch(console.error);
+checkUsers();
