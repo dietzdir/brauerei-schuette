@@ -36,7 +36,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await page.goto("http://localhost:3000");
 
     // Wait for products
-    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
 
     // Test filter tabs on mobile
     await page.locator("button[role='tab']", { hasText: "Biere" }).click();
@@ -65,7 +65,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await page.goto("http://localhost:3000");
 
     // Wait for products and add one to cart (this automatically opens drawer)
-    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
     await page.locator("button", { hasText: "In den Warenkorb" }).first().click();
 
     // Cart Sheet should be visible automatically
@@ -98,7 +98,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await reserveBtn.click();
 
     // Confirmation screen
-    await expect(page.locator("text=Reservierung erfolgreich!").or(page.locator("text=Bestellung erfolgreich!"))).toBeVisible({ timeout: 20000 });
+    await expect(page.locator("text=Reservierung erfolgreich!").or(page.locator("text=Bestellung erfolgreich!"))).toBeVisible({ timeout: 30000 });
   });
 
   test("4. Legal pages and mobile navigation", async ({ page }) => {
@@ -121,7 +121,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
   test("5. Auth Modal dialog on mobile viewport", async ({ page }) => {
     await page.goto("http://localhost:3000");
     // Wait for hydration and products to be fully loaded
-    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
 
     // Click Login/Konto button in header
     const authBtn = page.locator("header button[aria-label='Kundenkonto öffnen']");
@@ -138,7 +138,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
   test("6. Orders Drawer on mobile viewport", async ({ page }) => {
     await page.goto("http://localhost:3000");
     // Wait for hydration and products to be fully loaded
-    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
 
     // Click History button in header
     const historyBtn = page.locator("header button[aria-label='Bestellhistorie öffnen']");

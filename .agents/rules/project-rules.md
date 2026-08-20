@@ -19,6 +19,10 @@ trigger: always_on
 4. **Container/variant identifiers are a shared, fixed set, not free text per product.** See `ContainerType` below. The Aggregation View (Mission 4) depends on these being spelled identically across every product.
 5. **Admin access is granted via a Firebase custom claim (`admin: true`), set through the Admin SDK** — e.g. a one-off local script, not something the client can set on itself. A UI for managing admins is out of scope for now.
 6. **Firebase Admin SDK & Next.js 15 ESM Compatibility:** When using `firebase-admin` in Next.js App Router, ensure `jose` is strictly pinned to `4.x` (e.g., `"jose": "4.15.9"`) via npm `"overrides"` in `package.json`. Otherwise, `jwks-rsa` will crash with `ERR_REQUIRE_ESM` on Vercel due to loading an ESM version of `jose` via `require()`. Also, ensure `["firebase-admin", "jwks-rsa", "jose"]` are added to `serverExternalPackages` in `next.config.ts`.
+7. **User Profile Data Integrity & Auth State**: 
+   - **No Profile Overwrites from Checkout**: Never overwrite global user profile fields (`displayName`, `email`, `phone`, `address`) from checkout form data. Checkout data is order-specific (e.g., ordering for someone else). Overwriting causes cross-user data contamination. Only update fields like `lastOrderAt` upon checkout.
+   - **Strict Anonymous Profile Merging**: During login (e.g., social login), only carry over local profile data if the previous session was strictly an ANONYMOUS guest session (`isAnonymous: true`). Never merge profile data from one authenticated user into another.
+   - **Safe Logout Sequence**: Always clear local React state (`setProfile(null)`, `setUser(null)`) *before* calling `signOut(auth)`. This prevents stale profile data from leaking into `onAuthStateChanged` handlers which fire globally across tabs.
 
 ### Data model (TypeScript)
 

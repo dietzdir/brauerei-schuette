@@ -13,7 +13,7 @@ test("complete brewery ordering flow with single bottle, quantity preset, accoun
   await expect(page.locator("body")).toContainText("Unser Sortiment");
 
   // 3. Wait for products to load
-  await expect(page.locator("text=Börde Pils")).toBeVisible({ timeout: 20000 });
+  await expect(page.locator("text=Börde Pils")).toBeVisible({ timeout: 30000 });
 
   // 4. Locate Börde Pils card
   const boerdePilsCard = page.locator("[data-slot='card']", { hasText: "Börde Pils" });

@@ -56,6 +56,17 @@ const StatisticsManager = dynamic(
   }
 );
 
+const CompletedOrdersList = dynamic(
+  () => import("@/components/admin/CompletedOrdersList").then((mod) => mod.CompletedOrdersList),
+  {
+    loading: () => (
+      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white mt-8">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Lade abgeschlossene Bestellungen…</p>
+      </div>
+    ),
+  }
+);
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -270,6 +281,7 @@ export default function AdminDashboard() {
             ))}
           </div>
         )}
+            <CompletedOrdersList />
           </TabsContent>
 
           <TabsContent value="customers">
