@@ -188,21 +188,16 @@ export async function createOrderAction(
     try {
       const orderWritePromise = adminDb.collection("orders").doc(orderId).set(newOrder);
 
-      // Update / enrich user profile in Firestore
+      // Only update lastOrderAt — do NOT overwrite profile fields (displayName,
+      // email, phone, address) from checkout form data. The checkout form captures
+      // order-specific contact info which may differ from the user's stored profile
+      // (e.g. ordering on behalf of someone else). Overwriting causes cross-user
+      // data contamination when auth state is shared across browser tabs.
       const userUpdatePromise = adminDb
         .collection("users")
         .doc(userId)
         .set(
           {
-            displayName: customerName.trim(),
-            email: customerEmail.trim().toLowerCase(),
-            phoneNumber: customerPhone.trim(),
-            customerType,
-            companyName: companyName?.trim() || undefined,
-            street: street?.trim() || undefined,
-            houseNumber: houseNumber?.trim() || undefined,
-            zipCode: zipCode?.trim() || undefined,
-            city: city?.trim() || undefined,
             lastOrderAt: Timestamp.now(),
           },
           { merge: true }

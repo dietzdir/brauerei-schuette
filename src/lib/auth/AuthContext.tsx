@@ -194,8 +194,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSocialLogin = async (provider: any) => {
-    // Preserve any existing in-memory profile data (e.g. from checkout or guest session)
-    const prevProfile = profile;
+    // Only carry over profile data from an ANONYMOUS session (e.g. guest checkout form).
+    // Never merge data from one authenticated user into another — that's a data leak.
+    const prevProfile = profile?.isAnonymous ? profile : null;
 
     // Standard direct sign-in with popup (handles both new registrations and existing logins in one click)
     const userCredential = await signInWithPopup(auth, provider);
@@ -237,23 +238,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (newPhoto && existingData.photoURL !== newPhoto) {
         updates.photoURL = newPhoto;
       }
-      if (prevProfile?.phoneNumber && !existingData.phoneNumber) {
-        updates.phoneNumber = prevProfile.phoneNumber;
-      }
-      if (prevProfile?.street && !existingData.street) {
-        updates.street = prevProfile.street;
-      }
-      if (prevProfile?.houseNumber && !existingData.houseNumber) {
-        updates.houseNumber = prevProfile.houseNumber;
-      }
-      if (prevProfile?.zipCode && !existingData.zipCode) {
-        updates.zipCode = prevProfile.zipCode;
-      }
-      if (prevProfile?.city && !existingData.city) {
-        updates.city = prevProfile.city;
-      }
-      if (prevProfile?.companyName && !existingData.companyName) {
-        updates.companyName = prevProfile.companyName;
+      // Only merge contact data from an anonymous (guest checkout) session
+      if (prevProfile) {
+        if (prevProfile.phoneNumber && !existingData.phoneNumber) {
+          updates.phoneNumber = prevProfile.phoneNumber;
+        }
+        if (prevProfile.street && !existingData.street) {
+          updates.street = prevProfile.street;
+        }
+        if (prevProfile.houseNumber && !existingData.houseNumber) {
+          updates.houseNumber = prevProfile.houseNumber;
+        }
+        if (prevProfile.zipCode && !existingData.zipCode) {
+          updates.zipCode = prevProfile.zipCode;
+        }
+        if (prevProfile.city && !existingData.city) {
+          updates.city = prevProfile.city;
+        }
+        if (prevProfile.companyName && !existingData.companyName) {
+          updates.companyName = prevProfile.companyName;
+        }
       }
       if (Object.keys(updates).length > 0) {
         await setDoc(userRef, updates, { merge: true });
@@ -371,9 +375,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await signOut(auth);
+    // Clear local state FIRST to prevent stale profile data from leaking
+    // into onAuthStateChanged handlers (which fire across all tabs).
     setProfile(null);
     setUser(null);
+    await signOut(auth);
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch (e) {
