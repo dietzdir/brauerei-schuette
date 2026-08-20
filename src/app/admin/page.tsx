@@ -150,7 +150,7 @@ export default function AdminDashboard() {
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#c8d3d5] pb-6">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-xs font-bold uppercase tracking-widest mb-1">
-              Brauerei-Verwaltung
+              Handwerksbrauerei Schütte
             </div>
             <h1 className="font-heading text-3xl sm:text-4xl uppercase tracking-wide text-[#0f4851]">Admin Dashboard</h1>
             <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">Verwalte Bestellungen, Kunden, Statistiken, deinen Produkt-Katalog und Sonderöffnungszeiten.</p>
