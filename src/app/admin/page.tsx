@@ -45,6 +45,17 @@ const CustomerManager = dynamic(
   }
 );
 
+const StatisticsManager = dynamic(
+  () => import("@/components/admin/StatisticsManager").then((mod) => mod.StatisticsManager),
+  {
+    loading: () => (
+      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Lade Statistiken…</p>
+      </div>
+    ),
+  }
+);
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +142,7 @@ export default function AdminDashboard() {
               Brauerei-Verwaltung
             </div>
             <h1 className="font-heading text-3xl sm:text-4xl uppercase tracking-wide text-[#0f4851]">Admin Dashboard</h1>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">Verwalte Bestellungen, Kunden, deinen Produkt-Katalog und Sonderöffnungszeiten.</p>
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">Verwalte Bestellungen, Kunden, Statistiken, deinen Produkt-Katalog und Sonderöffnungszeiten.</p>
           </div>
           <Button variant="outline" className="rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee]" onClick={handleLogout}>
             Abmelden
@@ -139,11 +150,12 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="mb-6 grid w-full max-w-2xl grid-cols-4 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
+          <TabsList className="mb-6 grid w-full max-w-3xl grid-cols-5 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
             <TabsTrigger value="orders" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Bestellungen</TabsTrigger>
             <TabsTrigger value="customers" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Kunden</TabsTrigger>
             <TabsTrigger value="catalog" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Katalog</TabsTrigger>
             <TabsTrigger value="hours" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Öffnungszeiten</TabsTrigger>
+            <TabsTrigger value="statistics" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Statistik</TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-6">
@@ -270,6 +282,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="hours">
             <OpeningHoursManager />
+          </TabsContent>
+
+          <TabsContent value="statistics">
+            <StatisticsManager />
           </TabsContent>
         </Tabs>
       </div>
