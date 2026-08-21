@@ -5,7 +5,6 @@ import Image from "next/image";
 import { RentalItem } from "@/types";
 import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query } from "firebase/firestore";
-import { initialRentals } from "@/lib/firebase/seed";
 import { useCart } from "@/lib/cart/CartContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,20 +33,15 @@ export function RentalSection() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        if (!snapshot.empty) {
-          const items: RentalItem[] = [];
-          snapshot.forEach((docSnap) => {
-            items.push({ id: docSnap.id, ...(docSnap.data() as Omit<RentalItem, "id">) });
-          });
-          setRentals(items);
-        } else {
-          setRentals(initialRentals);
-        }
+        const items: RentalItem[] = [];
+        snapshot.forEach((docSnap) => {
+          items.push({ id: docSnap.id, ...(docSnap.data() as Omit<RentalItem, "id">) });
+        });
+        setRentals(items);
         setLoading(false);
       },
       (error) => {
-        console.warn("Firestore rentals listener error, using fallback:", error);
-        setRentals(initialRentals);
+        console.warn("Firestore rentals listener error:", error);
         setLoading(false);
       }
     );
