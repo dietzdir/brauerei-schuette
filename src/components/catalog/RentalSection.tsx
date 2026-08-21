@@ -7,7 +7,6 @@ import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { useCart } from "@/lib/cart/CartContext";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import {
@@ -74,22 +73,14 @@ export function RentalSection() {
   return (
     <section className="space-y-4 pt-6 border-t border-[#c8d3d5]">
       <div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant="secondary"
-            className="bg-[#0f4851] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
-          >
-            <Wrench className="size-3 mr-1 inline" aria-hidden="true" />
-            Zubehör & Verleih
-          </Badge>
-        </div>
-        <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851] mt-1">
-          Äquipment & Verleih
+        <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851]">
+          Zubehör & Verleih
         </h3>
-        <p className="text-xs text-[#505c5f]">
+        <p className="text-xs text-[#505c5f] mt-1">
           Ergänzen Sie Ihre Reservierung mit unserem Verleihangebot.
         </p>
       </div>
+
 
       {loading ? (
         <div className="border border-[#c8d3d5] bg-white p-6 animate-pulse rounded-none">
