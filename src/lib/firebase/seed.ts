@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
-import { Product } from "@/types";
+import { Product, RentalItem } from "@/types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyBcBycmgKHcMw6FIg6Rh9HV4WzA924F_uM",
@@ -169,6 +169,21 @@ const initialProducts: Omit<Product, "id">[] = [
   },
 ];
 
+const initialRentals: RentalItem[] = [
+  {
+    id: "zapfanlage",
+    name: "Profi-Bierzapfanlage mit Durchlaufkühler",
+    description:
+      "Kompakte, leistungsstarke Trockenkühl-Zapfanlage für 5l, 10l, 30l und 50l Fässer. Inklusive Zapfhahn, Tropfblech, CO2-Druckminderer und passenden Schläuchen. Binnen weniger Minuten einsatzbereit für perfekt gekühltes, frisch gezapftes Bier auf Ihrer Feier.",
+    image: "/images/zapfanlage.jpg",
+    isAiGenerated: true,
+    rentalPriceCents: 2500, // 25,00 € Mietpreis
+    depositCents: 5000, // 50,00 € Kaution
+    totalStock: 3, // 3 Zapfanlagen vorrätig
+    isActive: true,
+  },
+];
+
 export async function seedProductsIfEmpty() {
   try {
     const snapshot = await getDocs(collection(db, "products"));
@@ -184,9 +199,20 @@ export async function seedProductsIfEmpty() {
       }
       console.log("Seeding complete!");
     }
+
+    // Seed rentals if empty
+    const rentalsSnapshot = await getDocs(collection(db, "rentals"));
+    if (rentalsSnapshot.empty) {
+      console.log("Rentals collection is empty. Seeding initial rentals...");
+      for (const rental of initialRentals) {
+        await setDoc(doc(db, "rentals", rental.id), rental);
+        console.log(`Added rental: ${rental.name}`);
+      }
+    }
   } catch (error) {
-    console.error("Error checking/seeding products:", error);
+    console.error("Error checking/seeding products and rentals:", error);
   }
 }
 
-export { initialProducts };
+export { initialProducts, initialRentals };
+

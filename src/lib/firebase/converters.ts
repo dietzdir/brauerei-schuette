@@ -7,7 +7,7 @@ import {
   doc,
   Firestore,
 } from "firebase/firestore";
-import { Product, Order, UserProfile, StoreSettings } from "@/types";
+import { Product, Order, UserProfile, StoreSettings, RentalItem } from "@/types";
 
 export const productConverter: FirestoreDataConverter<Product> = {
   toFirestore(product: Product): DocumentData {
@@ -33,6 +33,30 @@ export const productConverter: FirestoreDataConverter<Product> = {
       image: data.image,
       isAiGenerated: data.isAiGenerated,
       badge: data.badge,
+      isActive: data.isActive !== false,
+    };
+  },
+};
+
+export const rentalItemConverter: FirestoreDataConverter<RentalItem> = {
+  toFirestore(rental: RentalItem): DocumentData {
+    const { id, ...data } = rental;
+    return data;
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions
+  ): RentalItem {
+    const data = snapshot.data(options);
+    return {
+      id: snapshot.id,
+      name: data.name || "",
+      description: data.description || "",
+      image: data.image,
+      isAiGenerated: data.isAiGenerated,
+      rentalPriceCents: data.rentalPriceCents || 0,
+      depositCents: data.depositCents || 0,
+      totalStock: typeof data.totalStock === "number" ? data.totalStock : 3,
       isActive: data.isActive !== false,
     };
   },
@@ -65,6 +89,7 @@ export const orderConverter: FirestoreDataConverter<Order> = {
       status: data.status || "pending",
       createdAt: data.createdAt,
       items: data.items || [],
+      rentalItems: data.rentalItems || [],
       itemsTotalCents: data.itemsTotalCents,
       depositTotalCents: data.depositTotalCents,
       grandTotalCents: data.grandTotalCents,
@@ -125,6 +150,10 @@ export function getProductsCollection(db: Firestore) {
   return collection(db, "products").withConverter(productConverter);
 }
 
+export function getRentalsCollection(db: Firestore) {
+  return collection(db, "rentals").withConverter(rentalItemConverter);
+}
+
 export function getOrdersCollection(db: Firestore) {
   return collection(db, "orders").withConverter(orderConverter);
 }
@@ -136,3 +165,4 @@ export function getUsersCollection(db: Firestore) {
 export function getStoreSettingsDoc(db: Firestore) {
   return doc(db, "settings", "store").withConverter(storeSettingsConverter);
 }
+

@@ -28,7 +28,9 @@ import {
   Loader2,
   ChevronRight,
   ChevronLeft,
+  Wrench,
 } from "lucide-react";
+
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { deleteOrder } from "@/app/actions/deleteOrder";
 
@@ -135,8 +137,11 @@ export function CompletedOrdersList() {
   };
 
   const calculateTotal = (order: Order) => {
-    return order.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    const itemsTotal = order.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    const rentalsTotal = (order.rentalItems || []).reduce((sum, r) => sum + r.rentalPriceCents, 0);
+    return itemsTotal + rentalsTotal;
   };
+
 
   if (loading) {
     return (
@@ -313,7 +318,24 @@ export function CompletedOrdersList() {
                           </span>
                         </li>
                       ))}
+                      {selectedOrder.rentalItems && selectedOrder.rentalItems.map((rental, rIdx) => (
+                        <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
+                          <div>
+                            <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
+                              <Wrench className="size-3 text-[#00A8BC]" />
+                              1× {rental.rentalName}
+                            </span>
+                            <span className="text-[10px] text-[#505c5f] block mt-0.5">
+                              Mietgerät (zzgl. {formatPrice(rental.depositCents)} Kaution vor Ort)
+                            </span>
+                          </div>
+                          <span className="font-bold text-[#0f4851] tabular-nums mt-0.5">
+                            {formatPrice(rental.rentalPriceCents)}
+                          </span>
+                        </li>
+                      ))}
                     </ul>
+
                     <div className="flex justify-between border-t border-[#c8d3d5] pt-3 text-sm font-bold">
                       <span className="text-[#505c5f] uppercase tracking-wider text-xs mt-0.5">Gesamt</span>
                       <span className="text-[#0f4851] tabular-nums text-base">{formatPrice(calculateTotal(selectedOrder))}</span>

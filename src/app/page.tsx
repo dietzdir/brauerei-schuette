@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
+import { RentalSection } from "@/components/catalog/RentalSection";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { OrdersDrawer } from "@/components/orders/OrdersDrawer";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -191,8 +192,10 @@ export default function Home() {
             </p>
           </div>
           <ProductGrid />
+          <RentalSection />
         </div>
       </main>
+
 
       {/* Footer */}
       <Footer />

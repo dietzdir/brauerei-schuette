@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { formatContainerType, formatPrice } from "@/lib/utils";
-import { Phone, Mail, MapPin, Building, Calendar } from "lucide-react";
+import { Phone, Mail, MapPin, Building, Calendar, Wrench } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 const CatalogManager = dynamic(
   () => import("@/components/admin/CatalogManager").then((mod) => mod.CatalogManager),
@@ -130,8 +131,15 @@ export default function AdminDashboard() {
     order.items.forEach(item => {
       body += `- ${item.quantity}x ${item.productName} (${formatContainerType(item.variantType)})\n`;
     });
+    if (order.rentalItems && order.rentalItems.length > 0) {
+      body += `\nGemietetes Zubehör:\n`;
+      order.rentalItems.forEach(r => {
+        body += `- 1x ${r.rentalName} (${formatPrice(r.rentalPriceCents)}${r.depositCents ? `, zzgl. ${formatPrice(r.depositCents)} Kaution` : ""})\n`;
+      });
+    }
     body += `\nWir freuen uns auf Ihren Besuch!\n\n`;
     body += `Viele Grüße\nIhr Team der Brauerei Schütte`;
+
     
     return `mailto:${order.customerEmail}?subject=${subject}&body=${encodeURIComponent(body)}`;
   };
@@ -241,15 +249,30 @@ export default function AdminDashboard() {
                   
                   <div className="mb-4 space-y-2">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-[#0f4851]">Artikel:</h4>
-                    <ul className="text-xs text-[#1a1c1c] space-y-1">
+                    <ul className="text-xs text-[#1a1c1c] space-y-1.5">
                       {order.items.map((item, idx) => (
                         <li key={idx} className="flex justify-between border-b border-[#c8d3d5] pb-1 last:border-0">
                           <span>{item.quantity}x {item.productName} <span className="text-[10px] text-[#505c5f]">({formatContainerType(item.variantType)})</span></span>
                           <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(item.unitPrice * item.quantity)}</span>
                         </li>
                       ))}
+                      {order.rentalItems && order.rentalItems.map((rental, rIdx) => (
+                        <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
+                          <div>
+                            <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
+                              <Wrench className="size-3 text-[#00A8BC]" />
+                              1x {rental.rentalName}
+                            </span>
+                            <span className="text-[10px] text-[#505c5f] block mt-0.5 font-medium">
+                              Mietgerät (zzgl. {formatPrice(rental.depositCents)} Kaution vor Ort)
+                            </span>
+                          </div>
+                          <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(rental.rentalPriceCents)}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
+
                 </div>
                 
                 <div className="mt-4 flex flex-col gap-2 border-t border-[#c8d3d5] pt-4">

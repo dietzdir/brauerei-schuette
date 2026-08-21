@@ -21,6 +21,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Rentals / Equipment: Public read, Admin-only write
+    match /rentals/{rentalId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Users: Owner read/write, Admin read/delete
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();

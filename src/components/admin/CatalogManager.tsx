@@ -4,15 +4,16 @@ import React, { useState, useEffect } from "react";
 import { query, onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase/config";
-import { getProductsCollection } from "@/lib/firebase/converters";
-import { Product, ProductVariant, ContainerType } from "@/types";
+import { getProductsCollection, getRentalsCollection } from "@/lib/firebase/converters";
+import { Product, ProductVariant, ContainerType, RentalItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, Sparkles } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, Sparkles, Wrench } from "lucide-react";
 import { formatPrice, formatContainerType } from "@/lib/utils";
+
 
 const CONTAINER_OPTIONS: ContainerType[] = [
   "0.75l bottle",
@@ -61,6 +62,7 @@ const resizeImage = (file: File, maxWidth = 800, maxHeight = 800): Promise<Blob>
 
 export function CatalogManager() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [rentals, setRentals] = useState<RentalItem[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -68,8 +70,14 @@ export function CatalogManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
+  // Rental Sheet state
+  const [rentalSheetOpen, setRentalSheetOpen] = useState(false);
+  const [editingRental, setEditingRental] = useState<RentalItem | null>(null);
+  const [isSavingRental, setIsSavingRental] = useState(false);
+  const [rentalUploadProgress, setRentalUploadProgress] = useState<number | null>(null);
+
   useEffect(() => {
-    const unsubscribe = onSnapshot(getProductsCollection(db), (snapshot) => {
+    const unsubscribeProducts = onSnapshot(getProductsCollection(db), (snapshot) => {
       const fetched: Product[] = snapshot.docs.map((docSnap) => docSnap.data());
       setProducts(fetched);
       setLoading(false);
@@ -78,8 +86,109 @@ export function CatalogManager() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubscribeRentals = onSnapshot(getRentalsCollection(db), (snapshot) => {
+      const fetched: RentalItem[] = snapshot.docs.map((docSnap) => docSnap.data());
+      setRentals(fetched);
+    }, (err) => {
+      console.error("Error fetching catalog rentals:", err);
+    });
+
+    return () => {
+      unsubscribeProducts();
+      unsubscribeRentals();
+    };
   }, []);
+
+  const handleOpenNewRental = () => {
+    setEditingRental({
+      id: "",
+      name: "",
+      description: "",
+      image: "/images/zapfanlage.jpg",
+      isAiGenerated: true,
+      rentalPriceCents: 2500,
+      depositCents: 5000,
+      totalStock: 3,
+      isActive: true,
+    });
+    setRentalSheetOpen(true);
+  };
+
+  const handleEditRental = (rental: RentalItem) => {
+    setEditingRental({ ...rental });
+    setRentalSheetOpen(true);
+  };
+
+  const handleDeleteRental = async (id: string) => {
+    if (confirm("Mietartikel wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
+      await deleteDoc(doc(db, "rentals", id));
+    }
+  };
+
+  const handleToggleActiveRental = async (rental: RentalItem) => {
+    const updated = rental.isActive === false ? true : false;
+    try {
+      await setDoc(doc(db, "rentals", rental.id), { ...rental, isActive: updated }, { merge: true });
+    } catch (err) {
+      console.error(err);
+      alert("Fehler beim Aktualisieren des Status.");
+    }
+  };
+
+  const handleRentalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !editingRental) return;
+    const file = e.target.files[0];
+    setRentalUploadProgress(0);
+
+    try {
+      const resizedBlob = await resizeImage(file, 800, 800);
+      const safeName = file.name.replace(/[^a-zA-Z0-9]/g, "_");
+      const storageRef = ref(storage, `rentals/${Date.now()}_${safeName}.webp`);
+      const uploadTask = uploadBytesResumable(storageRef, resizedBlob);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setRentalUploadProgress(progress);
+        },
+        (error) => {
+          console.error("Upload failed", error);
+          alert("Fehler beim Hochladen des Bildes.");
+          setRentalUploadProgress(null);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setEditingRental({ ...editingRental, image: downloadURL });
+          setRentalUploadProgress(null);
+        }
+      );
+    } catch (error) {
+      console.error("Resize error:", error);
+      alert("Fehler bei der Bildverarbeitung vor dem Upload.");
+      setRentalUploadProgress(null);
+    }
+  };
+
+  const saveRental = async () => {
+    if (!editingRental) return;
+    setIsSavingRental(true);
+    try {
+      let idToSave = editingRental.id;
+      if (!idToSave) {
+        idToSave = editingRental.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      }
+      const toSave = { ...editingRental, id: idToSave };
+      await setDoc(doc(db, "rentals", idToSave), toSave);
+      setRentalSheetOpen(false);
+    } catch (e) {
+      console.error(e);
+      alert("Fehler beim Speichern des Mietartikels.");
+    } finally {
+      setIsSavingRental(false);
+    }
+  };
+
 
   const handleOpenNew = () => {
     setEditingProduct({
@@ -320,6 +429,158 @@ export function CatalogManager() {
           })}
         </div>
       )}
+
+      {/* Rentals & Equipment Section */}
+      <div className="pt-8 border-t border-[#c8d3d5] space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-[10px] font-bold uppercase tracking-widest mb-1">
+              <Wrench className="size-3 text-[#00A8BC]" />
+              <span>Zubehör & Verleih</span>
+            </div>
+            <h2 className="font-heading text-2xl uppercase tracking-wider text-[#0f4851]">Zapfanlagen & Mietartikel</h2>
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">
+              Verwalte Mietpreise, Kaution und den Gerätebestand (z. B. 3 Zapfanlagen).
+            </p>
+          </div>
+          <Button
+            onClick={handleOpenNewRental}
+            className="gap-2 bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs"
+          >
+            <Plus className="size-4" /> Neuer Mietartikel
+          </Button>
+        </div>
+
+        {rentals.length === 0 ? (
+          <div className="rounded-none border border-dashed border-[#c8d3d5] p-8 text-center bg-white">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Keine Mietartikel angelegt.</p>
+            <Button
+              onClick={handleOpenNewRental}
+              variant="outline"
+              className="mt-3 text-xs font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851]"
+            >
+              Zapfanlage anlegen
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {rentals.map((rental) => {
+              const isRentalActive = rental.isActive !== false;
+              return (
+                <div
+                  key={rental.id}
+                  className={`rounded-none border p-5 shadow-xs flex flex-col justify-between transition-[opacity,border-color,background-color] duration-150 ${
+                    isRentalActive
+                      ? "bg-white border-[#c8d3d5]"
+                      : "bg-[#f9f9f9] border-dashed border-[#c8d3d5] opacity-75"
+                  }`}
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-4 gap-2">
+                      <div className="flex items-center gap-3">
+                        {rental.image ? (
+                          <img
+                            src={rental.image}
+                            alt={rental.name}
+                            className="size-14 rounded-none object-cover border border-[#c8d3d5]"
+                          />
+                        ) : (
+                          <div className="size-14 rounded-none bg-[#f4f6f7] border border-[#c8d3d5] flex items-center justify-center p-1 overflow-hidden shrink-0">
+                            <Wrench className="size-6 text-[#0f4851]/50" />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="font-heading text-lg leading-tight uppercase text-[#0f4851] mb-0.5">
+                            {rental.name}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="text-[9px] uppercase tracking-wider bg-[#0f4851] text-white px-2 py-0.5 rounded-none font-bold">
+                              Bestand: {rental.totalStock} Stück
+                            </span>
+                            {rental.isAiGenerated && (
+                              <span className="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-none font-bold border border-amber-300 flex items-center gap-0.5">
+                                <Sparkles className="size-2.5 text-amber-600" />
+                                KI-Bild
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quick Active Checkbox */}
+                      <label className="flex items-center gap-1.5 cursor-pointer bg-[#f9f9f9] px-2.5 py-1.5 rounded-none border border-[#c8d3d5] text-[11px] font-bold uppercase tracking-wider shadow-2xs hover:bg-[#eeeeee] shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={isRentalActive}
+                          onChange={() => handleToggleActiveRental(rental)}
+                          className="size-3.5 accent-[#00A8BC] rounded-none cursor-pointer"
+                        />
+                        <span className={isRentalActive ? "text-[#0f4851] font-bold" : "text-[#505c5f] font-medium"}>
+                          {isRentalActive ? "Aktiv" : "Inaktiv"}
+                        </span>
+                      </label>
+                    </div>
+
+                    {rental.description && (
+                      <p className="text-xs text-[#505c5f] mb-3 line-clamp-2 leading-relaxed">
+                        {rental.description}
+                      </p>
+                    )}
+
+                    <div className="p-3 bg-[#f9f9f9] border border-[#c8d3d5] rounded-none space-y-1.5 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#505c5f] font-bold uppercase tracking-wider text-[10px]">Mietpreis:</span>
+                        <span className="font-bold text-[#0f4851] tabular-nums text-sm">
+                          {formatPrice(rental.rentalPriceCents)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#505c5f] font-bold uppercase tracking-wider text-[10px]">Kaution:</span>
+                        <span className="font-semibold text-[#505c5f] tabular-nums text-xs">
+                          {formatPrice(rental.depositCents)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-[#c8d3d5]">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-2 rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee] h-8"
+                      onClick={() => handleEditRental(rental)}
+                    >
+                      <Pencil className="size-3 text-[#00A8BC]" aria-hidden="true" /> Bearbeiten
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      aria-label={`Mietartikel ${rental.name} löschen`}
+                      className="shrink-0 rounded-none h-8 w-8"
+                      onClick={() => handleDeleteRental(rental.id)}
+                    >
+                      <Trash2 className="size-3.5" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Rental Editor Sheet */}
+      <RentalEditorSheet
+        open={rentalSheetOpen}
+        onOpenChange={setRentalSheetOpen}
+        rental={editingRental}
+        setRental={setEditingRental}
+        onSave={saveRental}
+        isSaving={isSavingRental}
+        uploadProgress={rentalUploadProgress}
+        onImageUpload={handleRentalImageUpload}
+      />
+
 
       {/* Editor Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -688,4 +949,255 @@ function VariantRow({
     </div>
   );
 }
+
+interface RentalEditorSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  rental: RentalItem | null;
+  setRental: React.Dispatch<React.SetStateAction<RentalItem | null>>;
+  onSave: () => Promise<void>;
+  isSaving: boolean;
+  uploadProgress: number | null;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+}
+
+function RentalEditorSheet({
+  open,
+  onOpenChange,
+  rental,
+  setRental,
+  onSave,
+  isSaving,
+  uploadProgress,
+  onImageUpload,
+}: RentalEditorSheetProps) {
+  if (!rental) return null;
+
+  const centsToDisplay = (cents: number | undefined | null): string => {
+    if (cents === undefined || cents === null) return "";
+    return (cents / 100).toFixed(2).replace(".", ",");
+  };
+
+  const parseCurrencyInput = (val: string): number => {
+    if (!val || !val.trim()) return 0;
+    const normalized = val.replace(",", ".").trim();
+    const num = parseFloat(normalized);
+    if (isNaN(num) || num < 0) return 0;
+    return Math.round(num * 100);
+  };
+
+  const [priceStr, setPriceStr] = useState<string>(() => centsToDisplay(rental.rentalPriceCents));
+  const [depositStr, setDepositStr] = useState<string>(() => centsToDisplay(rental.depositCents));
+  const isPriceFocused = React.useRef(false);
+  const isDepositFocused = React.useRef(false);
+
+  useEffect(() => {
+    if (!isPriceFocused.current) {
+      setPriceStr(centsToDisplay(rental.rentalPriceCents));
+    }
+  }, [rental.rentalPriceCents]);
+
+  useEffect(() => {
+    if (!isDepositFocused.current) {
+      setDepositStr(centsToDisplay(rental.depositCents));
+    }
+  }, [rental.depositCents]);
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-2xl md:max-w-3xl overflow-y-auto w-full sm:w-[90vw] p-0">
+        <SheetHeader className="mb-6 px-4 pt-6 sm:px-6">
+          <SheetTitle>{rental.id ? "Mietartikel bearbeiten" : "Neuen Mietartikel anlegen"}</SheetTitle>
+          <SheetDescription>
+            Passe Namen, Mietpreis, Kaution und den Gesamtbestand der Zapfanlagen an.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-6 pb-20 px-4 sm:px-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none">
+              <input
+                type="checkbox"
+                id="rental-is-active"
+                checked={rental.isActive !== false}
+                onChange={(e) => setRental({ ...rental, isActive: e.target.checked })}
+                className="size-4.5 accent-[#00A8BC] rounded-none cursor-pointer"
+              />
+              <Label htmlFor="rental-is-active" className="cursor-pointer text-sm font-medium leading-snug">
+                Artikel im Shop zur Vermietung anbieten (Aktiv)
+                <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                  Wenn deaktiviert, wird dieser Mietartikel für Kunden im Shop ausgeblendet.
+                </span>
+              </Label>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Bezeichnung des Mietartikels *</Label>
+              <Input
+                value={rental.name}
+                onChange={(e) => setRental({ ...rental, name: e.target.value })}
+                placeholder="z. B. Profi-Bierzapfanlage mit Durchlaufkühler"
+                className="rounded-none border-[#c8d3d5]"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Beschreibung & Ausstattung</Label>
+              <textarea
+                className="flex min-h-[90px] w-full rounded-none border border-[#c8d3d5] bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={rental.description || ""}
+                onChange={(e) => setRental({ ...rental, description: e.target.value })}
+                placeholder="z. B. Inklusive Kompensatorschankhahn, Tropfschale, CO2-Druckminderer und Anschlussschläuchen."
+              />
+            </div>
+
+            {/* Price, Deposit & Stock Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="grid gap-2">
+                <Label>Mietpreis pro Abholung (€) *</Label>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="25,00"
+                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10"
+                  value={priceStr}
+                  onFocus={() => { isPriceFocused.current = true; }}
+                  onChange={(e) => {
+                    setPriceStr(e.target.value);
+                    const cents = parseCurrencyInput(e.target.value);
+                    setRental({ ...rental, rentalPriceCents: cents });
+                  }}
+                  onBlur={() => {
+                    isPriceFocused.current = false;
+                    const cents = parseCurrencyInput(priceStr);
+                    setPriceStr(centsToDisplay(cents));
+                  }}
+                />
+                <span className="text-[11px] text-muted-foreground">Wird zur Bestellsumme addiert.</span>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Kaution (€) *</Label>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="50,00"
+                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10"
+                  value={depositStr}
+                  onFocus={() => { isDepositFocused.current = true; }}
+                  onChange={(e) => {
+                    setDepositStr(e.target.value);
+                    const cents = parseCurrencyInput(e.target.value);
+                    setRental({ ...rental, depositCents: cents });
+                  }}
+                  onBlur={() => {
+                    isDepositFocused.current = false;
+                    const cents = parseCurrencyInput(depositStr);
+                    setDepositStr(centsToDisplay(cents));
+                  }}
+                />
+                <span className="text-[11px] text-muted-foreground">Informativ, zahlbar vor Ort bei Abholung.</span>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Gesamtbestand (Geräte-Pool) *</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="99"
+                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10 tabular-nums"
+                  value={rental.totalStock || 1}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    setRental({ ...rental, totalStock: isNaN(val) ? 1 : Math.max(1, val) });
+                  }}
+                />
+                <span className="text-[11px] text-muted-foreground">Max. Reservierungen pro Tag.</span>
+              </div>
+            </div>
+
+            {/* Image upload */}
+            <div className="grid gap-2 pt-2 border-t border-[#c8d3d5]">
+              <Label>Produktbild</Label>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                {rental.image ? (
+                  <div className="relative size-24 bg-slate-100 border border-[#c8d3d5] rounded-none overflow-hidden shrink-0">
+                    <img src={rental.image} alt="Vorschau" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="size-24 bg-slate-100 border border-dashed border-[#c8d3d5] rounded-none flex items-center justify-center text-slate-400 shrink-0">
+                    <Wrench className="size-8" />
+                  </div>
+                )}
+
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={onImageUpload}
+                      disabled={uploadProgress !== null}
+                      className="cursor-pointer rounded-none border-[#c8d3d5]"
+                    />
+                  </div>
+                  {uploadProgress !== null && (
+                    <div className="flex items-center gap-2 text-xs text-[#00A8BC] font-semibold">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      <span>Bild wird hochgeladen… {Math.round(uploadProgress)}%</span>
+                    </div>
+                  )}
+                  <p className="text-[11px] text-muted-foreground">
+                    Das Bild wird automatisch optimiert (WebP, max 800x800px).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Generated Watermark Toggle */}
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="rental-is-ai"
+                checked={rental.isAiGenerated ?? false}
+                onChange={(e) => setRental({ ...rental, isAiGenerated: e.target.checked })}
+                className="size-4 accent-[#00A8BC] rounded-none cursor-pointer"
+              />
+              <Label htmlFor="rental-is-ai" className="cursor-pointer text-xs font-medium flex items-center gap-1.5">
+                <Sparkles className="size-3.5 text-amber-500" />
+                Als KI-Symbolbild kennzeichnen (Badge einblenden)
+              </Label>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-6 border-t border-[#c8d3d5]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="rounded-none border-[#c8d3d5] text-xs font-bold uppercase tracking-wider text-[#505c5f]"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              type="button"
+              onClick={onSave}
+              disabled={isSaving || !rental.name?.trim()}
+              className="bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs px-6 shadow-xs"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="size-3.5 mr-2 animate-spin" />
+                  Speichere…
+                </>
+              ) : (
+                "Mietartikel speichern"
+              )}
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 

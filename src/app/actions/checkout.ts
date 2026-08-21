@@ -2,8 +2,8 @@
 
 import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
-import { ContainerType, Order, OrderItem, Product } from "@/types";
-import { initialProducts } from "@/lib/firebase/seed";
+import { ContainerType, Order, OrderItem, OrderRentalItem, Product, RentalItem } from "@/types";
+import { initialProducts, initialRentals } from "@/lib/firebase/seed";
 import { sendOrderConfirmationEmail } from "@/lib/email/emailService";
 
 export interface CheckoutInputItem {
@@ -26,6 +26,7 @@ export interface CheckoutInput {
   pickupDate?: string;
   pickupTime?: string;
   items: CheckoutInputItem[];
+  rentalItemId?: string;
 }
 
 export interface CheckoutResult {
@@ -52,6 +53,7 @@ export async function createOrderAction(
       pickupDate,
       pickupTime,
       items,
+      rentalItemId,
     } = input;
 
     if (!userId || !userId.trim()) {
@@ -76,84 +78,167 @@ export async function createOrderAction(
       };
     }
 
-    if (!items || items.length === 0) {
+    if ((!items || items.length === 0) && !rentalItemId) {
       return { success: false, error: "Der Warenkorb ist leer." };
     }
 
     // Server-side price, deposit and product validation
-    // Parallel server-side price, deposit and product validation (eliminating async waterfalls)
     const validatedOrderItems: OrderItem[] = [];
 
-    const itemValidationResults = await Promise.all(
-      items.map(async (item) => {
-        if (item.quantity <= 0) {
-          return { error: "Ungültige Bestellmenge." };
-        }
-
-        let productData: Product | null = null;
-
-        // Authoritative live catalog lookup from Firestore
-        try {
-          const productDoc = await adminDb.collection("products").doc(item.productId).get();
-          if (productDoc.exists) {
-            productData = { id: productDoc.id, ...(productDoc.data() as Omit<Product, "id">) };
+    if (items && items.length > 0) {
+      const itemValidationResults = await Promise.all(
+        items.map(async (item) => {
+          if (item.quantity <= 0) {
+            return { error: "Ungültige Bestellmenge." };
           }
-        } catch (err) {
-          console.warn("Firestore product lookup error, checking fallback:", err);
-        }
 
-        // Fallback only if not found in Firestore
-        if (!productData) {
-          const fallback = initialProducts.find(
-            (p) =>
-              p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === item.productId ||
-              p.name === item.productId
-          );
-          if (fallback) {
-            productData = { ...fallback, id: item.productId };
+          let productData: Product | null = null;
+
+          // Authoritative live catalog lookup from Firestore
+          try {
+            const productDoc = await adminDb.collection("products").doc(item.productId).get();
+            if (productDoc.exists) {
+              productData = { id: productDoc.id, ...(productDoc.data() as Omit<Product, "id">) };
+            }
+          } catch (err) {
+            console.warn("Firestore product lookup error, checking fallback:", err);
           }
-        }
 
-        if (!productData) {
-          return {
-            error: `Produkt nicht gefunden (ID: ${item.productId}).`,
+          // Fallback only if not found in Firestore
+          if (!productData) {
+            const fallback = initialProducts.find(
+              (p) =>
+                p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === item.productId ||
+                p.name === item.productId
+            );
+            if (fallback) {
+              productData = { ...fallback, id: item.productId };
+            }
+          }
+
+          if (!productData) {
+            return {
+              error: `Produkt nicht gefunden (ID: ${item.productId}).`,
+            };
+          }
+
+          const variant = productData.variants?.find((v) => v.type === item.variantType);
+
+          if (!variant) {
+            return {
+              error: `Gebinde "${item.variantType}" für "${productData.name}" existiert nicht mehr.`,
+            };
+          }
+
+          const orderItem: OrderItem = {
+            productId: item.productId,
+            productName: productData.name,
+            variantType: variant.type,
+            quantity: item.quantity,
+            unitPrice: variant.price, // Trust ONLY server-verified price
+            depositPrice: variant.deposit || 0, // Server-verified deposit
           };
+
+          return { item: orderItem };
+        })
+      );
+
+      for (const res of itemValidationResults) {
+        if (res.error) {
+          return { success: false, error: res.error };
         }
-
-        const variant = productData.variants?.find((v) => v.type === item.variantType);
-
-        if (!variant) {
-          return {
-            error: `Gebinde "${item.variantType}" für "${productData.name}" existiert nicht mehr.`,
-          };
+        if (res.item) {
+          validatedOrderItems.push(res.item);
         }
-
-        const orderItem: OrderItem = {
-          productId: item.productId,
-          productName: productData.name,
-          variantType: variant.type,
-          quantity: item.quantity,
-          unitPrice: variant.price, // Trust ONLY server-verified price
-          depositPrice: variant.deposit || 0, // Server-verified deposit
-        };
-
-        return { item: orderItem };
-      })
-    );
-
-    for (const res of itemValidationResults) {
-      if (res.error) {
-        return { success: false, error: res.error };
-      }
-      if (res.item) {
-        validatedOrderItems.push(res.item);
       }
     }
 
-    const itemsTotalCents = validatedOrderItems.reduce(
-      (sum, i) => sum + i.unitPrice * i.quantity,
-      0
-    );
+    // Rental item validation & date-based availability checking
+    const validatedRentalItems: OrderRentalItem[] = [];
+    let rentalPriceTotalCents = 0;
+
+    if (rentalItemId) {
+      if (!pickupDate || !pickupDate.trim()) {
+        return {
+          success: false,
+          error: "Für die Reservierung einer Zapfanlage muss ein gültiger Abholtermin gewählt sein.",
+        };
+      }
+
+      let rentalData: RentalItem | null = null;
+      try {
+        const rentalDoc = await adminDb.collection("rentals").doc(rentalItemId).get();
+        if (rentalDoc.exists) {
+          rentalData = { id: rentalDoc.id, ...(rentalDoc.data() as Omit<RentalItem, "id">) };
+        }
+      } catch (err) {
+        console.warn("Firestore rental lookup error, checking fallback:", err);
+      }
+
+      if (!rentalData) {
+        const fallback = initialRentals.find((r) => r.id === rentalItemId);
+        if (fallback) {
+          rentalData = fallback;
+        }
+      }
+
+      if (!rentalData) {
+        return {
+          success: false,
+          error: `Mietartikel nicht gefunden (ID: ${rentalItemId}).`,
+        };
+      }
+
+      if (rentalData.isActive === false) {
+        return {
+          success: false,
+          error: `Die Zapfanlage "${rentalData.name}" ist aktuell leider nicht zur Vermietung verfügbar.`,
+        };
+      }
+
+      // Check date availability against existing active orders for this pickupDate
+      try {
+        const existingOrdersSnapshot = await adminDb
+          .collection("orders")
+          .where("pickupDate", "==", pickupDate.trim())
+          .where("status", "in", ["pending", "ready"])
+          .get();
+
+        let reservedCount = 0;
+        existingOrdersSnapshot.forEach((docSnap) => {
+          const ord = docSnap.data() as Order;
+          if (ord.rentalItems && ord.rentalItems.length > 0) {
+            const hasRental = ord.rentalItems.some((r) => r.rentalId === rentalItemId);
+            if (hasRental) {
+              reservedCount += 1;
+            }
+          }
+        });
+
+        const totalStock = typeof rentalData.totalStock === "number" ? rentalData.totalStock : 3;
+        if (reservedCount >= totalStock) {
+          return {
+            success: false,
+            error: `Für den gewählten Abholtermin (${pickupDate.trim()}) sind leider bereits alle Zapfanlagen (${totalStock} Stück) vergeben. Bitte wählen Sie einen anderen Abholtermin oder entfernen Sie die Zapfanlage aus dem Warenkorb.`,
+          };
+        }
+      } catch (availErr) {
+        console.warn("Error checking rental availability count:", availErr);
+      }
+
+      validatedRentalItems.push({
+        rentalId: rentalData.id,
+        rentalName: rentalData.name,
+        rentalPriceCents: rentalData.rentalPriceCents,
+        depositCents: rentalData.depositCents,
+      });
+
+      rentalPriceTotalCents += rentalData.rentalPriceCents;
+    }
+
+    const itemsTotalCents =
+      validatedOrderItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0) +
+      rentalPriceTotalCents;
     const depositTotalCents = validatedOrderItems.reduce(
       (sum, i) => sum + (i.depositPrice || 0) * i.quantity,
       0
@@ -179,10 +264,12 @@ export async function createOrderAction(
       status: "pending",
       createdAt: Timestamp.now(),
       items: validatedOrderItems,
+      rentalItems: validatedRentalItems.length > 0 ? validatedRentalItems : undefined,
       itemsTotalCents,
       depositTotalCents,
       grandTotalCents,
     };
+
 
     // Save to Firestore via Admin SDK with timeout guard for local dev environments
     try {

@@ -54,6 +54,7 @@ import {
   ChevronLeft,
   ArrowLeft,
   MapPinCheckInside,
+  Wrench,
 } from "lucide-react";
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -75,8 +76,10 @@ type CheckoutStep = "cart" | "account-choice" | "guest-form";
 export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps) {
   const {
     items,
+    rentalItem,
     removeItem,
     updateQuantity,
+    removeRentalItem,
     clearCart,
     itemsTotalCents,
     depositTotalCents,
@@ -86,6 +89,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
     setIsOpen: contextSetIsOpen,
     lastAddedItemId,
   } = useCart();
+
   const { user, profile, linkWithEmailPassword, updateProfileData } = useAuth();
 
   const isDrawerOpen = open !== undefined ? open : contextIsOpen;
@@ -177,7 +181,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
   const handleProceedToCheckout = () => {
     setError(null);
-    if (items.length === 0) {
+    if (items.length === 0 && !rentalItem) {
       setError("Ihr Warenkorb ist leer.");
       return;
     }
@@ -210,7 +214,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
       return;
     }
 
-    if (items.length === 0) {
+    if (items.length === 0 && !rentalItem) {
       setError("Ihr Warenkorb ist leer.");
       return;
     }
@@ -243,6 +247,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
           variantType: i.variantType,
           quantity: i.quantity,
         })),
+        rentalItemId: rentalItem?.rentalId,
       });
 
       if (result.success && result.orderId) {
@@ -279,6 +284,16 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                 unitPrice: i.unitPrice,
                 depositPrice: i.depositPrice || 0,
               })),
+              rentalItems: rentalItem
+                ? [
+                    {
+                      rentalId: rentalItem.rentalId,
+                      rentalName: rentalItem.rentalName,
+                      rentalPriceCents: rentalItem.rentalPriceCents,
+                      depositCents: rentalItem.depositCents,
+                    },
+                  ]
+                : [],
               itemsTotalCents,
               depositTotalCents,
               grandTotalCents,
@@ -326,6 +341,16 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
               unitPrice: i.unitPrice,
               depositPrice: i.depositPrice,
             })),
+            rentalItems: rentalItem
+              ? [
+                  {
+                    rentalId: rentalItem.rentalId,
+                    rentalName: rentalItem.rentalName,
+                    rentalPriceCents: rentalItem.rentalPriceCents,
+                    depositCents: rentalItem.depositCents,
+                  },
+                ]
+              : undefined,
             itemsTotalCents,
             depositTotalCents,
             grandTotalCents,
@@ -335,16 +360,17 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
             "schuette_user_orders",
             JSON.stringify([localOrder, ...existing.filter((o: any) => o.id !== result.orderId)])
           );
-        } catch (e) {
-          console.warn("Could not cache order in localStorage:", e);
+        } catch (storageErr) {
+          console.warn("Could not cache local order:", storageErr);
         }
 
         clearCart();
       } else {
-        setError(result.error || "Bestellung konnte nicht ausgeführt werden.");
+        setError(result.error || "Es gab ein Problem bei der Auftragsübermittlung.");
       }
     } catch (err: any) {
-      setError(err?.message || "Unerwarteter Fehler bei der Bestellung.");
+      console.error(err);
+      setError(err?.message || "Netzwerkfehler beim Absenden der Reservierung.");
     } finally {
       setIsSubmitting(false);
     }
@@ -539,12 +565,12 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
               {step === "cart" && (
                 <>
                   <div className="flex-1 overflow-y-auto py-4 space-y-3 px-1.5">
-                    {items.length === 0 ? (
+                    {items.length === 0 && !rentalItem ? (
                       <div className="text-center py-12 text-[#505c5f] space-y-3">
                         <ShoppingBag className="size-12 mx-auto text-[#c8d3d5]" aria-hidden="true" />
                         <p className="font-heading text-lg uppercase tracking-wide text-[#0f4851]">Ihr Warenkorb ist leer</p>
                         <p className="text-xs">
-                          Fügen Sie Sorten und Gebinde aus unserem Sortiment hinzu.
+                          Fügen Sie Sorten, Gebinde oder eine Zapfanlage aus unserem Sortiment hinzu.
                         </p>
                         <Button
                           variant="outline"
@@ -555,103 +581,172 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         </Button>
                       </div>
                     ) : (
-                      items.map((item) => {
-                        const isHighlighted = item.id === lastAddedItemId;
-                        return (
-                          <ViewTransition key={item.id}>
-                            <div className={isHighlighted ? "rotating-glow-wrapper my-1" : ""}>
-                              <div
-                                className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5 relative"
-                              >
-                                {/* Row 1: Full Product Title + Delete Button */}
+                      <>
+                        {items.map((item) => {
+                          const isHighlighted = item.id === lastAddedItemId;
+                          return (
+                            <ViewTransition key={item.id}>
+                              <div className={isHighlighted ? "rotating-glow-wrapper my-1" : ""}>
+                                <div
+                                  className="p-3.5 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-2.5 relative"
+                                >
+                                  {/* Row 1: Full Product Title + Delete Button */}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
+                                        {item.productName}
+                                      </h4>
+                                      <p className="text-xs text-[#505c5f] font-medium mt-0.5">
+                                        {formatContainerType(item.variantType)}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                                      onClick={() => removeItem(item.id)}
+                                      aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
+                                      title="Artikel entfernen"
+                                    >
+                                      <Trash2 className="size-3.5" aria-hidden="true" />
+                                    </Button>
+                                  </div>
+
+                                  {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
+                                  <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
+                                    <div className="flex flex-col">
+                                      <div className="flex items-baseline gap-1.5">
+                                        <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
+                                          {formatPrice(item.unitPrice * item.quantity)}
+                                        </span>
+                                        {item.quantity > 1 && (
+                                          <span className="text-[11px] text-[#505c5f] tabular-nums">
+                                            ({formatPrice(item.unitPrice)} / Stk.)
+                                          </span>
+                                        )}
+                                      </div>
+                                      {item.depositPrice ? (
+                                        <span className="text-[11px] text-[#00A8BC] font-medium tabular-nums">
+                                          + {formatPrice(item.depositPrice * item.quantity)} Pfand
+                                        </span>
+                                      ) : null}
+                                    </div>
+
+                                    {/* Quantity controls */}
+                                    <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                        aria-label={`Menge für ${item.productName} verringern`}
+                                        title="Menge verringern"
+                                      >
+                                        <Minus className="size-3" aria-hidden="true" />
+                                      </Button>
+                                      <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
+                                        {item.quantity}
+                                      </span>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        aria-label={`Menge für ${item.productName} erhöhen`}
+                                        title="Menge erhöhen"
+                                      >
+                                        <Plus className="size-3" aria-hidden="true" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ViewTransition>
+                          );
+                        })}
+
+                        {/* Rental Item in Cart if selected */}
+                        {rentalItem && (
+                          <ViewTransition key={`cart-rental-${rentalItem.rentalId}`}>
+                            <div className={lastAddedItemId === `rental_${rentalItem.rentalId}` ? "rotating-glow-wrapper my-1" : ""}>
+                              <div className="p-3.5 rounded-none border border-[#00A8BC] bg-[#f0f7f8] shadow-2xs space-y-2.5 relative">
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <Badge variant="secondary" className="bg-[#0f4851] text-white text-[9px] font-bold uppercase rounded-none px-1.5 py-0.5">
+                                        <Wrench className="size-2.5 mr-1 inline" />
+                                        Mietartikel
+                                      </Badge>
+                                      <span className="text-[10px] text-[#00A8BC] font-bold">1x Reservierung</span>
+                                    </div>
                                     <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
-                                      {item.productName}
+                                      {rentalItem.rentalName}
                                     </h4>
-                                    <p className="text-xs text-[#505c5f] font-medium mt-0.5">
-                                      {formatContainerType(item.variantType)}
+                                    <p className="text-[11px] text-[#505c5f] font-medium mt-0.5">
+                                      Inkl. Kompensator-Zapfhahn, Durchlaufkühler & CO2-Druckminderer
                                     </p>
                                   </div>
                                   <Button
                                     variant="ghost"
                                     size="icon"
                                     className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
-                                    onClick={() => removeItem(item.id)}
-                                    aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
-                                    title="Artikel entfernen"
+                                    onClick={() => removeRentalItem()}
+                                    aria-label="Zapfanlage aus Warenkorb entfernen"
+                                    title="Mietartikel entfernen"
                                   >
                                     <Trash2 className="size-3.5" aria-hidden="true" />
                                   </Button>
                                 </div>
 
-                                {/* Row 2: Price & Deposit (Left) + Quantity Stepper (Right) */}
-                                <div className="flex items-end justify-between pt-2 border-t border-[#f0f2f3]">
+                                <div className="flex items-end justify-between pt-2 border-t border-[#c8d3d5]/70">
                                   <div className="flex flex-col">
-                                    <div className="flex items-baseline gap-1.5">
-                                      <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
-                                        {formatPrice(item.unitPrice * item.quantity)}
-                                      </span>
-                                      {item.quantity > 1 && (
-                                        <span className="text-[11px] text-[#505c5f] tabular-nums">
-                                          ({formatPrice(item.unitPrice)} / Stk.)
-                                        </span>
-                                      )}
-                                    </div>
-                                    {item.depositPrice ? (
-                                      <span className="text-[11px] text-[#00A8BC] font-medium tabular-nums">
-                                        + {formatPrice(item.depositPrice * item.quantity)} Pfand
-                                      </span>
-                                    ) : null}
-                                  </div>
-
-                                  {/* Quantity controls */}
-                                  <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                      aria-label={`Menge für ${item.productName} verringern`}
-                                      title="Menge verringern"
-                                    >
-                                      <Minus className="size-3" aria-hidden="true" />
-                                    </Button>
-                                    <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
-                                      {item.quantity}
+                                    <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
+                                      {formatPrice(rentalItem.rentalPriceCents)}
                                     </span>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
-                                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                      aria-label={`Menge für ${item.productName} erhöhen`}
-                                      title="Menge erhöhen"
-                                    >
-                                      <Plus className="size-3" aria-hidden="true" />
-                                    </Button>
+                                    <span className="text-[11px] text-[#505c5f] font-medium tabular-nums">
+                                      + zzgl. {formatPrice(rentalItem.depositCents)} Kaution bei Abholung
+                                    </span>
                                   </div>
+                                  <Badge variant="outline" className="text-[10px] uppercase font-bold text-[#0f4851] border-[#00A8BC] bg-white rounded-none">
+                                    Pro Abholtermin
+                                  </Badge>
                                 </div>
                               </div>
                             </div>
                           </ViewTransition>
-                        );
-                      })
+                        )}
+                      </>
                     )}
                   </div>
 
-                  {items.length > 0 && (
+                  {(items.length > 0 || rentalItem) && (
                     <div className="border-t border-[#c8d3d5] pt-4 space-y-4">
                       {/* Summary Breakdown */}
                       <div className="space-y-1.5 text-xs text-[#505c5f]">
-                        <div className="flex justify-between">
-                          <span>Zwischensumme Artikel:</span>
-                          <span className="font-bold text-[#1a1c1c] tabular-nums">{formatPrice(itemsTotalCents)}</span>
-                        </div>
+                        {items.length > 0 && (
+                          <div className="flex justify-between">
+                            <span>Zwischensumme Getränke:</span>
+                            <span className="font-bold text-[#1a1c1c] tabular-nums">
+                              {formatPrice(items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0))}
+                            </span>
+                          </div>
+                        )}
+                        {rentalItem && (
+                          <div className="flex justify-between text-[#0f4851] font-medium">
+                            <span>Miete Zapfanlage:</span>
+                            <span className="font-bold tabular-nums">{formatPrice(rentalItem.rentalPriceCents)}</span>
+                          </div>
+                        )}
                         {depositTotalCents > 0 && (
                           <div className="flex justify-between text-[#00A8BC]">
                             <span>Pfand (Flaschen / Gebinde):</span>
                             <span className="font-bold tabular-nums">+ {formatPrice(depositTotalCents)}</span>
+                          </div>
+                        )}
+                        {rentalItem && rentalItem.depositCents > 0 && (
+                          <div className="flex justify-between text-[#505c5f] text-[11px]">
+                            <span>Kaution Zapfanlage (Zahlung vor Ort):</span>
+                            <span className="font-medium tabular-nums">{formatPrice(rentalItem.depositCents)}</span>
                           </div>
                         )}
                       </div>
@@ -684,6 +779,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                   )}
                 </>
               )}
+
 
               {/* Step 2: Account Prioritization Choice */}
               {step === "account-choice" && (
@@ -988,18 +1084,34 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
                     {/* Summary Totals */}
                     <div className="space-y-1.5 text-xs text-[#505c5f] bg-white p-3.5 rounded-none border border-[#c8d3d5]">
-                      <div className="flex justify-between">
-                        <span>Zwischensumme Artikel:</span>
-                        <span className="font-bold text-[#1a1c1c] tabular-nums">{formatPrice(itemsTotalCents)}</span>
-                      </div>
+                      {items.length > 0 && (
+                        <div className="flex justify-between">
+                          <span>Zwischensumme Getränke:</span>
+                          <span className="font-bold text-[#1a1c1c] tabular-nums">
+                            {formatPrice(items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0))}
+                          </span>
+                        </div>
+                      )}
+                      {rentalItem && (
+                        <div className="flex justify-between text-[#0f4851] font-medium">
+                          <span>Miete Zapfanlage:</span>
+                          <span className="font-bold tabular-nums">{formatPrice(rentalItem.rentalPriceCents)}</span>
+                        </div>
+                      )}
                       {depositTotalCents > 0 && (
                         <div className="flex justify-between text-[#00A8BC]">
                           <span>Pfand (Flaschen / Gebinde):</span>
                           <span className="font-bold tabular-nums">+ {formatPrice(depositTotalCents)}</span>
                         </div>
                       )}
+                      {rentalItem && rentalItem.depositCents > 0 && (
+                        <div className="flex justify-between text-[#505c5f] text-[11px]">
+                          <span>Kaution Zapfanlage (Zahlung vor Ort):</span>
+                          <span className="font-medium tabular-nums">{formatPrice(rentalItem.depositCents)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-baseline font-bold pt-2 border-t border-[#c8d3d5] text-[#1a1c1c]">
-                        <span className="text-xs uppercase tracking-wider text-[#505c5f]">Gesamtbetrag:</span>
+                        <span className="text-xs uppercase tracking-wider text-[#505c5f]">Gesamtbetrag (inkl. Pfand):</span>
                         <span className="font-heading text-2xl text-[#0f4851] tabular-nums">
                           {formatPrice(grandTotalCents)}
                         </span>
@@ -1036,7 +1148,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <Button
                       type="submit"
                       className="w-full py-6 text-sm font-bold uppercase tracking-wider mt-2 flex flex-col items-center justify-center gap-0.5 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
-                      disabled={isSubmitting || items.length === 0}
+                      disabled={isSubmitting || (items.length === 0 && !rentalItem)}
                     >
                       {isSubmitting ? (
                         <div className="flex items-center">

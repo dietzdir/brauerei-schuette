@@ -78,6 +78,25 @@ export interface StoreSettings {
   bannerLookaheadDays?: number; // Days to look ahead for displaying exceptions in the banner
 }
 
+export interface RentalItem {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  isAiGenerated?: boolean;
+  rentalPriceCents: number; // EUR cents (e.g. 2500 for 25,00 €)
+  depositCents: number; // EUR cents (e.g. 5000 for 50,00 €) - Kaution informativ
+  totalStock: number; // e.g. 3
+  isActive: boolean;
+}
+
+export interface OrderRentalItem {
+  rentalId: string;
+  rentalName: string;
+  rentalPriceCents: number;
+  depositCents: number;
+}
+
 export interface Order {
   id: string;
   userId: string;
@@ -95,6 +114,7 @@ export interface Order {
   status: "pending" | "ready" | "completed";
   createdAt: any;
   items: OrderItem[];
+  rentalItems?: OrderRentalItem[];
   itemsTotalCents?: number;
   depositTotalCents?: number;
   grandTotalCents?: number;
@@ -105,3 +125,4 @@ export interface AdminNote {
   notes: string;        // admin-only internal notes about this customer
   updatedAt: any;       // Timestamp of last update
 }
+

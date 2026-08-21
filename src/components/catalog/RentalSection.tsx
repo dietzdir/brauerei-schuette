@@ -1,0 +1,264 @@
+"use client";
+
+import React, { useEffect, useState, ViewTransition } from "react";
+import Image from "next/image";
+import { RentalItem } from "@/types";
+import { db } from "@/lib/firebase/config";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { initialRentals } from "@/lib/firebase/seed";
+import { useCart } from "@/lib/cart/CartContext";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils";
+import {
+  Wrench,
+  Plus,
+  Check,
+  Info,
+  Sparkles,
+  ShieldCheck,
+  Clock,
+  Trash2,
+  Beer,
+} from "lucide-react";
+
+export function RentalSection() {
+  const [rentals, setRentals] = useState<RentalItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { rentalItem, addRentalItem, removeRentalItem } = useCart();
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const q = query(collection(db, "rentals"));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const items: RentalItem[] = [];
+          snapshot.forEach((docSnap) => {
+            items.push({ id: docSnap.id, ...(docSnap.data() as Omit<RentalItem, "id">) });
+          });
+          setRentals(items);
+        } else {
+          setRentals(initialRentals);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.warn("Firestore rentals listener error, using fallback:", error);
+        setRentals(initialRentals);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const activeRentals = rentals.filter((r) => r.isActive !== false);
+
+  if (!loading && activeRentals.length === 0) {
+    return null;
+  }
+
+  const handleToggleRental = (rental: RentalItem) => {
+    const isCurrentlyInCart = rentalItem?.rentalId === rental.id;
+
+    if (isCurrentlyInCart) {
+      removeRentalItem();
+    } else {
+      addRentalItem({
+        rentalId: rental.id,
+        rentalName: rental.name,
+        rentalPriceCents: rental.rentalPriceCents,
+        depositCents: rental.depositCents,
+        image: rental.image,
+      });
+
+      setJustAddedId(rental.id);
+      setTimeout(() => setJustAddedId(null), 1500);
+    }
+  };
+
+  return (
+    <section className="space-y-4 pt-6 border-t border-[#c8d3d5]">
+      <div>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="secondary"
+            className="bg-[#0f4851] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
+          >
+            <Wrench className="size-3 mr-1 inline" aria-hidden="true" />
+            Zubehör & Verleih
+          </Badge>
+        </div>
+        <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851] mt-1">
+          Zapfanlage mieten
+        </h3>
+        <p className="text-xs text-[#505c5f]">
+          Keine eigene Zapfanlage? Mieten Sie unsere professionelle Durchlaufkühler-Zapfanlage passend zu Ihrem Fassbier.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="border border-[#c8d3d5] bg-white p-6 animate-pulse rounded-none">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-5 aspect-16/9 bg-[#f4f6f7]" />
+            <div className="md:col-span-7 space-y-3">
+              <div className="h-6 w-2/3 bg-[#f4f6f7]" />
+              <div className="h-4 w-full bg-[#f4f6f7]" />
+              <div className="h-4 w-4/5 bg-[#f4f6f7]" />
+              <div className="h-10 w-48 bg-[#f4f6f7] mt-4" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {activeRentals.map((rental) => {
+            const isInCart = rentalItem?.rentalId === rental.id;
+            const isJustAdded = justAddedId === rental.id;
+
+            return (
+              <Card
+                key={rental.id}
+                className={`overflow-hidden rounded-none border transition-all duration-200 bg-white shadow-xs p-0 ${
+                  isInCart
+                    ? "border-[#00A8BC] ring-1 ring-[#00A8BC]"
+                    : "border-[#c8d3d5] hover:border-[#0f4851]"
+                }`}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch">
+                  {/* Left: Image (16:9 on mobile, fills column on desktop) */}
+                  <div className="md:col-span-5 relative bg-[#f4f6f7] overflow-hidden flex items-center justify-center min-h-[220px] md:min-h-full border-b md:border-b-0 md:border-r border-[#c8d3d5]">
+                    {rental.image ? (
+                      <ViewTransition name={`rental-img-${rental.id}`} share="morph">
+                        <div className="relative w-full h-full aspect-16/9 md:aspect-auto min-h-[220px]">
+                          <Image
+                            src={rental.image}
+                            alt={rental.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 40vw"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                        </div>
+                      </ViewTransition>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#505c5f]">
+                        <Beer className="size-12 text-[#0f4851]/40 mb-2" />
+                        <span className="text-xs font-semibold">Brauerei Schütte Zapftechnik</span>
+                      </div>
+                    )}
+
+                    {/* AI Generated Badge */}
+                    {rental.image && rental.isAiGenerated && (
+                      <div className="absolute bottom-2.5 right-2.5 z-10 pointer-events-none">
+                        <span className="inline-flex items-center gap-1 bg-black/65 backdrop-blur-xs text-white/95 text-[10px] font-medium px-2 py-0.5 rounded-none border border-white/20 shadow-xs select-none">
+                          <Sparkles className="size-2.5 text-amber-300 shrink-0" aria-hidden="true" />
+                          <span>KI-Symbolbild</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right: Content & Action */}
+                  <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Badge
+                          variant="outline"
+                          className="text-[11px] font-bold text-[#0f4851] bg-[#f0f7f8] border-[#00A8BC] rounded-none"
+                        >
+                          Trockenkühler &bull; Sofort zapfbereit
+                        </Badge>
+                        <span className="text-[11px] font-bold text-[#505c5f] tabular-nums">
+                          Bestand: {rental.totalStock} {rental.totalStock === 1 ? "Gerät" : "Geräte"}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-heading text-2xl uppercase tracking-wide text-[#0f4851]">
+                          {rental.name}
+                        </h4>
+                        {rental.description && (
+                          <p className="text-xs text-[#505c5f] mt-1.5 leading-relaxed">
+                            {rental.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Equipment Highlights */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs text-[#505c5f]">
+                        <div className="flex items-center gap-1.5 font-medium">
+                          <ShieldCheck className="size-4 text-[#00A8BC] shrink-0" />
+                          <span>Inkl. Zapfhahn & Schläuche</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 font-medium">
+                          <Clock className="size-4 text-[#00A8BC] shrink-0" />
+                          <span>Binnen 5 Minuten betriebsbereit</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price & Action Section */}
+                    <div className="pt-4 border-t border-[#c8d3d5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#f9f9f9] -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5">
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                            Mietgebühr:
+                          </span>
+                          <span className="font-heading text-3xl tracking-wide text-[#0f4851] tabular-nums">
+                            {formatPrice(rental.rentalPriceCents)}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#505c5f] flex items-center gap-1 font-medium mt-0.5">
+                          <Info className="size-3 text-[#00A8BC] shrink-0" />
+                          <span>zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung</span>
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {isInCart ? (
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <Button
+                              type="button"
+                              onClick={() => handleToggleRental(rental)}
+                              variant="default"
+                              className="w-full sm:w-auto bg-[#0f4851] text-white hover:bg-[#153e45] rounded-none font-bold uppercase tracking-wider text-xs h-10 px-5 shadow-xs flex items-center gap-2"
+                            >
+                              <Check className="size-4 text-[#00A8BC]" />
+                              <span>Im Warenkorb</span>
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => removeRentalItem()}
+                              variant="outline"
+                              size="icon"
+                              aria-label="Zapfanlage aus dem Warenkorb entfernen"
+                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => handleToggleRental(rental)}
+                            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs transition-colors"
+                          >
+                            <Plus className="size-4 mr-1.5" />
+                            <span>Zur Reservierung hinzufügen</span>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
