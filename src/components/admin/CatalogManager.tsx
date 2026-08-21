@@ -435,15 +435,12 @@ export function CatalogManager() {
       <div className="pt-8 border-t border-[#c8d3d5] space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-[10px] font-bold uppercase tracking-widest mb-1">
-              <Wrench className="size-3 text-[#00A8BC]" />
-              <span>Zubehör & Verleih</span>
-            </div>
-            <h2 className="font-heading text-2xl uppercase tracking-wider text-[#0f4851]">Verleih & Zubehör</h2>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">
+            <h2 className="font-heading text-2xl uppercase tracking-wider text-[#0f4851]">Zubehör & Verleih</h2>
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f] mt-1">
               Verwalte Mietpreise, Kaution und den Bestand der Verleihartikel.
             </p>
           </div>
+
           <Button
             onClick={handleOpenNewRental}
             className="gap-2 bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs"
