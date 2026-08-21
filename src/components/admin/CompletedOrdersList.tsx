@@ -33,6 +33,7 @@ import {
 
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { deleteOrder } from "@/app/actions/deleteOrder";
+import { toast } from "sonner";
 
 export function CompletedOrdersList() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -107,18 +108,20 @@ export function CompletedOrdersList() {
     try {
       const result = await deleteOrder(selectedOrder.id);
       if (result.success) {
+        toast.success(`Bestellung #${selectedOrder.id.slice(0, 8)} wurde gelöscht.`);
         setDeleteDialogOpen(false);
         setSheetOpen(false);
         setSelectedOrder(null);
       } else {
-        alert(result.error || "Fehler beim Löschen der Bestellung.");
+        toast.error(result.error || "Fehler beim Löschen der Bestellung.");
       }
     } catch (error) {
       console.error("Error deleting order:", error);
-      alert("Ein unerwarteter Fehler ist aufgetreten.");
+      toast.error("Ein unerwarteter Fehler ist aufgetreten.");
     }
     setDeleting(false);
   }, [selectedOrder]);
+
 
   const formatDate = (timestamp: unknown) => {
     if (!timestamp) return "–";

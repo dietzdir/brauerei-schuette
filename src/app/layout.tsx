@@ -3,8 +3,10 @@ import { Anton, Fira_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const anton = Anton({
+
   weight: "400",
   variable: "--font-anton",
   subsets: ["latin"],
@@ -71,7 +73,9 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>{children}</CartProvider>
         </AuthProvider>
+        <Toaster position="top-right" richColors />
       </body>
+
     </html>
   );
 }

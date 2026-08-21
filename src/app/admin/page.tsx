@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { Phone, Mail, MapPin, Building, Calendar, Wrench } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+
 
 
 const CatalogManager = dynamic(
@@ -104,11 +106,14 @@ export default function AdminDashboard() {
     try {
       const orderRef = doc(db, "orders", orderId);
       await updateDoc(orderRef, { status: newStatus });
+      const statusLabel = newStatus === "ready" ? "Abholbereit" : newStatus === "completed" ? "Abgeschlossen" : "Eingegangen";
+      toast.success(`Bestellstatus auf „${statusLabel}“ geändert.`);
     } catch (error) {
       console.error("Error updating order status:", error);
-      alert("Fehler beim Aktualisieren des Status.");
+      toast.error("Fehler beim Aktualisieren des Status.");
     }
   };
+
 
   const handleLogout = async () => {
     await logout();

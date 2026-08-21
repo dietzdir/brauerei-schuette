@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { formatContainerType, formatPrice } from "@/lib/utils";
 import { deleteCustomer } from "@/app/actions/deleteCustomer";
+import { toast } from "sonner";
 
 export function CustomerManager() {
   const [customers, setCustomers] = useState<UserProfile[]>([]);
@@ -138,11 +139,12 @@ export function CustomerManager() {
         updatedAt: Timestamp.now(),
       });
       setNotesSaved(true);
+      toast.success("Anmerkungen gespeichert.");
       if (notesTimeoutRef.current) clearTimeout(notesTimeoutRef.current);
       notesTimeoutRef.current = setTimeout(() => setNotesSaved(false), 2500);
     } catch (error) {
       console.error("Error saving admin notes:", error);
-      alert("Fehler beim Speichern der Anmerkungen.");
+      toast.error("Fehler beim Speichern der Anmerkungen.");
     }
     setNotesSaving(false);
   }, [selectedCustomer, adminNotes]);
@@ -153,18 +155,20 @@ export function CustomerManager() {
     try {
       const result = await deleteCustomer(selectedCustomer.uid);
       if (result.success) {
+        toast.success(`Kunde „${selectedCustomer.displayName || selectedCustomer.email || "Konto"}“ wurde gelöscht.`);
         setDeleteDialogOpen(false);
         setSheetOpen(false);
         setSelectedCustomer(null);
       } else {
-        alert(result.error || "Fehler beim Löschen des Kunden.");
+        toast.error(result.error || "Fehler beim Löschen des Kunden.");
       }
     } catch (error) {
       console.error("Error deleting customer:", error);
-      alert("Ein unerwarteter Fehler ist aufgetreten.");
+      toast.error("Ein unerwarteter Fehler ist aufgetreten.");
     }
     setDeleting(false);
   }, [selectedCustomer]);
+
 
   // Filter customers by search query
   const filteredCustomers = customers.filter((c) => {

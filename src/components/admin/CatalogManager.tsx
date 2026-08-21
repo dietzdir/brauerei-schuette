@@ -11,8 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, Sparkles, Wrench } from "lucide-react";
 import { formatPrice, formatContainerType } from "@/lib/utils";
+import { toast } from "sonner";
+
 
 
 const CONTAINER_OPTIONS: ContainerType[] = [
@@ -70,6 +82,11 @@ export function CatalogManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
+  // Deletion modal state
+  const [rentalToDelete, setRentalToDelete] = useState<RentalItem | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Rental Sheet state
   const [rentalSheetOpen, setRentalSheetOpen] = useState(false);
   const [editingRental, setEditingRental] = useState<RentalItem | null>(null);
@@ -114,15 +131,23 @@ export function CatalogManager() {
     setRentalSheetOpen(true);
   };
 
-
   const handleEditRental = (rental: RentalItem) => {
     setEditingRental({ ...rental });
     setRentalSheetOpen(true);
   };
 
-  const handleDeleteRental = async (id: string) => {
-    if (confirm("Mietartikel wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
-      await deleteDoc(doc(db, "rentals", id));
+  const confirmDeleteRental = async () => {
+    if (!rentalToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteDoc(doc(db, "rentals", rentalToDelete.id));
+      toast.success(`Mietartikel „${rentalToDelete.name}“ wurde gelöscht.`);
+      setRentalToDelete(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Fehler beim Löschen des Mietartikels.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -130,9 +155,10 @@ export function CatalogManager() {
     const updated = rental.isActive === false ? true : false;
     try {
       await setDoc(doc(db, "rentals", rental.id), { ...rental, isActive: updated }, { merge: true });
+      toast.success(`Mietartikel „${rental.name}“ ist nun ${updated ? "aktiv" : "inaktiv"}.`);
     } catch (err) {
       console.error(err);
-      alert("Fehler beim Aktualisieren des Status.");
+      toast.error("Fehler beim Aktualisieren des Status.");
     }
   };
 
@@ -155,18 +181,19 @@ export function CatalogManager() {
         },
         (error) => {
           console.error("Upload failed", error);
-          alert("Fehler beim Hochladen des Bildes.");
+          toast.error("Fehler beim Hochladen des Bildes.");
           setRentalUploadProgress(null);
         },
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setEditingRental({ ...editingRental, image: downloadURL });
+          toast.success("Bild erfolgreich hochgeladen.");
           setRentalUploadProgress(null);
         }
       );
     } catch (error) {
       console.error("Resize error:", error);
-      alert("Fehler bei der Bildverarbeitung vor dem Upload.");
+      toast.error("Fehler bei der Bildverarbeitung vor dem Upload.");
       setRentalUploadProgress(null);
     }
   };
@@ -181,15 +208,15 @@ export function CatalogManager() {
       }
       const toSave = { ...editingRental, id: idToSave };
       await setDoc(doc(db, "rentals", idToSave), toSave);
+      toast.success(`Mietartikel „${toSave.name}“ erfolgreich gespeichert.`);
       setRentalSheetOpen(false);
     } catch (e) {
       console.error(e);
-      alert("Fehler beim Speichern des Mietartikels.");
+      toast.error("Fehler beim Speichern des Mietartikels.");
     } finally {
       setIsSavingRental(false);
     }
   };
-
 
   const handleOpenNew = () => {
     setEditingProduct({
@@ -207,9 +234,18 @@ export function CatalogManager() {
     setSheetOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Produkt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
-      await deleteDoc(doc(db, "products", id));
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteDoc(doc(db, "products", productToDelete.id));
+      toast.success(`Produkt „${productToDelete.name}“ wurde gelöscht.`);
+      setProductToDelete(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Fehler beim Löschen des Produkts.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -217,9 +253,10 @@ export function CatalogManager() {
     const updated = prod.isActive === false ? true : false;
     try {
       await setDoc(doc(db, "products", prod.id), { ...prod, isActive: updated }, { merge: true });
+      toast.success(`Produkt „${prod.name}“ ist nun ${updated ? "aktiv" : "inaktiv"}.`);
     } catch (err) {
       console.error(err);
-      alert("Fehler beim Aktualisieren des Status.");
+      toast.error("Fehler beim Aktualisieren des Status.");
     }
   };
 
@@ -243,18 +280,19 @@ export function CatalogManager() {
         },
         (error) => {
           console.error("Upload failed", error);
-          alert("Fehler beim Hochladen des Bildes.");
+          toast.error("Fehler beim Hochladen des Bildes.");
           setUploadProgress(null);
         },
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setEditingProduct({ ...editingProduct, image: downloadURL });
+          toast.success("Bild erfolgreich hochgeladen.");
           setUploadProgress(null);
         }
       );
     } catch (error) {
       console.error("Resize error:", error);
-      alert("Fehler bei der Bildverarbeitung vor dem Upload.");
+      toast.error("Fehler bei der Bildverarbeitung vor dem Upload.");
       setUploadProgress(null);
     }
   };
@@ -271,14 +309,16 @@ export function CatalogManager() {
       
       const toSave = { ...editingProduct, id: idToSave };
       await setDoc(doc(db, "products", idToSave), toSave);
+      toast.success(`Produkt „${toSave.name}“ erfolgreich gespeichert.`);
       setSheetOpen(false);
     } catch (e) {
       console.error(e);
-      alert("Fehler beim Speichern des Produkts.");
+      toast.error("Fehler beim Speichern des Produkts.");
     } finally {
       setIsSaving(false);
     }
   };
+
 
   const addVariant = () => {
     setEditingProduct((prev) => {
@@ -421,10 +461,11 @@ export function CatalogManager() {
                 <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee] h-8" onClick={() => handleEdit(prod)}>
                   <Pencil className="size-3 text-[#00A8BC]" aria-hidden="true" /> Bearbeiten
                 </Button>
-                <Button variant="destructive" size="icon" aria-label={`Produkt ${prod.name} löschen`} className="shrink-0 rounded-none h-8 w-8" onClick={() => handleDelete(prod.id)}>
+                <Button variant="destructive" size="icon" aria-label={`Produkt ${prod.name} löschen`} className="shrink-0 rounded-none h-8 w-8" onClick={() => setProductToDelete(prod)}>
                   <Trash2 className="size-3.5" aria-hidden="true" />
                 </Button>
               </div>
+
               </div>
             );
           })}
@@ -555,10 +596,11 @@ export function CatalogManager() {
                       size="icon"
                       aria-label={`Mietartikel ${rental.name} löschen`}
                       className="shrink-0 rounded-none h-8 w-8"
-                      onClick={() => handleDeleteRental(rental.id)}
+                      onClick={() => setRentalToDelete(rental)}
                     >
                       <Trash2 className="size-3.5" aria-hidden="true" />
                     </Button>
+
                   </div>
                 </div>
               );
@@ -792,9 +834,82 @@ export function CatalogManager() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Delete Product In-App Confirmation Dialog */}
+      <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
+        <AlertDialogContent className="rounded-none border-[#c8d3d5]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-heading text-lg uppercase tracking-wide text-[#0f4851]">
+              Produkt löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-[#505c5f]">
+              Möchten Sie das Produkt <strong>{productToDelete?.name}</strong> endgültig löschen?
+              <br /><br />
+              <strong>Diese Aktion kann nicht rückgängig gemacht werden.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="rounded-none border-[#c8d3d5] font-bold uppercase tracking-wider text-xs"
+              disabled={isDeleting}
+            >
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProduct}
+              disabled={isDeleting}
+              className="rounded-none bg-destructive hover:bg-destructive/90 text-white font-bold uppercase tracking-wider text-xs"
+            >
+              {isDeleting ? (
+                <Loader2 className="size-3.5 animate-spin mr-1" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-3.5 mr-1" aria-hidden="true" />
+              )}
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Rental In-App Confirmation Dialog */}
+      <AlertDialog open={!!rentalToDelete} onOpenChange={(open) => !open && setRentalToDelete(null)}>
+        <AlertDialogContent className="rounded-none border-[#c8d3d5]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-heading text-lg uppercase tracking-wide text-[#0f4851]">
+              Mietartikel löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-[#505c5f]">
+              Möchten Sie den Mietartikel <strong>{rentalToDelete?.name}</strong> endgültig löschen?
+              <br /><br />
+              <strong>Diese Aktion kann nicht rückgängig gemacht werden.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="rounded-none border-[#c8d3d5] font-bold uppercase tracking-wider text-xs"
+              disabled={isDeleting}
+            >
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteRental}
+              disabled={isDeleting}
+              className="rounded-none bg-destructive hover:bg-destructive/90 text-white font-bold uppercase tracking-wider text-xs"
+            >
+              {isDeleting ? (
+                <Loader2 className="size-3.5 animate-spin mr-1" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-3.5 mr-1" aria-hidden="true" />
+              )}
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
 
 function VariantRow({
   variant,
