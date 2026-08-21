@@ -6,7 +6,7 @@ import { RentalItem } from "@/types";
 import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { useCart } from "@/lib/cart/CartContext";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
@@ -16,16 +16,13 @@ import {
   Check,
   Info,
   Sparkles,
-  ShieldCheck,
-  Clock,
   Trash2,
-  Beer,
 } from "lucide-react";
 
 export function RentalSection() {
   const [rentals, setRentals] = useState<RentalItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { rentalItem, addRentalItem, removeRentalItem } = useCart();
+  const { rentalItems, addRentalItem, removeRentalItem } = useCart();
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,10 +53,10 @@ export function RentalSection() {
   }
 
   const handleToggleRental = (rental: RentalItem) => {
-    const isCurrentlyInCart = rentalItem?.rentalId === rental.id;
+    const isCurrentlyInCart = rentalItems.some((r) => r.rentalId === rental.id);
 
     if (isCurrentlyInCart) {
-      removeRentalItem();
+      removeRentalItem(rental.id);
     } else {
       addRentalItem({
         rentalId: rental.id,
@@ -87,10 +84,10 @@ export function RentalSection() {
           </Badge>
         </div>
         <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851] mt-1">
-          Zapfanlage mieten
+          Äquipment & Verleih
         </h3>
         <p className="text-xs text-[#505c5f]">
-          Keine eigene Zapfanlage? Mieten Sie unsere professionelle Durchlaufkühler-Zapfanlage passend zu Ihrem Fassbier.
+          Ergänzen Sie Ihre Reservierung mit unserem Verleihangebot.
         </p>
       </div>
 
@@ -109,7 +106,7 @@ export function RentalSection() {
       ) : (
         <div className="space-y-4">
           {activeRentals.map((rental) => {
-            const isInCart = rentalItem?.rentalId === rental.id;
+            const isInCart = rentalItems.some((r) => r.rentalId === rental.id);
             const isJustAdded = justAddedId === rental.id;
 
             return (
@@ -139,8 +136,8 @@ export function RentalSection() {
                       </ViewTransition>
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#505c5f]">
-                        <Beer className="size-12 text-[#0f4851]/40 mb-2" />
-                        <span className="text-xs font-semibold">Brauerei Schütte Zapftechnik</span>
+                        <Wrench className="size-12 text-[#0f4851]/40 mb-2" />
+                        <span className="text-xs font-semibold">Brauerei Schütte Verleih</span>
                       </div>
                     )}
 
@@ -159,14 +156,8 @@ export function RentalSection() {
                   <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
                     <div className="space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Badge
-                          variant="outline"
-                          className="text-[11px] font-bold text-[#0f4851] bg-[#f0f7f8] border-[#00A8BC] rounded-none"
-                        >
-                          Trockenkühler &bull; Sofort zapfbereit
-                        </Badge>
                         <span className="text-[11px] font-bold text-[#505c5f] tabular-nums">
-                          Bestand: {rental.totalStock} {rental.totalStock === 1 ? "Gerät" : "Geräte"}
+                          Bestand: {rental.totalStock} {rental.totalStock === 1 ? "Stück" : "Stück"}
                         </span>
                       </div>
 
@@ -179,18 +170,6 @@ export function RentalSection() {
                             {rental.description}
                           </p>
                         )}
-                      </div>
-
-                      {/* Equipment Highlights */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs text-[#505c5f]">
-                        <div className="flex items-center gap-1.5 font-medium">
-                          <ShieldCheck className="size-4 text-[#00A8BC] shrink-0" />
-                          <span>Inkl. Zapfhahn & Schläuche</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 font-medium">
-                          <Clock className="size-4 text-[#00A8BC] shrink-0" />
-                          <span>Binnen 5 Minuten betriebsbereit</span>
-                        </div>
                       </div>
                     </div>
 
@@ -205,10 +184,12 @@ export function RentalSection() {
                             {formatPrice(rental.rentalPriceCents)}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#505c5f] flex items-center gap-1 font-medium mt-0.5">
-                          <Info className="size-3 text-[#00A8BC] shrink-0" />
-                          <span>zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung</span>
-                        </p>
+                        {rental.depositCents > 0 && (
+                          <p className="text-[11px] text-[#505c5f] flex items-center gap-1 font-medium mt-0.5">
+                            <Info className="size-3 text-[#00A8BC] shrink-0" />
+                            <span>zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung</span>
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -225,10 +206,10 @@ export function RentalSection() {
                             </Button>
                             <Button
                               type="button"
-                              onClick={() => removeRentalItem()}
+                              onClick={() => removeRentalItem(rental.id)}
                               variant="outline"
                               size="icon"
-                              aria-label="Zapfanlage aus dem Warenkorb entfernen"
+                              aria-label="Mietartikel aus dem Warenkorb entfernen"
                               className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300"
                             >
                               <Trash2 className="size-4" />
@@ -256,3 +237,4 @@ export function RentalSection() {
     </section>
   );
 }
+

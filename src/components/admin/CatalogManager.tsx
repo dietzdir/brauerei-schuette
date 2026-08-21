@@ -104,15 +104,16 @@ export function CatalogManager() {
       id: "",
       name: "",
       description: "",
-      image: "/images/zapfanlage.jpg",
-      isAiGenerated: true,
-      rentalPriceCents: 2500,
-      depositCents: 5000,
-      totalStock: 3,
+      image: "",
+      isAiGenerated: false,
+      rentalPriceCents: 0,
+      depositCents: 0,
+      totalStock: 1,
       isActive: true,
     });
     setRentalSheetOpen(true);
   };
+
 
   const handleEditRental = (rental: RentalItem) => {
     setEditingRental({ ...rental });
@@ -438,9 +439,9 @@ export function CatalogManager() {
               <Wrench className="size-3 text-[#00A8BC]" />
               <span>Zubehör & Verleih</span>
             </div>
-            <h2 className="font-heading text-2xl uppercase tracking-wider text-[#0f4851]">Zapfanlagen & Mietartikel</h2>
+            <h2 className="font-heading text-2xl uppercase tracking-wider text-[#0f4851]">Verleih & Zubehör</h2>
             <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">
-              Verwalte Mietpreise, Kaution und den Gerätebestand (z. B. 3 Zapfanlagen).
+              Verwalte Mietpreise, Kaution und den Bestand der Verleihartikel.
             </p>
           </div>
           <Button
@@ -459,7 +460,7 @@ export function CatalogManager() {
               variant="outline"
               className="mt-3 text-xs font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851]"
             >
-              Zapfanlage anlegen
+              Mietartikel anlegen
             </Button>
           </div>
         ) : (
@@ -1009,7 +1010,7 @@ function RentalEditorSheet({
         <SheetHeader className="mb-6 px-4 pt-6 sm:px-6">
           <SheetTitle>{rental.id ? "Mietartikel bearbeiten" : "Neuen Mietartikel anlegen"}</SheetTitle>
           <SheetDescription>
-            Passe Namen, Mietpreis, Kaution und den Gesamtbestand der Zapfanlagen an.
+            Passe Bezeichnung, Mietpreis, Kaution und Bestand an.
           </SheetDescription>
         </SheetHeader>
 
@@ -1036,7 +1037,7 @@ function RentalEditorSheet({
               <Input
                 value={rental.name}
                 onChange={(e) => setRental({ ...rental, name: e.target.value })}
-                placeholder="z. B. Profi-Bierzapfanlage mit Durchlaufkühler"
+                placeholder="z. B. Profi-Bierzapfanlage, Bierzeltgarnitur, Stehtisch"
                 className="rounded-none border-[#c8d3d5]"
               />
             </div>
@@ -1047,9 +1048,10 @@ function RentalEditorSheet({
                 className="flex min-h-[90px] w-full rounded-none border border-[#c8d3d5] bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 value={rental.description || ""}
                 onChange={(e) => setRental({ ...rental, description: e.target.value })}
-                placeholder="z. B. Inklusive Kompensatorschankhahn, Tropfschale, CO2-Druckminderer und Anschlussschläuchen."
+                placeholder="z. B. 1 Biertisch (220 x 50 cm) und 2 Bierbänke (220 x 25 cm), klappbar und wetterfest lasiert."
               />
             </div>
+
 
             {/* Price, Deposit & Stock Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">

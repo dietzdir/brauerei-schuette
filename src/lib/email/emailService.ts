@@ -54,8 +54,9 @@ export function generateOrderConfirmationHtml(order: Order): string {
         <td style="padding: 12px 8px; font-weight: 700; color: #0F4851; font-size: 13px;">
           ${rental.rentalName}
           <div style="font-size: 11px; font-weight: 600; color: #00A8BC; margin-top: 2px;">
-            Mietartikel (inkl. Zapfzubehör)
+            Mietartikel / Verleih
           </div>
+
         </td>
         <td style="padding: 12px 8px; text-align: center; color: #0F4851; font-weight: 700; font-size: 13px;">
           1

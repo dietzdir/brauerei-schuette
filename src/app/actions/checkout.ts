@@ -26,7 +26,8 @@ export interface CheckoutInput {
   pickupDate?: string;
   pickupTime?: string;
   items: CheckoutInputItem[];
-  rentalItemId?: string;
+  rentalItemIds?: string[];
+  rentalItemId?: string; // backwards compatibility
 }
 
 export interface CheckoutResult {
@@ -53,8 +54,10 @@ export async function createOrderAction(
       pickupDate,
       pickupTime,
       items,
+      rentalItemIds: inputRentalIds,
       rentalItemId,
     } = input;
+
 
     if (!userId || !userId.trim()) {
       return { success: false, error: "Ungültige Benutzer-ID (nicht authentifiziert)." };
@@ -153,50 +156,23 @@ export async function createOrderAction(
       }
     }
 
-    // Rental item validation & date-based availability checking
+    // Rental items validation & date-based availability checking
     const validatedRentalItems: OrderRentalItem[] = [];
     let rentalPriceTotalCents = 0;
 
-    if (rentalItemId) {
+    const rawRentalIds = inputRentalIds || (rentalItemId ? [rentalItemId] : []);
+    const rentalItemIds = Array.from(new Set(rawRentalIds.filter(Boolean)));
+
+    if (rentalItemIds.length > 0) {
       if (!pickupDate || !pickupDate.trim()) {
         return {
           success: false,
-          error: "Für die Reservierung einer Zapfanlage muss ein gültiger Abholtermin gewählt sein.",
+          error: "Für die Reservierung von Mietartikeln muss ein gültiger Abholtermin gewählt sein.",
         };
       }
 
-      let rentalData: RentalItem | null = null;
-      try {
-        const rentalDoc = await adminDb.collection("rentals").doc(rentalItemId).get();
-        if (rentalDoc.exists) {
-          rentalData = { id: rentalDoc.id, ...(rentalDoc.data() as Omit<RentalItem, "id">) };
-        }
-      } catch (err) {
-        console.warn("Firestore rental lookup error, checking fallback:", err);
-      }
-
-      if (!rentalData) {
-        const fallback = initialRentals.find((r) => r.id === rentalItemId);
-        if (fallback) {
-          rentalData = fallback;
-        }
-      }
-
-      if (!rentalData) {
-        return {
-          success: false,
-          error: `Mietartikel nicht gefunden (ID: ${rentalItemId}).`,
-        };
-      }
-
-      if (rentalData.isActive === false) {
-        return {
-          success: false,
-          error: `Die Zapfanlage "${rentalData.name}" ist aktuell leider nicht zur Vermietung verfügbar.`,
-        };
-      }
-
-      // Check date availability against existing active orders for this pickupDate
+      // Pre-fetch active orders for this pickupDate once
+      let existingOrdersForDate: Order[] = [];
       try {
         const existingOrdersSnapshot = await adminDb
           .collection("orders")
@@ -204,37 +180,74 @@ export async function createOrderAction(
           .where("status", "in", ["pending", "ready"])
           .get();
 
-        let reservedCount = 0;
         existingOrdersSnapshot.forEach((docSnap) => {
-          const ord = docSnap.data() as Order;
+          existingOrdersForDate.push(docSnap.data() as Order);
+        });
+      } catch (availErr) {
+        console.warn("Error querying existing orders for date availability:", availErr);
+      }
+
+      for (const rId of rentalItemIds) {
+        let rentalData: RentalItem | null = null;
+        try {
+          const rentalDoc = await adminDb.collection("rentals").doc(rId).get();
+          if (rentalDoc.exists) {
+            rentalData = { id: rentalDoc.id, ...(rentalDoc.data() as Omit<RentalItem, "id">) };
+          }
+        } catch (err) {
+          console.warn(`Firestore rental lookup error for ${rId}, checking fallback:`, err);
+        }
+
+        if (!rentalData) {
+          const fallback = initialRentals.find((r) => r.id === rId);
+          if (fallback) {
+            rentalData = fallback;
+          }
+        }
+
+        if (!rentalData) {
+          return {
+            success: false,
+            error: `Mietartikel nicht gefunden (ID: ${rId}).`,
+          };
+        }
+
+        if (rentalData.isActive === false) {
+          return {
+            success: false,
+            error: `Der Mietartikel „${rentalData.name}“ ist aktuell leider nicht zur Vermietung verfügbar.`,
+          };
+        }
+
+        // Count reservations for this specific rental item on pickupDate
+        let reservedCount = 0;
+        existingOrdersForDate.forEach((ord) => {
           if (ord.rentalItems && ord.rentalItems.length > 0) {
-            const hasRental = ord.rentalItems.some((r) => r.rentalId === rentalItemId);
-            if (hasRental) {
+            if (ord.rentalItems.some((r) => r.rentalId === rId)) {
               reservedCount += 1;
             }
           }
         });
 
-        const totalStock = typeof rentalData.totalStock === "number" ? rentalData.totalStock : 3;
+        const totalStock = typeof rentalData.totalStock === "number" ? rentalData.totalStock : 1;
         if (reservedCount >= totalStock) {
           return {
             success: false,
-            error: `Für den gewählten Abholtermin (${pickupDate.trim()}) sind leider bereits alle Zapfanlagen (${totalStock} Stück) vergeben. Bitte wählen Sie einen anderen Abholtermin oder entfernen Sie die Zapfanlage aus dem Warenkorb.`,
+            error: `Für den gewählten Abholtermin (${pickupDate.trim()}) sind leider bereits alle „${rentalData.name}“ (${totalStock} Stück) vergeben. Bitte wählen Sie einen anderen Abholtermin oder entfernen Sie den Artikel aus dem Warenkorb.`,
           };
         }
-      } catch (availErr) {
-        console.warn("Error checking rental availability count:", availErr);
+
+        validatedRentalItems.push({
+          rentalId: rentalData.id,
+          rentalName: rentalData.name,
+          rentalPriceCents: rentalData.rentalPriceCents,
+          depositCents: rentalData.depositCents,
+        });
+
+        rentalPriceTotalCents += rentalData.rentalPriceCents;
       }
-
-      validatedRentalItems.push({
-        rentalId: rentalData.id,
-        rentalName: rentalData.name,
-        rentalPriceCents: rentalData.rentalPriceCents,
-        depositCents: rentalData.depositCents,
-      });
-
-      rentalPriceTotalCents += rentalData.rentalPriceCents;
     }
+
 
     const itemsTotalCents =
       validatedOrderItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0) +

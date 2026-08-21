@@ -17,12 +17,12 @@ export interface RentalCartItem {
 
 interface CartContextType {
   items: CartItem[];
-  rentalItem: RentalCartItem | null;
+  rentalItems: RentalCartItem[];
   addItem: (item: Omit<CartItem, "id">, options?: { openDrawer?: boolean }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   addRentalItem: (item: RentalCartItem, options?: { openDrawer?: boolean }) => void;
-  removeRentalItem: () => void;
+  removeRentalItem: (rentalId: string) => void;
   clearCart: () => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -43,7 +43,7 @@ const RENTAL_STORAGE_KEY = "brauerei_schuette_rental_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [rentalItem, setRentalItem] = useState<RentalCartItem | null>(null);
+  const [rentalItems, setRentalItems] = useState<RentalCartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [lastAddedItemId, setLastAddedItemId] = useState<string | null>(null);
@@ -58,7 +58,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       const savedRental = localStorage.getItem(RENTAL_STORAGE_KEY);
       if (savedRental) {
-        setRentalItem(JSON.parse(savedRental));
+        const parsed = JSON.parse(savedRental);
+        if (Array.isArray(parsed)) {
+          setRentalItems(parsed);
+        } else if (parsed && parsed.rentalId) {
+          setRentalItems([parsed]);
+        }
       }
     } catch (e) {
       console.error("Failed to load cart from localStorage", e);
@@ -80,15 +85,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoaded) return;
     try {
-      if (rentalItem) {
-        localStorage.setItem(RENTAL_STORAGE_KEY, JSON.stringify(rentalItem));
+      if (rentalItems.length > 0) {
+        localStorage.setItem(RENTAL_STORAGE_KEY, JSON.stringify(rentalItems));
       } else {
         localStorage.removeItem(RENTAL_STORAGE_KEY);
       }
     } catch (e) {
-      console.error("Failed to save rental to localStorage", e);
+      console.error("Failed to save rental items to localStorage", e);
     }
-  }, [rentalItem, isLoaded]);
+  }, [rentalItems, isLoaded]);
 
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
@@ -144,7 +149,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     item: RentalCartItem,
     options: { openDrawer?: boolean } = { openDrawer: true }
   ) => {
-    setRentalItem(item);
+    setRentalItems((prev) => {
+      if (prev.some((r) => r.rentalId === item.rentalId)) {
+        return prev;
+      }
+      return [...prev, item];
+    });
+
     setLastAddedItemId(`rental_${item.rentalId}`);
     if (highlightTimeoutRef.current) {
       clearTimeout(highlightTimeoutRef.current);
@@ -158,20 +169,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const removeRentalItem = () => {
-    setRentalItem(null);
+  const removeRentalItem = (rentalId: string) => {
+    setRentalItems((prev) => prev.filter((r) => r.rentalId !== rentalId));
   };
 
   const clearCart = () => {
     setItems([]);
-    setRentalItem(null);
+    setRentalItems([]);
   };
 
   const totalCount =
-    items.reduce((sum, item) => sum + item.quantity, 0) + (rentalItem ? 1 : 0);
+    items.reduce((sum, item) => sum + item.quantity, 0) + rentalItems.length;
   const itemsTotalCents =
     items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) +
-    (rentalItem ? rentalItem.rentalPriceCents : 0);
+    rentalItems.reduce((sum, r) => sum + r.rentalPriceCents, 0);
   const depositTotalCents = items.reduce(
     (sum, item) => sum + (item.depositPrice || 0) * item.quantity,
     0
@@ -182,7 +193,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider
       value={{
         items,
-        rentalItem,
+        rentalItems,
         addItem,
         removeItem,
         updateQuantity,
@@ -213,4 +224,5 @@ export function useCart() {
   }
   return context;
 }
+
 
