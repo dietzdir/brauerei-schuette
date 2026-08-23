@@ -6,7 +6,12 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test tests/e2e.spec.ts --project=chromium",
+    "test:mobile": "playwright test tests/mobile.spec.ts --project=chromium",
+    "test:rental": "playwright test tests/rental.spec.ts --project=chromium",
+    "test:all": "playwright test --project=chromium",
+    "test:clean": "node scripts/cleanup_test_data.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
