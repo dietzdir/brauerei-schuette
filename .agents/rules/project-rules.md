@@ -134,11 +134,11 @@ service cloud.firestore {
    - **Exclusively Lucide Icons (`lucide-react`)**: Use exclusively icons from `lucide-react` across the entire codebase. Do NOT use emojis or third-party icon libraries for UI controls or navigation.
    - **Alias Component Name Collisions**: When importing icons from `lucide-react` that share a name with a shadcn/UI component (e.g., `Calendar`), you MUST alias the icon upon import (`import { Calendar as CalendarIcon } from "lucide-react";`). Using the unaliased `<Calendar />` by mistake will render a massive, transparent interactive date picker instead of a small icon, completely breaking the layout.
 
-### Verification & Post-Test Cleanup
+### Verification & Mandatory Post-Test Cleanup Checklist
 
-1. **Strict Post-Test Cleanup**:
-   - **Stop Background Servers**: Always terminate (`kill`) any local dev/start servers (`next start`, `next dev`) immediately after test completion so background processes and ports (e.g. 3000) are fully released.
-   - **Delete Generated Test Artifacts**: Immediately remove any temporary test reports, screenshots, or folders created during test runs (`test-results/`, `playwright-report/`).
-   - **Delete Created Test Data**: Delete all test records created in the database (e.g., test orders, temporary test users) and ONLY those test items, leaving genuine application data untouched.
+1. **Mandatory Post-Test Cleanup (Must be executed automatically after EVERY test run without waiting for reminders)**:
+   - **Step 1 - Stop Background Servers**: Immediately terminate (`kill`) all local server background tasks (`npm run start`, `npm run dev`) so ports (3000) and system resources are freed.
+   - **Step 2 - Delete Generated Test Artifacts**: Delete all temporary folders and test reports created by test runners (`test-results/`, `playwright-report/`).
+   - **Step 3 - Delete Created Test Data from Database**: Automatically purge all test-generated database records (e.g. test orders for "Max Mustermann", "Mobile Testkunde", and temporary test user accounts in Firestore) while leaving genuine catalog and store data untouched.
 2. **Interactive Flow Verification**:
    - After each mission, confirm `next build` succeeds, then use Antigravity's browser subagent to click through the flow you just built before marking the mission done (concrete checks are listed per mission below).
