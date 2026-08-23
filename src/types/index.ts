@@ -95,6 +95,7 @@ export interface OrderRentalItem {
   rentalName: string;
   rentalPriceCents: number;
   depositCents: number;
+  quantity: number;
 }
 
 export interface Order {

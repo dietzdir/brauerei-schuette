@@ -49,32 +49,37 @@ export function generateOrderConfirmationHtml(order: Order): string {
 
   const rentalRows = (order.rentalItems || [])
     .map(
-      (rental) => `
+      (rental) => {
+        const qty = rental.quantity || 1;
+        const totalRentalPrice = rental.rentalPriceCents * qty;
+        const totalDeposit = (rental.depositCents || 0) * qty;
+
+        return `
       <tr style="border-bottom: 1px solid #e5e7eb; background-color: #f0fdf4;">
         <td style="padding: 12px 8px; font-weight: 700; color: #0F4851; font-size: 13px;">
           ${rental.rentalName}
           <div style="font-size: 11px; font-weight: 600; color: #00A8BC; margin-top: 2px;">
             Mietartikel / Verleih
           </div>
-
         </td>
         <td style="padding: 12px 8px; text-align: center; color: #0F4851; font-weight: 700; font-size: 13px;">
-          1
+          ${qty}
         </td>
         <td style="padding: 12px 8px; text-align: right; color: #505c5f; font-size: 13px;">
           ${formatPrice(rental.rentalPriceCents)}
           ${
-            rental.depositCents && rental.depositCents > 0
+            totalDeposit > 0
               ? `<div style="font-size: 11px; color: #505c5f; font-weight: 500;">zzgl. ${formatPrice(
-                  rental.depositCents
+                  totalDeposit
                 )} Kaution vor Ort</div>`
               : ""
           }
         </td>
         <td style="padding: 12px 8px; text-align: right; font-weight: 800; color: #0F4851; font-size: 13px;">
-          ${formatPrice(rental.rentalPriceCents)}
+          ${formatPrice(totalRentalPrice)}
         </td>
-      </tr>`
+      </tr>`;
+      }
     )
     .join("");
 

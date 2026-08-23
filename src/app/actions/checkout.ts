@@ -12,6 +12,11 @@ export interface CheckoutInputItem {
   quantity: number;
 }
 
+export interface CheckoutInputRentalItem {
+  rentalId: string;
+  quantity?: number;
+}
+
 export interface CheckoutInput {
   userId: string;
   customerName: string;
@@ -26,6 +31,7 @@ export interface CheckoutInput {
   pickupDate?: string;
   pickupTime?: string;
   items: CheckoutInputItem[];
+  rentalItems?: (CheckoutInputRentalItem | string)[];
   rentalItemIds?: string[];
   rentalItemId?: string; // backwards compatibility
 }
@@ -54,6 +60,7 @@ export async function createOrderAction(
       pickupDate,
       pickupTime,
       items,
+      rentalItems: inputRentalItems,
       rentalItemIds: inputRentalIds,
       rentalItemId,
     } = input;
@@ -81,7 +88,29 @@ export async function createOrderAction(
       };
     }
 
-    if ((!items || items.length === 0) && !rentalItemId) {
+    const requestedRentals: { rentalId: string; quantity: number }[] = [];
+    if (inputRentalItems && inputRentalItems.length > 0) {
+      inputRentalItems.forEach((r) => {
+        if (typeof r === "string" && r.trim()) {
+          requestedRentals.push({ rentalId: r.trim(), quantity: 1 });
+        } else if (r && typeof r === "object" && r.rentalId) {
+          requestedRentals.push({
+            rentalId: r.rentalId.trim(),
+            quantity: typeof r.quantity === "number" && r.quantity > 0 ? r.quantity : 1,
+          });
+        }
+      });
+    } else if (inputRentalIds && inputRentalIds.length > 0) {
+      inputRentalIds.forEach((id) => {
+        if (id && id.trim()) {
+          requestedRentals.push({ rentalId: id.trim(), quantity: 1 });
+        }
+      });
+    } else if (rentalItemId && rentalItemId.trim()) {
+      requestedRentals.push({ rentalId: rentalItemId.trim(), quantity: 1 });
+    }
+
+    if ((!items || items.length === 0) && requestedRentals.length === 0) {
       return { success: false, error: "Der Warenkorb ist leer." };
     }
 
@@ -160,10 +189,7 @@ export async function createOrderAction(
     const validatedRentalItems: OrderRentalItem[] = [];
     let rentalPriceTotalCents = 0;
 
-    const rawRentalIds = inputRentalIds || (rentalItemId ? [rentalItemId] : []);
-    const rentalItemIds = Array.from(new Set(rawRentalIds.filter(Boolean)));
-
-    if (rentalItemIds.length > 0) {
+    if (requestedRentals.length > 0) {
       if (!pickupDate || !pickupDate.trim()) {
         return {
           success: false,
@@ -187,7 +213,10 @@ export async function createOrderAction(
         console.warn("Error querying existing orders for date availability:", availErr);
       }
 
-      for (const rId of rentalItemIds) {
+      for (const reqRental of requestedRentals) {
+        const rId = reqRental.rentalId;
+        const reqQty = reqRental.quantity || 1;
+
         let rentalData: RentalItem | null = null;
         try {
           const rentalDoc = await adminDb.collection("rentals").doc(rId).get();
@@ -223,17 +252,30 @@ export async function createOrderAction(
         let reservedCount = 0;
         existingOrdersForDate.forEach((ord) => {
           if (ord.rentalItems && ord.rentalItems.length > 0) {
-            if (ord.rentalItems.some((r) => r.rentalId === rId)) {
-              reservedCount += 1;
-            }
+            ord.rentalItems.forEach((r) => {
+              if (r.rentalId === rId) {
+                reservedCount += typeof r.quantity === "number" && r.quantity > 0 ? r.quantity : 1;
+              }
+            });
           }
         });
 
-        const totalStock = typeof rentalData.totalStock === "number" ? rentalData.totalStock : 1;
-        if (reservedCount >= totalStock) {
+        const totalStock = typeof rentalData.totalStock === "number" && rentalData.totalStock > 0 ? rentalData.totalStock : 1;
+        const availableLeft = Math.max(0, totalStock - reservedCount);
+
+        if (reqQty > totalStock) {
           return {
             success: false,
-            error: `Für den gewählten Abholtermin (${pickupDate.trim()}) sind leider bereits alle „${rentalData.name}“ (${totalStock} Stück) vergeben. Bitte wählen Sie einen anderen Abholtermin oder entfernen Sie den Artikel aus dem Warenkorb.`,
+            error: `Von „${rentalData.name}“ können maximal ${totalStock} Stück ausgeliehen werden.`,
+          };
+        }
+
+        if (reservedCount + reqQty > totalStock) {
+          return {
+            success: false,
+            error: availableLeft > 0
+              ? `Für den gewählten Abholtermin (${pickupDate.trim()}) sind nur noch ${availableLeft} von ${totalStock} „${rentalData.name}“ verfügbar (Sie haben ${reqQty} Stück ausgewählt). Bitte reduzieren Sie die Anzahl oder wählen Sie einen anderen Termin.`
+              : `Für den gewählten Abholtermin (${pickupDate.trim()}) sind leider bereits alle „${rentalData.name}“ (${totalStock} Stück) vergeben. Bitte wählen Sie einen anderen Abholtermin oder entfernen Sie den Artikel aus dem Warenkorb.`,
           };
         }
 
@@ -241,10 +283,11 @@ export async function createOrderAction(
           rentalId: rentalData.id,
           rentalName: rentalData.name,
           rentalPriceCents: rentalData.rentalPriceCents,
-          depositCents: rentalData.depositCents,
+          depositCents: rentalData.depositCents || 0,
+          quantity: reqQty,
         });
 
-        rentalPriceTotalCents += rentalData.rentalPriceCents;
+        rentalPriceTotalCents += rentalData.rentalPriceCents * reqQty;
       }
     }
 

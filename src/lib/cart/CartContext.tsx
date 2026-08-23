@@ -13,6 +13,8 @@ export interface RentalCartItem {
   rentalPriceCents: number;
   depositCents: number;
   image?: string;
+  quantity: number;
+  totalStock: number;
 }
 
 interface CartContextType {
@@ -21,8 +23,9 @@ interface CartContextType {
   addItem: (item: Omit<CartItem, "id">, options?: { openDrawer?: boolean }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
-  addRentalItem: (item: RentalCartItem, options?: { openDrawer?: boolean }) => void;
+  addRentalItem: (item: Omit<RentalCartItem, "quantity"> & { quantity?: number; totalStock?: number }, options?: { openDrawer?: boolean }) => void;
   removeRentalItem: (rentalId: string) => void;
+  updateRentalQuantity: (rentalId: string, quantity: number) => void;
   clearCart: () => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -39,7 +42,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "brauerei_schuette_cart_v2";
-const RENTAL_STORAGE_KEY = "brauerei_schuette_rental_v1";
+const RENTAL_STORAGE_KEY = "brauerei_schuette_rental_v2";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -56,13 +59,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         setItems(JSON.parse(saved));
       }
-      const savedRental = localStorage.getItem(RENTAL_STORAGE_KEY);
+      const savedRental = localStorage.getItem(RENTAL_STORAGE_KEY) || localStorage.getItem("brauerei_schuette_rental_v1");
       if (savedRental) {
         const parsed = JSON.parse(savedRental);
         if (Array.isArray(parsed)) {
-          setRentalItems(parsed);
+          setRentalItems(
+            parsed.map((r: any) => ({
+              ...r,
+              quantity: typeof r.quantity === "number" && r.quantity > 0 ? r.quantity : 1,
+              totalStock: typeof r.totalStock === "number" && r.totalStock > 0 ? r.totalStock : 99,
+            }))
+          );
         } else if (parsed && parsed.rentalId) {
-          setRentalItems([parsed]);
+          setRentalItems([
+            {
+              ...parsed,
+              quantity: typeof parsed.quantity === "number" && parsed.quantity > 0 ? parsed.quantity : 1,
+              totalStock: typeof parsed.totalStock === "number" && parsed.totalStock > 0 ? parsed.totalStock : 99,
+            },
+          ]);
         }
       }
     } catch (e) {
@@ -146,14 +161,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addRentalItem = (
-    item: RentalCartItem,
+    item: Omit<RentalCartItem, "quantity"> & { quantity?: number; totalStock?: number },
     options: { openDrawer?: boolean } = { openDrawer: true }
   ) => {
+    const qtyToAdd = item.quantity && item.quantity > 0 ? item.quantity : 1;
+    const maxStock = typeof item.totalStock === "number" && item.totalStock > 0 ? item.totalStock : 99;
+
     setRentalItems((prev) => {
-      if (prev.some((r) => r.rentalId === item.rentalId)) {
-        return prev;
+      const existingIndex = prev.findIndex((r) => r.rentalId === item.rentalId);
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        const currentQty = updated[existingIndex].quantity || 1;
+        const newQty = Math.min(maxStock, currentQty + qtyToAdd);
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: newQty,
+          totalStock: maxStock,
+          rentalPriceCents: item.rentalPriceCents,
+          depositCents: item.depositCents,
+        };
+        return updated;
       }
-      return [...prev, item];
+      return [
+        ...prev,
+        {
+          ...item,
+          quantity: Math.min(maxStock, qtyToAdd),
+          totalStock: maxStock,
+        },
+      ];
     });
 
     setLastAddedItemId(`rental_${item.rentalId}`);
@@ -169,6 +205,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateRentalQuantity = (rentalId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeRentalItem(rentalId);
+      return;
+    }
+    setRentalItems((prev) =>
+      prev.map((r) => {
+        if (r.rentalId === rentalId) {
+          const maxStock = typeof r.totalStock === "number" && r.totalStock > 0 ? r.totalStock : 99;
+          return { ...r, quantity: Math.min(maxStock, quantity) };
+        }
+        return r;
+      })
+    );
+  };
+
   const removeRentalItem = (rentalId: string) => {
     setRentalItems((prev) => prev.filter((r) => r.rentalId !== rentalId));
   };
@@ -179,14 +231,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const totalCount =
-    items.reduce((sum, item) => sum + item.quantity, 0) + rentalItems.length;
+    items.reduce((sum, item) => sum + item.quantity, 0) +
+    rentalItems.reduce((sum, r) => sum + (r.quantity || 1), 0);
   const itemsTotalCents =
     items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) +
-    rentalItems.reduce((sum, r) => sum + r.rentalPriceCents, 0);
-  const depositTotalCents = items.reduce(
-    (sum, item) => sum + (item.depositPrice || 0) * item.quantity,
-    0
-  );
+    rentalItems.reduce((sum, r) => sum + r.rentalPriceCents * (r.quantity || 1), 0);
+  const depositTotalCents =
+    items.reduce((sum, item) => sum + (item.depositPrice || 0) * item.quantity, 0) +
+    rentalItems.reduce((sum, r) => sum + (r.depositCents || 0) * (r.quantity || 1), 0);
   const grandTotalCents = itemsTotalCents + depositTotalCents;
 
   return (
@@ -199,6 +251,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         addRentalItem,
         removeRentalItem,
+        updateRentalQuantity,
         clearCart,
         isOpen,
         setIsOpen,

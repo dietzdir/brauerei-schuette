@@ -149,7 +149,10 @@ export default function AdminDashboardPage() {
     if (order.rentalItems && order.rentalItems.length > 0) {
       body += `\nGemietetes Zubehör:\n`;
       order.rentalItems.forEach(r => {
-        body += `- 1x ${r.rentalName} (${formatPrice(r.rentalPriceCents)}${r.depositCents && r.depositCents > 0 ? `, zzgl. ${formatPrice(r.depositCents)} Kaution` : ""})\n`;
+        const qty = r.quantity || 1;
+        const totalRental = r.rentalPriceCents * qty;
+        const totalDep = (r.depositCents || 0) * qty;
+        body += `- ${qty}x ${r.rentalName} (${formatPrice(totalRental)}${totalDep > 0 ? `, zzgl. ${formatPrice(totalDep)} Kaution` : ""})\n`;
       });
     }
     body += `\nWir freuen uns auf Ihren Besuch!\n\n`;
@@ -396,22 +399,28 @@ export default function AdminDashboardPage() {
                           <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(item.unitPrice * item.quantity)}</span>
                         </li>
                       ))}
-                      {order.rentalItems && order.rentalItems.map((rental, rIdx) => (
-                        <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
-                          <div>
-                            <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
-                              <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
-                              1x {rental.rentalName}
-                            </span>
-                            <span className="text-[10px] text-[#505c5f] block mt-0.5 font-medium">
-                              {rental.depositCents > 0 
-                                ? `Mietgerät (zzgl. ${formatPrice(rental.depositCents)} Kaution vor Ort)` 
-                                : "Mietgerät (ohne Kaution)"}
-                            </span>
-                          </div>
-                          <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(rental.rentalPriceCents)}</span>
-                        </li>
-                      ))}
+                      {order.rentalItems && order.rentalItems.map((rental, rIdx) => {
+                        const qty = rental.quantity || 1;
+                        const totalRental = rental.rentalPriceCents * qty;
+                        const totalDep = (rental.depositCents || 0) * qty;
+
+                        return (
+                          <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
+                            <div>
+                              <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
+                                <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
+                                {qty}x {rental.rentalName}
+                              </span>
+                              <span className="text-[10px] text-[#505c5f] block mt-0.5 font-medium">
+                                {totalDep > 0 
+                                  ? `Mietgerät (zzgl. ${formatPrice(totalDep)} Kaution vor Ort)` 
+                                  : "Mietgerät (ohne Kaution)"}
+                              </span>
+                            </div>
+                            <span className="font-bold text-[#0f4851] tabular-nums">{formatPrice(totalRental)}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
 

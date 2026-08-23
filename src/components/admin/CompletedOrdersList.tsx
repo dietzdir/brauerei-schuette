@@ -140,9 +140,11 @@ export function CompletedOrdersList() {
   };
 
   const calculateTotal = (order: Order) => {
+    if (typeof order.grandTotalCents === "number") return order.grandTotalCents;
     const itemsTotal = order.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-    const rentalsTotal = (order.rentalItems || []).reduce((sum, r) => sum + r.rentalPriceCents, 0);
-    return itemsTotal + rentalsTotal;
+    const rentalsTotal = (order.rentalItems || []).reduce((sum, r) => sum + r.rentalPriceCents * (r.quantity || 1), 0);
+    const depositTotal = order.depositTotalCents || 0;
+    return itemsTotal + rentalsTotal + depositTotal;
   };
 
 
@@ -321,24 +323,30 @@ export function CompletedOrdersList() {
                           </span>
                         </li>
                       ))}
-                      {selectedOrder.rentalItems && selectedOrder.rentalItems.map((rental, rIdx) => (
-                        <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
-                          <div>
-                            <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
-                              <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
-                              1× {rental.rentalName}
+                      {selectedOrder.rentalItems && selectedOrder.rentalItems.map((rental, rIdx) => {
+                        const qty = rental.quantity || 1;
+                        const totalRental = rental.rentalPriceCents * qty;
+                        const totalDep = (rental.depositCents || 0) * qty;
+
+                        return (
+                          <li key={`rental-${rIdx}`} className="flex justify-between items-start border border-[#00A8BC]/40 bg-[#f0f7f8] p-2 rounded-none">
+                            <div>
+                              <span className="font-bold text-[#0f4851] flex items-center gap-1.5">
+                                <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
+                                {qty}× {rental.rentalName}
+                              </span>
+                              <span className="text-[10px] text-[#505c5f] block mt-0.5 font-medium">
+                                {totalDep > 0 
+                                  ? `Mietgerät (zzgl. ${formatPrice(totalDep)} Kaution vor Ort)` 
+                                  : "Mietgerät (ohne Kaution)"}
+                              </span>
+                            </div>
+                            <span className="font-bold text-[#0f4851] tabular-nums mt-0.5">
+                              {formatPrice(totalRental)}
                             </span>
-                            <span className="text-[10px] text-[#505c5f] block mt-0.5 font-medium">
-                              {rental.depositCents > 0 
-                                ? `Mietgerät (zzgl. ${formatPrice(rental.depositCents)} Kaution vor Ort)` 
-                                : "Mietgerät (ohne Kaution)"}
-                            </span>
-                          </div>
-                          <span className="font-bold text-[#0f4851] tabular-nums mt-0.5">
-                            {formatPrice(rental.rentalPriceCents)}
-                          </span>
-                        </li>
-                      ))}
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     <div className="flex justify-between border-t border-[#c8d3d5] pt-3 text-sm font-bold">

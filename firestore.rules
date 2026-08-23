@@ -120,9 +120,9 @@ service cloud.firestore {
         && (!('pickupDate' in request.resource.data) || (request.resource.data.pickupDate is string && request.resource.data.pickupDate.size() <= 50))
         && (!('pickupTime' in request.resource.data) || (request.resource.data.pickupTime is string && request.resource.data.pickupTime.size() <= 50))
         && request.resource.data.items is list
-        && request.resource.data.items.size() > 0
         && request.resource.data.items.size() <= 50
         && (!('rentalItems' in request.resource.data) || (request.resource.data.rentalItems is list && request.resource.data.rentalItems.size() <= 20))
+        && (request.resource.data.items.size() > 0 || (('rentalItems' in request.resource.data) && request.resource.data.rentalItems.size() > 0))
         && request.resource.data.status in ['pending', 'ready', 'completed'];
 
       allow update: if isAdmin() && isValidOrderFields();

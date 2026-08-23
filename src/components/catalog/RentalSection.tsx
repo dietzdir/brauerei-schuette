@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/utils";
 import {
   Wrench,
   Plus,
+  Minus,
   Check,
   Info,
   Sparkles,
@@ -21,7 +22,7 @@ import {
 export function RentalSection() {
   const [rentals, setRentals] = useState<RentalItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { rentalItems, addRentalItem, removeRentalItem } = useCart();
+  const { rentalItems, addRentalItem, removeRentalItem, updateRentalQuantity } = useCart();
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,25 +52,6 @@ export function RentalSection() {
     return null;
   }
 
-  const handleToggleRental = (rental: RentalItem) => {
-    const isCurrentlyInCart = rentalItems.some((r) => r.rentalId === rental.id);
-
-    if (isCurrentlyInCart) {
-      removeRentalItem(rental.id);
-    } else {
-      addRentalItem({
-        rentalId: rental.id,
-        rentalName: rental.name,
-        rentalPriceCents: rental.rentalPriceCents,
-        depositCents: rental.depositCents,
-        image: rental.image,
-      });
-
-      setJustAddedId(rental.id);
-      setTimeout(() => setJustAddedId(null), 1500);
-    }
-  };
-
   return (
     <section className="space-y-4 pt-6 border-t border-[#c8d3d5]">
       <div>
@@ -97,8 +79,10 @@ export function RentalSection() {
       ) : (
         <div className="space-y-4">
           {activeRentals.map((rental) => {
-            const isInCart = rentalItems.some((r) => r.rentalId === rental.id);
-            const isJustAdded = justAddedId === rental.id;
+            const cartItem = rentalItems.find((r) => r.rentalId === rental.id);
+            const isInCart = Boolean(cartItem && cartItem.quantity > 0);
+            const currentQty = cartItem?.quantity || 0;
+            const maxStock = typeof rental.totalStock === "number" && rental.totalStock > 0 ? rental.totalStock : 99;
 
             return (
               <Card
@@ -143,29 +127,32 @@ export function RentalSection() {
                     )}
                   </div>
 
-                  {/* Right: Content & Action */}
-                  <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-[11px] font-bold text-[#505c5f] tabular-nums">
-                          Bestand: {rental.totalStock} {rental.totalStock === 1 ? "Stück" : "Stück"}
+                  {/* Right: Content & Controls */}
+                  <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-[10px] font-bold uppercase tracking-widest">
+                          <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
+                          Verleih-Equipment
+                        </div>
+                        <span className="text-[11px] font-semibold text-[#505c5f] tabular-nums">
+                          Bestand: {rental.totalStock} Stück
                         </span>
                       </div>
 
-                      <div>
-                        <h4 className="font-heading text-2xl uppercase tracking-wide text-[#0f4851]">
-                          {rental.name}
-                        </h4>
-                        {rental.description && (
-                          <p className="text-xs text-[#505c5f] mt-1.5 leading-relaxed">
-                            {rental.description}
-                          </p>
-                        )}
-                      </div>
+                      <h4 className="font-heading text-xl sm:text-2xl uppercase tracking-wide text-[#0f4851] mt-2 leading-tight">
+                        {rental.name}
+                      </h4>
+
+                      {rental.description && (
+                        <p className="text-xs text-[#505c5f] mt-1.5 leading-relaxed">
+                          {rental.description}
+                        </p>
+                      )}
                     </div>
 
                     {/* Price & Action Section */}
-                    <div className="pt-4 border-t border-[#c8d3d5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#f9f9f9] -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5">
+                    <div className="pt-4 border-t border-[#c8d3d5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#f9f9f9] -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 mt-4">
                       <div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
@@ -186,23 +173,45 @@ export function RentalSection() {
                       <div className="flex items-center gap-2">
                         {isInCart ? (
                           <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <Button
-                              type="button"
-                              onClick={() => handleToggleRental(rental)}
-                              variant="default"
-                              aria-label={`Mietartikel ${rental.name} ist im Warenkorb. Klicken zum Entfernen.`}
-                              className="w-full sm:w-auto bg-[#0f4851] text-white hover:bg-[#153e45] rounded-none font-bold uppercase tracking-wider text-xs h-10 px-5 shadow-xs flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-2 focus-visible:outline-none"
-                            >
-                              <Check className="size-4 text-[#00A8BC]" aria-hidden="true" />
-                              <span>Im Warenkorb</span>
-                            </Button>
+                            <div className="flex items-center border border-[#c8d3d5] bg-white rounded-none h-10 shadow-2xs">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Menge für Mietartikel ${rental.name} verringern`}
+                                disabled={currentQty <= 1}
+                                onClick={() => updateRentalQuantity(rental.id, currentQty - 1)}
+                                className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                              >
+                                <Minus className="size-3.5" aria-hidden="true" />
+                              </Button>
+                              <div
+                                role="status"
+                                aria-live="polite"
+                                aria-label={`Ausgewählte Menge für ${rental.name}: ${currentQty}`}
+                                className="w-10 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
+                              >
+                                {currentQty}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Menge für Mietartikel ${rental.name} erhöhen`}
+                                disabled={currentQty >= maxStock}
+                                onClick={() => updateRentalQuantity(rental.id, currentQty + 1)}
+                                className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                              >
+                                <Plus className="size-3.5" aria-hidden="true" />
+                              </Button>
+                            </div>
                             <Button
                               type="button"
                               onClick={() => removeRentalItem(rental.id)}
                               variant="outline"
                               size="icon"
                               aria-label={`Mietartikel ${rental.name} aus dem Warenkorb entfernen`}
-                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
+                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
                             >
                               <Trash2 className="size-4" aria-hidden="true" />
                             </Button>
@@ -210,11 +219,23 @@ export function RentalSection() {
                         ) : (
                           <Button
                             type="button"
-                            onClick={() => handleToggleRental(rental)}
+                            onClick={() => {
+                              addRentalItem({
+                                rentalId: rental.id,
+                                rentalName: rental.name,
+                                rentalPriceCents: rental.rentalPriceCents,
+                                depositCents: rental.depositCents,
+                                image: rental.image,
+                                quantity: 1,
+                                totalStock: maxStock,
+                              });
+                              setJustAddedId(rental.id);
+                              setTimeout(() => setJustAddedId(null), 1500);
+                            }}
                             aria-label={`Mietartikel ${rental.name} zur Reservierung hinzufügen`}
-                            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-[#0f4851] focus-visible:ring-offset-2 focus-visible:outline-none"
+                            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs transition-colors flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#0f4851] focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer"
                           >
-                            <Plus className="size-4 mr-1.5" aria-hidden="true" />
+                            <Plus className="size-4" aria-hidden="true" />
                             <span>Zur Reservierung hinzufügen</span>
                           </Button>
                         )}
@@ -230,4 +251,3 @@ export function RentalSection() {
     </section>
   );
 }
-

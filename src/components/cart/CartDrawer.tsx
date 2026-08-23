@@ -80,6 +80,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
     removeItem,
     updateQuantity,
     removeRentalItem,
+    updateRentalQuantity,
     clearCart,
     itemsTotalCents,
     depositTotalCents,
@@ -248,7 +249,10 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
           variantType: i.variantType,
           quantity: i.quantity,
         })),
-        rentalItemIds: rentalItems.map((r) => r.rentalId),
+        rentalItems: rentalItems.map((r) => ({
+          rentalId: r.rentalId,
+          quantity: r.quantity,
+        })),
       });
 
       if (result.success && result.orderId) {
@@ -289,7 +293,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                 rentalId: r.rentalId,
                 rentalName: r.rentalName,
                 rentalPriceCents: r.rentalPriceCents,
-                depositCents: r.depositCents,
+                depositCents: r.depositCents || 0,
+                quantity: r.quantity,
               })),
               itemsTotalCents,
               depositTotalCents,
@@ -343,7 +348,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                   rentalId: r.rentalId,
                   rentalName: r.rentalName,
                   rentalPriceCents: r.rentalPriceCents,
-                  depositCents: r.depositCents,
+                  depositCents: r.depositCents || 0,
+                  quantity: r.quantity,
                 }))
               : undefined,
             itemsTotalCents,
@@ -672,10 +678,12 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5 mb-1">
                                       <Badge variant="secondary" className="bg-[#0f4851] text-white text-[9px] font-bold uppercase rounded-none px-1.5 py-0.5">
-                                        <Wrench className="size-2.5 mr-1 inline" />
+                                        <Wrench className="size-2.5 mr-1 inline" aria-hidden="true" />
                                         Mietartikel
                                       </Badge>
-                                      <span className="text-[10px] text-[#00A8BC] font-bold">1x Reservierung</span>
+                                      <span className="text-[10px] text-[#00A8BC] font-bold tabular-nums">
+                                        {rental.quantity}x Reservierung
+                                      </span>
                                     </div>
                                     <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
                                       {rental.rentalName}
@@ -684,7 +692,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                                    className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1 cursor-pointer"
                                     onClick={() => removeRentalItem(rental.rentalId)}
                                     aria-label={`Mietartikel ${rental.rentalName} aus Warenkorb entfernen`}
                                     title="Mietartikel entfernen"
@@ -693,20 +701,51 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                   </Button>
                                 </div>
 
-                                <div className="flex items-end justify-between pt-2 border-t border-[#c8d3d5]/70">
-                                  <div className="flex flex-col">
+                                <div className="flex items-end justify-between pt-2 border-t border-[#c8d3d5]/70 gap-2">
+                                  <div className="flex flex-col min-w-0">
                                     <span className="font-bold text-sm text-[#1a1c1c] tabular-nums">
-                                      {formatPrice(rental.rentalPriceCents)}
+                                      {formatPrice(rental.rentalPriceCents * rental.quantity)}
                                     </span>
+                                    {rental.quantity > 1 && (
+                                      <span className="text-[10px] text-[#505c5f] tabular-nums">
+                                        ({formatPrice(rental.rentalPriceCents)} / Stück)
+                                      </span>
+                                    )}
                                     {rental.depositCents > 0 && (
-                                      <span className="text-[11px] text-[#505c5f] font-medium tabular-nums">
-                                        + zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung
+                                      <span className="text-[11px] text-[#505c5f] font-medium tabular-nums mt-0.5">
+                                        + zzgl. {formatPrice(rental.depositCents * rental.quantity)} Kaution bei Abholung
                                       </span>
                                     )}
                                   </div>
-                                  <Badge variant="outline" className="text-[10px] uppercase font-bold text-[#0f4851] border-[#00A8BC] bg-white rounded-none">
-                                    Pro Abholtermin
-                                  </Badge>
+
+                                  <div className="flex items-center border border-[#c8d3d5] bg-white rounded-none h-8 shadow-2xs shrink-0">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                                      onClick={() => updateRentalQuantity(rental.rentalId, rental.quantity - 1)}
+                                      disabled={rental.quantity <= 1}
+                                      aria-label={`Menge für ${rental.rentalName} verringern`}
+                                    >
+                                      <Minus className="size-3" aria-hidden="true" />
+                                    </Button>
+                                    <span
+                                      className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
+                                      aria-live="polite"
+                                    >
+                                      {rental.quantity}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                                      onClick={() => updateRentalQuantity(rental.rentalId, rental.quantity + 1)}
+                                      disabled={rental.quantity >= (rental.totalStock || 99)}
+                                      aria-label={`Menge für ${rental.rentalName} erhöhen`}
+                                    >
+                                      <Plus className="size-3" aria-hidden="true" />
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -730,8 +769,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         )}
                         {rentalItems.map((r) => (
                           <div key={`breakdown-rent-${r.rentalId}`} className="flex justify-between text-[#0f4851] font-medium">
-                            <span>Miete {r.rentalName}:</span>
-                            <span className="font-bold tabular-nums">{formatPrice(r.rentalPriceCents)}</span>
+                            <span>Miete {r.quantity > 1 ? `${r.quantity}x ` : ""}{r.rentalName}:</span>
+                            <span className="font-bold tabular-nums">{formatPrice(r.rentalPriceCents * r.quantity)}</span>
                           </div>
                         ))}
                         {depositTotalCents > 0 && (
@@ -742,8 +781,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                         )}
                         {rentalItems.filter((r) => r.depositCents > 0).map((r) => (
                           <div key={`breakdown-dep-${r.rentalId}`} className="flex justify-between text-[#505c5f] text-[11px]">
-                            <span>Kaution {r.rentalName} (vor Ort):</span>
-                            <span className="font-medium tabular-nums">{formatPrice(r.depositCents)}</span>
+                            <span>Kaution {r.quantity > 1 ? `${r.quantity}x ` : ""}{r.rentalName} (vor Ort):</span>
+                            <span className="font-medium tabular-nums">{formatPrice(r.depositCents * r.quantity)}</span>
                           </div>
                         ))}
                       </div>
@@ -1091,8 +1130,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       )}
                       {rentalItems.map((r) => (
                         <div key={`summary-rent-${r.rentalId}`} className="flex justify-between text-[#0f4851] font-medium">
-                          <span>Miete {r.rentalName}:</span>
-                          <span className="font-bold tabular-nums">{formatPrice(r.rentalPriceCents)}</span>
+                          <span>Miete {r.quantity > 1 ? `${r.quantity}x ` : ""}{r.rentalName}:</span>
+                          <span className="font-bold tabular-nums">{formatPrice(r.rentalPriceCents * r.quantity)}</span>
                         </div>
                       ))}
                       {depositTotalCents > 0 && (
@@ -1103,8 +1142,8 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       )}
                       {rentalItems.filter((r) => r.depositCents > 0).map((r) => (
                         <div key={`summary-dep-${r.rentalId}`} className="flex justify-between text-[#505c5f] text-[11px]">
-                          <span>Kaution {r.rentalName} (vor Ort):</span>
-                          <span className="font-medium tabular-nums">{formatPrice(r.depositCents)}</span>
+                          <span>Kaution {r.quantity > 1 ? `${r.quantity}x ` : ""}{r.rentalName} (vor Ort):</span>
+                          <span className="font-medium tabular-nums">{formatPrice(r.depositCents * r.quantity)}</span>
                         </div>
                       ))}
                       <div className="flex justify-between items-baseline font-bold pt-2 border-t border-[#c8d3d5] text-[#1a1c1c]">
