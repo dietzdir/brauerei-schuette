@@ -64,7 +64,7 @@ export function generateOrderConfirmationHtml(order: Order): string {
         <td style="padding: 12px 8px; text-align: right; color: #505c5f; font-size: 13px;">
           ${formatPrice(rental.rentalPriceCents)}
           ${
-            rental.depositCents
+            rental.depositCents && rental.depositCents > 0
               ? `<div style="font-size: 11px; color: #505c5f; font-weight: 500;">zzgl. ${formatPrice(
                   rental.depositCents
                 )} Kaution vor Ort</div>`

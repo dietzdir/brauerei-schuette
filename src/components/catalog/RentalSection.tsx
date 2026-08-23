@@ -177,7 +177,7 @@ export function RentalSection() {
                         </div>
                         {rental.depositCents > 0 && (
                           <p className="text-[11px] text-[#505c5f] flex items-center gap-1 font-medium mt-0.5">
-                            <Info className="size-3 text-[#00A8BC] shrink-0" />
+                            <Info className="size-3 text-[#00A8BC] shrink-0" aria-hidden="true" />
                             <span>zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung</span>
                           </p>
                         )}

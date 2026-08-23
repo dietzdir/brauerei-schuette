@@ -576,7 +576,7 @@ export function CatalogManager() {
                       <div className="flex justify-between items-center">
                         <span className="text-[#505c5f] font-bold uppercase tracking-wider text-[10px]">Kaution:</span>
                         <span className="font-semibold text-[#505c5f] tabular-nums text-xs">
-                          {formatPrice(rental.depositCents)}
+                          {rental.depositCents > 0 ? formatPrice(rental.depositCents) : "Keine (0,00 €)"}
                         </span>
                       </div>
                     </div>
@@ -1191,11 +1191,11 @@ function RentalEditorSheet({
               </div>
 
               <div className="grid gap-2">
-                <Label>Kaution (€) *</Label>
+                <Label>Kaution (€)</Label>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="50,00"
+                  placeholder="0,00"
                   className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10"
                   value={depositStr}
                   onFocus={() => { isDepositFocused.current = true; }}
@@ -1210,7 +1210,7 @@ function RentalEditorSheet({
                     setDepositStr(centsToDisplay(cents));
                   }}
                 />
-                <span className="text-[11px] text-muted-foreground">Informativ, zahlbar vor Ort bei Abholung.</span>
+                <span className="text-[11px] text-muted-foreground">Optional. Bei 0 € wird kein Kautionshinweis im Shop angezeigt.</span>
               </div>
 
               <div className="grid gap-2">

@@ -178,7 +178,7 @@ const initialRentals: RentalItem[] = [
     image: "/images/zapfanlage.jpg",
     isAiGenerated: true,
     rentalPriceCents: 2500, // 25,00 € Mietpreis
-    depositCents: 5000, // 50,00 € Kaution
+    depositCents: 0, // 0,00 € Kaution
     totalStock: 3, // 3 Zapfanlagen vorrätig
     isActive: true,
   },
