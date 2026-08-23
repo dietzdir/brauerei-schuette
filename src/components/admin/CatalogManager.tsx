@@ -794,8 +794,8 @@ export function CatalogManager() {
                       className="size-4 accent-[#0f4851] rounded cursor-pointer"
                     />
                     <span className="text-xs font-medium text-[#505c5f] flex items-center gap-1.5">
-                      <Sparkles className="size-3.5 text-amber-500 shrink-0" />
-                      Bild ist KI-generiert (Wasserzeichen „✨ KI-Symbolbild“ auf Produktkarte einblenden)
+                      <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-hidden="true" />
+                      Bild ist KI-generiert (Wasserzeichen „KI-Symbolbild“ auf Produktkarte einblenden)
                     </span>
                   </label>
                 </div>

@@ -9,7 +9,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { formatContainerType, formatPrice } from "@/lib/utils";
-import { Phone, Mail, MapPin, Building, Calendar, Wrench } from "lucide-react";
+import { 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Building, 
+  Calendar, 
+  Wrench, 
+  Package, 
+  Users, 
+  Beer, 
+  Clock, 
+  BarChart3, 
+  User, 
+  LogOut 
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -63,39 +77,33 @@ const CompletedOrdersList = dynamic(
   () => import("@/components/admin/CompletedOrdersList").then((mod) => mod.CompletedOrdersList),
   {
     loading: () => (
-      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white mt-8">
+      <div className="rounded-none border border-dashed border-[#c8d3d5] p-12 text-center bg-white">
         <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Lade abgeschlossene Bestellungen…</p>
       </div>
     ),
   }
 );
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile, logout } = useAuth();
+  const { logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Note: The middleware protects the route from unauthenticated users,
-    // but we can also ensure the query works. Since this is an admin query,
-    // Firestore rules should allow reads where admin == true.
     const q = query(
       collection(db, "orders"),
       where("status", "in", ["pending", "ready"])
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedOrders: Order[] = [];
-      snapshot.forEach((docSnap) => {
-        fetchedOrders.push({ id: docSnap.id, ...docSnap.data() } as Order);
+      const ordersData: Order[] = [];
+      snapshot.forEach((doc) => {
+        ordersData.push({ id: doc.id, ...doc.data() } as Order);
       });
-      // Sort by createdAt descending
-      fetchedOrders.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-      setOrders(fetchedOrders);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching pending orders:", error);
+      // Sort newest first
+      ordersData.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+      setOrders(ordersData);
       setLoading(false);
     });
 
@@ -168,19 +176,57 @@ export default function AdminDashboard() {
             <h1 className="font-heading text-3xl sm:text-4xl uppercase tracking-wide text-[#0f4851]">Admin Dashboard</h1>
             <p className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">Verwalte Bestellungen, Kunden, Statistiken, deinen Produkt-Katalog und Sonderöffnungszeiten.</p>
           </div>
-          <Button variant="outline" className="rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee]" onClick={handleLogout}>
-            Abmelden
+          <Button 
+            variant="outline" 
+            className="rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#0f4851] hover:bg-[#eeeeee] flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none" 
+            onClick={handleLogout}
+          >
+            <LogOut className="size-3.5" aria-hidden="true" />
+            <span>Abmelden</span>
           </Button>
         </div>
 
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="mb-6 grid w-full max-w-3xl grid-cols-5 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
-            <TabsTrigger value="orders" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Bestellungen</TabsTrigger>
-            <TabsTrigger value="customers" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Kunden</TabsTrigger>
-            <TabsTrigger value="catalog" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Katalog</TabsTrigger>
-            <TabsTrigger value="hours" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Öffnungszeiten</TabsTrigger>
-            <TabsTrigger value="statistics" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors">Statistik</TabsTrigger>
-          </TabsList>
+          {/* Responsive scrollable tabs for mobile portrait & grid on tablet/desktop */}
+          <div className="mb-6 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+            <TabsList className="flex sm:grid sm:grid-cols-5 w-max sm:w-full max-w-4xl bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1 gap-1 sm:gap-0 h-auto min-h-10">
+              <TabsTrigger 
+                value="orders" 
+                className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2 rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none shrink-0"
+              >
+                <Package className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>Bestellungen</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="customers" 
+                className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2 rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none shrink-0"
+              >
+                <Users className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>Kunden</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="catalog" 
+                className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2 rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none shrink-0"
+              >
+                <Beer className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>Katalog</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hours" 
+                className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2 rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none shrink-0"
+              >
+                <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>Öffnungszeiten</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="statistics" 
+                className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2 rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none shrink-0"
+              >
+                <BarChart3 className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>Statistik</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="orders" className="space-y-6">
             {orders.length === 0 ? (
@@ -210,7 +256,20 @@ export default function AdminDashboard() {
                   
                   <div className="mb-4">
                     <h3 className="mb-1 font-heading text-xl uppercase tracking-wide text-[#0f4851]">{order.customerName}</h3>
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#505c5f]">Typ: {order.customerType === "business" ? "🏢 Geschäftskunde" : "👤 Privatkunde"}</p>
+                    <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#505c5f]">
+                      <span>Typ:</span>
+                      {order.customerType === "business" ? (
+                        <span className="inline-flex items-center gap-1 text-[#0f4851]">
+                          <Building className="size-3.5 text-[#00A8BC]" aria-hidden="true" />
+                          Geschäftskunde
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[#0f4851]">
+                          <User className="size-3.5 text-[#00A8BC]" aria-hidden="true" />
+                          Privatkunde
+                        </span>
+                      )}
+                    </div>
                     
                     {order.pickupDate && (
                       <div className="mb-3 p-3 rounded-none bg-[#f9f9f9] border border-[#c8d3d5] flex items-center gap-2 text-xs font-bold text-[#0f4851]">

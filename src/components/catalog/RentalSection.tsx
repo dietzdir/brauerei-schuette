@@ -190,9 +190,10 @@ export function RentalSection() {
                               type="button"
                               onClick={() => handleToggleRental(rental)}
                               variant="default"
-                              className="w-full sm:w-auto bg-[#0f4851] text-white hover:bg-[#153e45] rounded-none font-bold uppercase tracking-wider text-xs h-10 px-5 shadow-xs flex items-center gap-2"
+                              aria-label={`Mietartikel ${rental.name} ist im Warenkorb. Klicken zum Entfernen.`}
+                              className="w-full sm:w-auto bg-[#0f4851] text-white hover:bg-[#153e45] rounded-none font-bold uppercase tracking-wider text-xs h-10 px-5 shadow-xs flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-2 focus-visible:outline-none"
                             >
-                              <Check className="size-4 text-[#00A8BC]" />
+                              <Check className="size-4 text-[#00A8BC]" aria-hidden="true" />
                               <span>Im Warenkorb</span>
                             </Button>
                             <Button
@@ -200,19 +201,20 @@ export function RentalSection() {
                               onClick={() => removeRentalItem(rental.id)}
                               variant="outline"
                               size="icon"
-                              aria-label="Mietartikel aus dem Warenkorb entfernen"
-                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300"
+                              aria-label={`Mietartikel ${rental.name} aus dem Warenkorb entfernen`}
+                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
                             >
-                              <Trash2 className="size-4" />
+                              <Trash2 className="size-4" aria-hidden="true" />
                             </Button>
                           </div>
                         ) : (
                           <Button
                             type="button"
                             onClick={() => handleToggleRental(rental)}
-                            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs transition-colors"
+                            aria-label={`Mietartikel ${rental.name} zur Reservierung hinzufügen`}
+                            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-[#0f4851] focus-visible:ring-offset-2 focus-visible:outline-none"
                           >
-                            <Plus className="size-4 mr-1.5" />
+                            <Plus className="size-4 mr-1.5" aria-hidden="true" />
                             <span>Zur Reservierung hinzufügen</span>
                           </Button>
                         )}

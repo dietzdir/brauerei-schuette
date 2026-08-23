@@ -14,5 +14,5 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 4: Konsistente Toast-Notifications im Admin (Code-Hygiene)**
   **Prompt:** "Konsultiere den Skill `ask-sonner` und überarbeite `src/components/admin/OpeningHoursManager.tsx`. Entferne die dortige lokale Error/Success-State-Logik (`successMessage`, `error`) und ersetze sie global durch die `toast.success()` / `toast.error()` Funktionen von Sonner. Ziel ist eine 100%ige Konsistenz beim User-Feedback im gesamten Admin-Bereich."
 
-- [ ] **Task 5: Accessibility & Keyboard-Navigation (A11y)**
+- [x] **Task 5: Accessibility & Keyboard-Navigation (A11y)**
   **Prompt:** "Verwende den Skill `web-design-guidelines` für ein Accessibility-Update. Überprüfe alle interaktiven Elemente (insbesondere die Mengen-Stepper in `ProductCard` und `CartDrawer`) auf semantisch korrekte `aria-labels`. Ergänze außerdem gut sichtbare Keyboard-Focus-Rings (z.B. `focus-visible:ring-...`), um eine barrierefreie Tastaturnavigation im gesamten Shop zu gewährleisten."

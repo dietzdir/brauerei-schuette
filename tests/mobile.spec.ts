@@ -124,7 +124,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
 
     // Click Login/Konto button in header
-    const authBtn = page.locator("header button[aria-label='Kundenkonto öffnen']");
+    const authBtn = page.locator("header button[aria-label*='Kundenkonto']");
     await authBtn.click();
 
     // Dialog should be open
@@ -141,7 +141,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await expect(page.locator("button", { hasText: "In den Warenkorb" }).first()).toBeVisible({ timeout: 30000 });
 
     // Click History button in header
-    const historyBtn = page.locator("header button[aria-label='Bestellhistorie öffnen']");
+    const historyBtn = page.locator("header button[aria-label*='Bestellhistorie']");
     await historyBtn.click();
 
     // Orders drawer should be open

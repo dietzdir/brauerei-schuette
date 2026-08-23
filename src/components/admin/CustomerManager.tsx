@@ -312,7 +312,7 @@ export function CustomerManager() {
                   {selectedCustomer.displayName || "Unbenannt"}
                 </SheetTitle>
                 <SheetDescription className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">
-                  {selectedCustomer.customerType === "business" ? "🏢 Geschäftskunde" : "👤 Privatkunde"} · Registriert seit {formatDate(selectedCustomer.createdAt)}
+                  {selectedCustomer.customerType === "business" ? "Geschäftskunde" : "Privatkunde"} · Registriert seit {formatDate(selectedCustomer.createdAt)}
                 </SheetDescription>
               </SheetHeader>
 

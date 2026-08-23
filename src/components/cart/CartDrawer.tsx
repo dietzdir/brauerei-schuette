@@ -598,7 +598,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1"
+                                      className="size-7 shrink-0 text-[#505c5f] hover:text-destructive hover:bg-destructive/10 rounded-none -mr-1 -mt-1 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
                                       onClick={() => removeItem(item.id)}
                                       aria-label={`Artikel ${item.productName} aus Warenkorb entfernen`}
                                       title="Artikel entfernen"
@@ -628,26 +628,29 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                     </div>
 
                                     {/* Quantity controls */}
-                                    <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white">
+                                    <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white focus-within:ring-2 focus-within:ring-[#00A8BC]">
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
                                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                        aria-label={`Menge für ${item.productName} verringern`}
+                                        aria-label={`Menge für ${item.productName} verringern (aktuell: ${item.quantity})`}
                                         title="Menge verringern"
                                       >
                                         <Minus className="size-3" aria-hidden="true" />
                                       </Button>
-                                      <span className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums">
+                                      <span 
+                                        className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
+                                        aria-label={`Aktuelle Menge: ${item.quantity} Stück`}
+                                      >
                                         {item.quantity}
                                       </span>
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee]"
+                                        className="size-7 rounded-none text-[#505c5f] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
                                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                        aria-label={`Menge für ${item.productName} erhöhen`}
+                                        aria-label={`Menge für ${item.productName} erhöhen (aktuell: ${item.quantity})`}
                                         title="Menge erhöhen"
                                       >
                                         <Plus className="size-3" aria-hidden="true" />
@@ -1020,15 +1023,15 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       >
                         <SelectTrigger id="checkout-customer-type" className="w-full bg-white h-10 text-sm font-medium rounded-none border-[#c8d3d5] text-[#1a1c1c]">
                           <SelectValue placeholder="Kundentyp wählen">
-                            {customerType === "business" ? "🏢 Geschäftskunde (Firma / Verein / Gastro)" : "👤 Privatkunde"}
+                            {customerType === "business" ? "Geschäftskunde (Firma / Verein / Gastro)" : "Privatkunde"}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-none border-[#c8d3d5]">
-                          <SelectItem value="private" label="👤 Privatkunde" className="rounded-none text-sm">
-                            👤 Privatkunde
+                          <SelectItem value="private" label="Privatkunde" className="rounded-none text-sm">
+                            Privatkunde
                           </SelectItem>
-                          <SelectItem value="business" label="🏢 Geschäftskunde (Firma / Verein / Gastro)" className="rounded-none text-sm">
-                            🏢 Geschäftskunde (Firma / Verein / Gastro)
+                          <SelectItem value="business" label="Geschäftskunde (Firma / Verein / Gastro)" className="rounded-none text-sm">
+                            Geschäftskunde (Firma / Verein / Gastro)
                           </SelectItem>
                         </SelectContent>
                       </Select>

@@ -62,20 +62,20 @@ export function ProductGrid() {
           <TabsList className="grid grid-cols-3 w-full sm:w-[340px] bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1 h-10 group-data-horizontal/tabs:h-10 items-center">
             <TabsTrigger 
               value="all" 
-              className="h-full flex items-center justify-center rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851]"
+              className="h-full flex items-center justify-center rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               Alle
             </TabsTrigger>
             <TabsTrigger 
               value="Beer" 
-              className="h-full flex items-center justify-center gap-1.5 rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851]"
+              className="h-full flex items-center justify-center gap-1.5 rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               <Beer className="size-3.5" aria-hidden="true" />
               Biere
             </TabsTrigger>
             <TabsTrigger 
               value="Lemonade" 
-              className="h-full flex items-center justify-center gap-1.5 rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851]"
+              className="h-full flex items-center justify-center gap-1.5 rounded-none uppercase tracking-wider text-xs font-bold transition-colors duration-150 data-active:bg-[#0f4851] data-active:text-white data-active:shadow-none text-[#505c5f] hover:text-[#0f4851] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               <GlassWater className="size-3.5" aria-hidden="true" />
               Brausen

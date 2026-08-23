@@ -65,8 +65,8 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             variant="outline"
             size="sm"
             onClick={onOpenAuth}
-            aria-label="Kundenkonto öffnen"
-            className="flex items-center gap-1.5 text-xs h-9 px-2.5 sm:px-3 bg-white border-[#c8d3d5] hover:bg-[#f3f3f3] rounded-none font-medium text-[#1a1c1c]"
+            aria-label={isAnonymous ? "Kundenkonto öffnen (Anmelden oder Registrieren)" : `Kundenkonto von ${displayName} öffnen`}
+            className="flex items-center gap-1.5 text-xs h-9 px-2.5 sm:px-3 bg-white border-[#c8d3d5] hover:bg-[#f3f3f3] rounded-none font-medium text-[#1a1c1c] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none"
           >
             {profile?.photoURL ? (
               <img src={profile.photoURL} alt="Profile" className="size-4 rounded-none shrink-0" />
@@ -86,8 +86,8 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             variant="outline"
             size="sm"
             onClick={onOpenOrders}
-            aria-label="Bestellhistorie öffnen"
-            className="flex items-center gap-1.5 text-xs h-9 px-2.5 sm:px-3 bg-white border-[#c8d3d5] hover:bg-[#f3f3f3] rounded-none font-medium text-[#1a1c1c]"
+            aria-label="Bestellhistorie und Reservierungen öffnen"
+            className="flex items-center gap-1.5 text-xs h-9 px-2.5 sm:px-3 bg-white border-[#c8d3d5] hover:bg-[#f3f3f3] rounded-none font-medium text-[#1a1c1c] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none"
           >
             <History className="size-3.5 text-[#505c5f]" aria-hidden="true" />
             <span className="hidden md:inline uppercase tracking-wider font-semibold text-[11px]">Bestellungen</span>
@@ -97,8 +97,8 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
           <Button
             size="sm"
             onClick={handleOpenCart}
-            aria-label="Warenkorb öffnen"
-            className={`relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+            aria-label={totalCount > 0 ? `Warenkorb öffnen, ${totalCount} ${totalCount === 1 ? "Artikel" : "Artikel"} enthalten` : "Warenkorb öffnen, aktuell leer"}
+            className={`relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-all duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0f4851] focus-visible:ring-offset-2 focus-visible:outline-none ${
               isBumping ? "ring-2 ring-[#0f4851]/40" : ""
             }`}
           >

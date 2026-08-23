@@ -171,7 +171,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 }
               }}
             >
-              <SelectTrigger id={`variant-select-${product.id}`} className="w-full bg-white h-9 text-xs rounded-none border-[#c8d3d5]">
+              <SelectTrigger id={`variant-select-${product.id}`} className="w-full bg-white h-9 text-xs rounded-none border-[#c8d3d5] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none">
                 <SelectValue placeholder="Gebinde wählen">
                   {formatContainerType(selectedVariantType)}
                 </SelectValue>
@@ -210,13 +210,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white overflow-hidden shadow-2xs">
+              <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white overflow-hidden shadow-2xs focus-within:ring-2 focus-within:ring-[#00A8BC]">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label={`Menge für ${product.name} verringern`}
-                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee]"
+                  aria-label={`Menge für ${product.name} verringern (aktuell: ${quantity})`}
+                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
                   disabled={quantity <= 1}
                 >
@@ -229,20 +229,23 @@ export function ProductCard({ product }: ProductCardProps) {
                   min="1"
                   max="999"
                   value={quantity}
-                  aria-label={`Menge für ${product.name}`}
+                  aria-label={`Menge in Stück für ${product.name}`}
+                  aria-valuenow={quantity}
+                  aria-valuemin={1}
+                  aria-valuemax={999}
                   onChange={(e) => {
                     const val = parseInt(e.target.value, 10);
                     if (!isNaN(val) && val >= 1) setQuantity(val);
                     else if (e.target.value === "") setQuantity(1);
                   }}
-                  className="w-12 text-center text-xs font-bold bg-transparent outline-none py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-12 text-center text-xs font-bold bg-transparent outline-none focus-visible:bg-[#f0f7f8] py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label={`Menge für ${product.name} erhöhen`}
-                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee]"
+                  aria-label={`Menge für ${product.name} erhöhen (aktuell: ${quantity})`}
+                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
                   onClick={() => setQuantity((prev) => prev + 1)}
                 >
                   <Plus className="size-3.5" aria-hidden="true" />
@@ -258,9 +261,10 @@ export function ProductCard({ product }: ProductCardProps) {
                       type="button"
                       variant={quantity === cnt ? "default" : "outline"}
                       size="sm"
-                      aria-label={`${cnt} Stück (${cnt === 6 ? "6er Kasten" : `${cnt}er`}) auswählen`}
+                      aria-label={`${cnt} Stück (${cnt === 6 ? "6er Kasten" : `${cnt}er`}) für ${product.name} auswählen`}
+                      aria-pressed={quantity === cnt}
                       onClick={() => setQuantity(cnt)}
-                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase tabular-nums ${
+                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase tabular-nums focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none ${
                         quantity === cnt ? "bg-[#0f4851] text-white" : "border-[#c8d3d5] text-[#0f4851]"
                       }`}
                     >

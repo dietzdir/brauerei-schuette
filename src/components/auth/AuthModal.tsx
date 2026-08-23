@@ -369,15 +369,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     >
                       <SelectTrigger id="edit-customer-type" className="w-full bg-white h-9 text-xs font-medium rounded-none border-[#c8d3d5]">
                         <SelectValue placeholder="Kundentyp wählen">
-                          {editCustomerType === "business" ? "🏢 Geschäftskunde (Firma / Gastro)" : "👤 Privatkunde"}
+                          {editCustomerType === "business" ? "Geschäftskunde (Firma / Gastro)" : "Privatkunde"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-[#c8d3d5]">
-                        <SelectItem value="private" label="👤 Privatkunde" className="rounded-none">
-                          👤 Privatkunde
+                        <SelectItem value="private" label="Privatkunde" className="rounded-none">
+                          Privatkunde
                         </SelectItem>
-                        <SelectItem value="business" label="🏢 Geschäftskunde (Firma / Gastro)" className="rounded-none">
-                          🏢 Geschäftskunde (Firma / Gastro)
+                        <SelectItem value="business" label="Geschäftskunde (Firma / Gastro)" className="rounded-none">
+                          Geschäftskunde (Firma / Gastro)
                         </SelectItem>
                       </SelectContent>
                     </Select>
