@@ -16,13 +16,12 @@ import {
   Check,
   Info,
   Sparkles,
-  Trash2,
 } from "lucide-react";
 
 export function RentalSection() {
   const [rentals, setRentals] = useState<RentalItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { rentalItems, addRentalItem, removeRentalItem, updateRentalQuantity } = useCart();
+  const { rentalItems, addRentalItem, updateRentalQuantity } = useCart();
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -130,17 +129,13 @@ export function RentalSection() {
                   {/* Right: Content & Controls */}
                   <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[#0f4851]/10 text-[#0f4851] text-[10px] font-bold uppercase tracking-widest">
-                          <Wrench className="size-3 text-[#00A8BC]" aria-hidden="true" />
-                          Verleih-Equipment
-                        </div>
+                      <div className="flex items-center justify-end">
                         <span className="text-[11px] font-semibold text-[#505c5f] tabular-nums">
                           Bestand: {rental.totalStock} Stück
                         </span>
                       </div>
 
-                      <h4 className="font-heading text-xl sm:text-2xl uppercase tracking-wide text-[#0f4851] mt-2 leading-tight">
+                      <h4 className="font-heading text-xl sm:text-2xl uppercase tracking-wide text-[#0f4851] mt-1 leading-tight">
                         {rental.name}
                       </h4>
 
@@ -172,48 +167,36 @@ export function RentalSection() {
 
                       <div className="flex items-center gap-2">
                         {isInCart ? (
-                          <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="flex items-center border border-[#c8d3d5] bg-white rounded-none h-10 shadow-2xs">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                aria-label={`Menge für Mietartikel ${rental.name} verringern`}
-                                disabled={currentQty <= 1}
-                                onClick={() => updateRentalQuantity(rental.id, currentQty - 1)}
-                                className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
-                              >
-                                <Minus className="size-3.5" aria-hidden="true" />
-                              </Button>
-                              <div
-                                role="status"
-                                aria-live="polite"
-                                aria-label={`Ausgewählte Menge für ${rental.name}: ${currentQty}`}
-                                className="w-10 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
-                              >
-                                {currentQty}
-                              </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                aria-label={`Menge für Mietartikel ${rental.name} erhöhen`}
-                                disabled={currentQty >= maxStock}
-                                onClick={() => updateRentalQuantity(rental.id, currentQty + 1)}
-                                className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
-                              >
-                                <Plus className="size-3.5" aria-hidden="true" />
-                              </Button>
+                          <div className="flex items-center border border-[#c8d3d5] bg-white rounded-none h-10 shadow-2xs">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Menge für Mietartikel ${rental.name} verringern`}
+                              disabled={currentQty <= 1}
+                              onClick={() => updateRentalQuantity(rental.id, currentQty - 1)}
+                              className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                            >
+                              <Minus className="size-3.5" aria-hidden="true" />
+                            </Button>
+                            <div
+                              role="status"
+                              aria-live="polite"
+                              aria-label={`Ausgewählte Menge für ${rental.name}: ${currentQty}`}
+                              className="w-10 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
+                            >
+                              {currentQty}
                             </div>
                             <Button
                               type="button"
-                              onClick={() => removeRentalItem(rental.id)}
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              aria-label={`Mietartikel ${rental.name} aus dem Warenkorb entfernen`}
-                              className="size-10 rounded-none border-[#c8d3d5] text-[#505c5f] hover:text-red-600 hover:border-red-300 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
+                              aria-label={`Menge für Mietartikel ${rental.name} erhöhen`}
+                              disabled={currentQty >= maxStock}
+                              onClick={() => updateRentalQuantity(rental.id, currentQty + 1)}
+                              className="size-9 rounded-none text-[#0f4851] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
                             >
-                              <Trash2 className="size-4" aria-hidden="true" />
+                              <Plus className="size-3.5" aria-hidden="true" />
                             </Button>
                           </div>
                         ) : (
