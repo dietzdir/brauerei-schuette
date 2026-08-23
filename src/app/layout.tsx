@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { CartProvider } from "@/lib/cart/CartContext";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaUpdateManager } from "@/components/pwa/PwaUpdateManager";
+import { PullToRefresh } from "@/components/pwa/PullToRefresh";
 
 const anton = Anton({
 
@@ -70,10 +72,13 @@ export default function RootLayout({
       className={`${firaSans.variable} ${anton.variable} ${jetbrainsMono.variable} h-full antialiased font-sans overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans selection:bg-[#00A8BC]/20 selection:text-[#0F4851] overflow-x-hidden w-full">
-        <AuthProvider>
-          <CartProvider>{children}</CartProvider>
-        </AuthProvider>
-        <Toaster position="top-right" richColors />
+        <PullToRefresh>
+          <AuthProvider>
+            <CartProvider>{children}</CartProvider>
+          </AuthProvider>
+          <PwaUpdateManager />
+          <Toaster position="top-right" richColors />
+        </PullToRefresh>
       </body>
 
     </html>

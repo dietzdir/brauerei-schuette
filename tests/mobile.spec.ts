@@ -160,4 +160,20 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     const loginClientWidth = await page.evaluate(() => document.body.clientWidth);
     expect(loginScrollWidth).toBeLessThanOrEqual(loginClientWidth + 1);
   });
+
+  test("8. PWA Version API and PullToRefresh indicator", async ({ page, request }) => {
+    // Check /api/version endpoint returns valid JSON with no-cache headers
+    const res = await request.get("http://localhost:3000/api/version");
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.status).toBe("ok");
+    expect(data.buildId).toBeTruthy();
+    expect(typeof data.timestamp).toBe("number");
+    expect(res.headers()["cache-control"]).toContain("no-store");
+
+    // Navigate to homepage and verify Pull-to-Refresh indicator is mounted in DOM
+    await page.goto("http://localhost:3000");
+    const ptrIndicator = page.locator("text=Ziehen zum Aktualisieren").or(page.locator("text=Wird aktualisiert…")).or(page.locator("text=Loslassen zum Aktualisieren"));
+    await expect(ptrIndicator).toBeAttached();
+  });
 });
