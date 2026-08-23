@@ -1041,17 +1041,17 @@ export function CatalogManager() {
               </div>
 
               {/* Sticky Footer Action Bar */}
-              <div className="p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 flex items-center justify-end gap-3 shadow-md">
+              <div className="p-3 sm:p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 grid grid-cols-2 sm:flex sm:justify-end gap-2.5 sm:gap-3 shadow-md">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setSheetOpen(false)}
-                  className="rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider"
+                  className="w-full sm:w-auto rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider text-[#505c5f]"
                 >
                   Abbrechen
                 </Button>
                 <Button 
-                  className="bg-[#00a8bc] hover:bg-[#0092a4] text-white font-bold uppercase tracking-wider h-10 px-6 rounded-none shadow-xs" 
+                  className="w-full sm:w-auto bg-[#00a8bc] hover:bg-[#0092a4] text-white font-bold uppercase tracking-wider h-10 px-6 rounded-none shadow-xs" 
                   onClick={saveProduct} 
                   disabled={isSaving || !editingProduct.name}
                 >
@@ -1185,74 +1185,60 @@ function VariantRow({
 
   return (
     <div
-      className={`p-3.5 rounded-none border transition-[opacity,border-color,background-color] duration-150 space-y-3 ${
+      className={`p-3.5 sm:p-4 rounded-none border transition-[opacity,border-color,background-color] duration-150 space-y-3 ${
         isVarActive
-          ? "bg-white border-[#c8d3d5]"
+          ? "bg-white border-[#c8d3d5] shadow-2xs"
           : "bg-[#f9f9f9] border-dashed border-[#c8d3d5] opacity-75"
       }`}
     >
-      {/* Top Row: Gebinde-Typ + Status + Delete */}
-      <div className="flex items-end gap-2.5">
-        <div className="flex-1 min-w-0 grid gap-1.5">
-          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Gebinde-Typ</Label>
-          <Select
-            value={variant.type}
-            onValueChange={(val) => {
-              if (val) {
-                updateVariant(index, "type", val as ContainerType);
-              }
-            }}
-          >
-            <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs">
-              <SelectValue>{variant.type ? formatContainerType(variant.type) : "Wähle Gebinde..."}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="rounded-none border-[#c8d3d5]">
-              {CONTAINER_OPTIONS.map((opt) => (
-                <SelectItem key={opt} value={opt}>
-                  {formatContainerType(opt as any)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="shrink-0 grid gap-1.5">
-          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f] text-center">Status</Label>
-          <label className="flex items-center justify-center gap-1.5 h-9 px-2.5 bg-white border border-[#c8d3d5] cursor-pointer hover:bg-[#f9f9f9] select-none shadow-2xs">
-            <input
-              type="checkbox"
-              checked={isVarActive}
-              onChange={(e) => updateVariant(index, "isActive", e.target.checked)}
-              className="size-3.5 accent-[#0f4851] rounded-none cursor-pointer"
-            />
-            <span className={`text-xs font-semibold ${isVarActive ? "text-emerald-700" : "text-[#505c5f]"}`}>
-              {isVarActive ? "Aktiv" : "Inaktiv"}
-            </span>
-          </label>
-        </div>
-
-        <div className="shrink-0">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 text-[#505c5f] hover:text-red-600 hover:bg-red-50 rounded-none shrink-0"
-            onClick={() => removeVariant(index)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
+      {/* Top Header: Label + Delete Button */}
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs font-bold uppercase tracking-wider text-[#0f4851]">
+          Gebinde-Auswahl
+        </Label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-[#505c5f] hover:text-red-600 hover:bg-red-50 rounded-none shrink-0"
+          onClick={() => removeVariant(index)}
+          title="Gebinde entfernen"
+          aria-label="Gebinde entfernen"
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </div>
 
-      {/* Bottom Row: Preis & Pfand */}
-      <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-[#f0f0f0]">
-        <div className="grid gap-1.5">
-          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Preis (€)</Label>
+      {/* Full-Width Select Dropdown */}
+      <Select
+        value={variant.type}
+        onValueChange={(val) => {
+          if (val) {
+            updateVariant(index, "type", val as ContainerType);
+          }
+        }}
+      >
+        <SelectTrigger className="w-full bg-white rounded-none border-[#c8d3d5] h-10 text-xs font-semibold">
+          <SelectValue>{variant.type ? formatContainerType(variant.type) : "Wähle Gebinde..."}</SelectValue>
+        </SelectTrigger>
+        <SelectContent className="rounded-none border-[#c8d3d5]">
+          {CONTAINER_OPTIONS.map((opt) => (
+            <SelectItem key={opt} value={opt} className="rounded-none text-xs">
+              {formatContainerType(opt as any)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Bottom Grid: Preis, Pfand & Status */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2.5 border-t border-[#f0f0f0]">
+        <div className="grid gap-1">
+          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Preis (€) *</Label>
           <Input
             type="text"
             inputMode="decimal"
             placeholder="0,00"
-            className="bg-white rounded-none border-[#c8d3d5] text-xs font-semibold h-9"
+            className="bg-white rounded-none border-[#c8d3d5] text-xs font-semibold h-9 tabular-nums"
             value={priceStr}
             onFocus={() => { isPriceFocused.current = true; }}
             onChange={(e) => {
@@ -1267,13 +1253,13 @@ function VariantRow({
           />
         </div>
 
-        <div className="grid gap-1.5">
+        <div className="grid gap-1">
           <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Pfand (€)</Label>
           <Input
             type="text"
             inputMode="decimal"
             placeholder="0,00"
-            className="bg-white rounded-none border-[#c8d3d5] text-xs font-semibold h-9"
+            className="bg-white rounded-none border-[#c8d3d5] text-xs font-semibold h-9 tabular-nums"
             value={depositStr}
             onFocus={() => { isDepositFocused.current = true; }}
             onChange={(e) => {
@@ -1286,6 +1272,21 @@ function VariantRow({
               setDepositStr(centsToDisplay(cents));
             }}
           />
+        </div>
+
+        <div className="grid gap-1">
+          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Status</Label>
+          <label className="flex items-center justify-center gap-2 h-9 px-3 bg-white border border-[#c8d3d5] cursor-pointer hover:bg-[#f9f9f9] select-none shadow-2xs">
+            <input
+              type="checkbox"
+              checked={isVarActive}
+              onChange={(e) => updateVariant(index, "isActive", e.target.checked)}
+              className="size-4 accent-[#0f4851] rounded-none cursor-pointer"
+            />
+            <span className={`text-xs font-semibold ${isVarActive ? "text-emerald-700" : "text-[#505c5f]"}`}>
+              {isVarActive ? "Aktiv" : "Inaktiv"}
+            </span>
+          </label>
         </div>
       </div>
     </div>
@@ -1564,12 +1565,12 @@ function RentalEditorSheet({
         </div>
 
         {/* Sticky Footer Action Bar */}
-        <div className="p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 flex items-center justify-end gap-3 shadow-md">
+        <div className="p-3 sm:p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 grid grid-cols-2 sm:flex sm:justify-end gap-2.5 sm:gap-3 shadow-md">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider text-[#505c5f]"
+            className="w-full sm:w-auto rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider text-[#505c5f]"
           >
             Abbrechen
           </Button>
@@ -1577,7 +1578,7 @@ function RentalEditorSheet({
             type="button"
             onClick={onSave}
             disabled={isSaving || !rental.name?.trim()}
-            className="bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs"
+            className="w-full sm:w-auto bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs"
           >
             {isSaving ? (
               <>

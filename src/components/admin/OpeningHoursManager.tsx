@@ -524,8 +524,8 @@ export function OpeningHoursManager() {
 
       {/* Exception Edit / Add Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-[#f9f9f9] p-6 border-l border-[#c8d3d5]">
-          <SheetHeader className="pb-4 border-b border-[#c8d3d5]">
+        <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-[#f9f9f9] p-0 border-l border-[#c8d3d5] overflow-hidden">
+          <SheetHeader className="p-4 sm:p-6 pb-3 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
             <SheetTitle className="font-heading text-xl uppercase tracking-wider text-[#0f4851]">
               {editingExceptionId ? "Ausnahmetermin bearbeiten" : "Neuen Ausnahmetermin anlegen"}
             </SheetTitle>
@@ -534,149 +534,152 @@ export function OpeningHoursManager() {
             </SheetDescription>
           </SheetHeader>
 
-          {formError && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-center gap-2 text-xs text-destructive mt-3">
-              <AlertCircle className="size-4 shrink-0" />
-              <span>{formError}</span>
-            </div>
-          )}
+          <form onSubmit={handleSaveException} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              {formError && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-center gap-2 text-xs text-destructive">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
 
-          <form onSubmit={handleSaveException} className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
-            {/* Date Input */}
-            <div className="space-y-1.5">
-              <Label htmlFor="ex-date" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
-                Datum der Ausnahme *
-              </Label>
-              <Input
-                id="ex-date"
-                type="date"
-                value={exDate}
-                onChange={(e) => setExDate(e.target.value)}
-                required
-                className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
-              />
-            </div>
+              {/* Date Input */}
+              <div className="space-y-1.5">
+                <Label htmlFor="ex-date" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  Datum der Ausnahme *
+                </Label>
+                <Input
+                  id="ex-date"
+                  type="date"
+                  value={exDate}
+                  onChange={(e) => setExDate(e.target.value)}
+                  required
+                  className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
+                />
+              </div>
 
-            {/* Type Selector */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Art der Abweichung *</Label>
-              <Select
-                value={exType}
-                onValueChange={(val) => {
-                  if (val) setExType(val as OpeningHourExceptionType);
-                }}
-              >
-                <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] text-xs">
-                  <SelectValue placeholder="Wählen...">
-                    {exType === "closed" && (
-                      <span className="flex items-center gap-1.5">
-                        <XCircle className="size-3.5 text-rose-500 shrink-0" />
-                        <span>Geschlossen (z.B. Feiertag / Urlaub / Ausfall)</span>
-                      </span>
-                    )}
-                    {exType === "special_open" && (
-                      <span className="flex items-center gap-1.5">
-                        <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
-                        <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
-                      </span>
-                    )}
-                    {exType === "altered_hours" && (
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="size-3.5 text-amber-500 shrink-0" />
-                        <span>Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)</span>
-                      </span>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-[#c8d3d5]">
-                  {isRegularDay ? (
-                    <>
-                      <SelectItem value="closed" className="rounded-none text-xs">
-                        <div className="flex items-center gap-1.5">
+              {/* Type Selector */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Art der Abweichung *</Label>
+                <Select
+                  value={exType}
+                  onValueChange={(val) => {
+                    if (val) setExType(val as OpeningHourExceptionType);
+                  }}
+                >
+                  <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] text-xs">
+                    <SelectValue placeholder="Wählen...">
+                      {exType === "closed" && (
+                        <span className="flex items-center gap-1.5">
                           <XCircle className="size-3.5 text-rose-500 shrink-0" />
                           <span>Geschlossen (z.B. Feiertag / Urlaub / Ausfall)</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="altered_hours" className="rounded-none text-xs">
-                        <div className="flex items-center gap-1.5">
+                        </span>
+                      )}
+                      {exType === "special_open" && (
+                        <span className="flex items-center gap-1.5">
+                          <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
+                          <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
+                        </span>
+                      )}
+                      {exType === "altered_hours" && (
+                        <span className="flex items-center gap-1.5">
                           <Clock className="size-3.5 text-amber-500 shrink-0" />
                           <span>Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)</span>
+                        </span>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none border-[#c8d3d5]">
+                    {isRegularDay ? (
+                      <>
+                        <SelectItem value="closed" className="rounded-none text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <XCircle className="size-3.5 text-rose-500 shrink-0" />
+                            <span>Geschlossen (z.B. Feiertag / Urlaub / Ausfall)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="altered_hours" className="rounded-none text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="size-3.5 text-amber-500 shrink-0" />
+                            <span>Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)</span>
+                          </div>
+                        </SelectItem>
+                      </>
+                    ) : (
+                      <SelectItem value="special_open" className="rounded-none text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
+                          <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
                         </div>
                       </SelectItem>
-                    </>
-                  ) : (
-                    <SelectItem value="special_open" className="rounded-none text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
-                        <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
-                      </div>
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Times (if not closed) */}
-            {exType !== "closed" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-white rounded-none border border-[#c8d3d5]">
-                <div className="space-y-1.5">
-                  <Label htmlFor="ex-open" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Öffnet um</Label>
-                  <Input
-                    id="ex-open"
-                    type="time"
-                    value={exOpenTime}
-                    onChange={(e) => setExOpenTime(e.target.value)}
-                    required
-                    className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="ex-close" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Schließt um</Label>
-                  <Input
-                    id="ex-close"
-                    type="time"
-                    value={exCloseTime}
-                    onChange={(e) => setExCloseTime(e.target.value)}
-                    required
-                    className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
-                  />
-                </div>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            {/* Note / Reason */}
-            <div className="space-y-1.5">
-              <Label htmlFor="ex-note" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
-                Grund / Hinweis (für Kunden sichtbar)
-              </Label>
-              <Input
-                id="ex-note"
-                placeholder={
-                  exType === "closed"
-                    ? "z. B. Betriebsurlaub oder Karfreitag"
-                    : exType === "special_open"
-                    ? "z. B. Gründonnerstag (Ersatzverkauf) oder Hoffest"
-                    : "z. B. Früherer Feierabend"
-                }
-                value={exNote}
-                onChange={(e) => setExNote(e.target.value)}
-                className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
-              />
-              <p className="text-[11px] text-[#505c5f]">
-                Dieser Text wird den Kunden auf der Startseite und im Checkout angezeigt.
-              </p>
+              {/* Times (if not closed) */}
+              {exType !== "closed" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-white rounded-none border border-[#c8d3d5]">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ex-open" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Öffnet um</Label>
+                    <Input
+                      id="ex-open"
+                      type="time"
+                      value={exOpenTime}
+                      onChange={(e) => setExOpenTime(e.target.value)}
+                      required
+                      className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ex-close" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Schließt um</Label>
+                    <Input
+                      id="ex-close"
+                      type="time"
+                      value={exCloseTime}
+                      onChange={(e) => setExCloseTime(e.target.value)}
+                      required
+                      className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Note / Reason */}
+              <div className="space-y-1.5">
+                <Label htmlFor="ex-note" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  Grund / Hinweis (für Kunden sichtbar)
+                </Label>
+                <Input
+                  id="ex-note"
+                  placeholder={
+                    exType === "closed"
+                      ? "z. B. Betriebsurlaub oder Karfreitag"
+                      : exType === "special_open"
+                      ? "z. B. Gründonnerstag (Ersatzverkauf) oder Hoffest"
+                      : "z. B. Früherer Feierabend"
+                  }
+                  value={exNote}
+                  onChange={(e) => setExNote(e.target.value)}
+                  className="bg-white rounded-none border-[#c8d3d5] text-xs h-9"
+                />
+                <p className="text-[11px] text-[#505c5f]">
+                  Dieser Text wird den Kunden auf der Startseite und im Checkout angezeigt.
+                </p>
+              </div>
             </div>
 
-            <div className="pt-4 flex gap-3">
+            {/* Sticky Action Footer */}
+            <div className="p-3 sm:p-4 bg-white border-t border-[#c8d3d5] shrink-0 grid grid-cols-2 gap-3 shadow-md">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setSheetOpen(false)}
-                className="flex-1 rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#505c5f] hover:bg-[#eeeeee]"
+                className="w-full rounded-none border-[#c8d3d5] bg-white text-xs font-bold uppercase tracking-wider text-[#505c5f] hover:bg-[#eeeeee] h-10"
               >
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={saving} className="flex-1 bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-xs">
+              <Button type="submit" disabled={saving} className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 shadow-xs">
                 {saving ? "Speichern..." : "Übernehmen"}
               </Button>
             </div>
