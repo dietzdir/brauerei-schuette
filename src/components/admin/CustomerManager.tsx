@@ -304,105 +304,127 @@ export function CustomerManager() {
 
       {/* Customer Detail Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto bg-[#f9f9f9] border-l border-[#c8d3d5] rounded-none p-0">
+        <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-xl flex flex-col h-full bg-[#f9f9f9] border-l border-[#c8d3d5] rounded-none p-0 overflow-hidden">
           {selectedCustomer && (
             <div className="flex flex-col h-full">
-              <SheetHeader className="p-6 pb-4 bg-white border-b border-[#c8d3d5]">
-                <SheetTitle className="font-heading text-xl uppercase tracking-wide text-[#0f4851]">
-                  {selectedCustomer.displayName || "Unbenannt"}
+              <SheetHeader className="p-4 sm:p-6 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
+                <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">
+                  {selectedCustomer.displayName || "Unbenannter Kunde"}
                 </SheetTitle>
-                <SheetDescription className="text-xs uppercase tracking-wider font-semibold text-[#505c5f]">
-                  {selectedCustomer.customerType === "business" ? "Geschäftskunde" : "Privatkunde"} · Registriert seit {formatDate(selectedCustomer.createdAt)}
+                <SheetDescription className="text-xs uppercase tracking-wider font-semibold text-[#505c5f] flex items-center gap-2 flex-wrap pt-1">
+                  <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-none ${
+                    selectedCustomer.customerType === "business"
+                      ? "bg-[#00A8BC]/10 text-[#00A8BC] border border-[#00A8BC]/30"
+                      : "bg-slate-100 text-[#505c5f] border border-slate-300"
+                  }`}>
+                    {selectedCustomer.customerType === "business" ? "Geschäftskunde" : "Privatkunde"}
+                  </span>
+                  <span>· Registriert seit {formatDate(selectedCustomer.createdAt)}</span>
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
                 {/* Contact Details */}
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] mb-3 flex items-center gap-1.5">
+                <section className="space-y-2.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
                     <User className="size-3.5" aria-hidden="true" />
-                    Kontaktdaten
+                    Kundendaten & Kontakt
                   </h3>
-                  <div className="bg-white border border-[#c8d3d5] divide-y divide-[#c8d3d5]">
+                  <div className="bg-white border border-[#c8d3d5] divide-y divide-[#c8d3d5] rounded-none shadow-2xs">
                     {selectedCustomer.companyName && (
-                      <div className="flex items-center gap-3 p-3 text-sm">
+                      <div className="flex items-center gap-3 p-3.5 text-sm">
                         <Building className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
-                        <span className="font-semibold text-[#1a1c1c]">{selectedCustomer.companyName}</span>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#505c5f] block font-bold">Firma</span>
+                          <span className="font-semibold text-[#1a1c1c]">{selectedCustomer.companyName}</span>
+                        </div>
                       </div>
                     )}
                     {selectedCustomer.email && (
-                      <div className="flex items-center gap-3 p-3 text-sm">
+                      <div className="flex items-center gap-3 p-3.5 text-sm">
                         <Mail className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
-                        <a href={`mailto:${selectedCustomer.email}`} className="text-[#00A8BC] hover:underline font-bold break-all">
-                          {selectedCustomer.email}
-                        </a>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#505c5f] block font-bold">E-Mail</span>
+                          <a href={`mailto:${selectedCustomer.email}`} className="text-[#00A8BC] hover:underline font-bold break-all">
+                            {selectedCustomer.email}
+                          </a>
+                        </div>
                       </div>
                     )}
                     {selectedCustomer.phoneNumber && (
-                      <div className="flex items-center gap-3 p-3 text-sm">
+                      <div className="flex items-center gap-3 p-3.5 text-sm">
                         <Phone className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
-                        <a href={`tel:${selectedCustomer.phoneNumber}`} className="text-[#00A8BC] hover:underline font-bold tabular-nums">
-                          {selectedCustomer.phoneNumber}
-                        </a>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#505c5f] block font-bold">Telefon</span>
+                          <a href={`tel:${selectedCustomer.phoneNumber}`} className="text-[#00A8BC] hover:underline font-bold tabular-nums">
+                            {selectedCustomer.phoneNumber}
+                          </a>
+                        </div>
                       </div>
                     )}
                     {(selectedCustomer.street || selectedCustomer.city) && (
-                      <div className="flex items-start gap-3 p-3 text-sm">
+                      <div className="flex items-start gap-3 p-3.5 text-sm">
                         <MapPin className="size-4 text-[#00A8BC] shrink-0 mt-0.5" aria-hidden="true" />
-                        <span className="text-[#1a1c1c]">
-                          {selectedCustomer.street} {selectedCustomer.houseNumber}
-                          {(selectedCustomer.street || selectedCustomer.houseNumber) && <br />}
-                          {selectedCustomer.zipCode} {selectedCustomer.city}
-                        </span>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#505c5f] block font-bold">Adresse</span>
+                          <span className="text-[#1a1c1c] font-medium">
+                            {selectedCustomer.street} {selectedCustomer.houseNumber}
+                            {(selectedCustomer.street || selectedCustomer.houseNumber) && <br />}
+                            {selectedCustomer.zipCode} {selectedCustomer.city}
+                          </span>
+                        </div>
                       </div>
                     )}
-                    <div className="flex items-center gap-3 p-3 text-sm">
+                    <div className="flex items-center gap-3 p-3.5 text-sm">
                       <CalendarIcon className="size-4 text-[#00A8BC] shrink-0" aria-hidden="true" />
-                      <span className="text-[#505c5f] tabular-nums">Registriert: {formatDate(selectedCustomer.createdAt)}</span>
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-[#505c5f] block font-bold">Konto erstellt am</span>
+                        <span className="text-[#505c5f] tabular-nums font-medium">{formatDate(selectedCustomer.createdAt)}</span>
+                      </div>
                     </div>
                   </div>
                 </section>
 
                 {/* Admin Notes (separate collection) */}
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] mb-3 flex items-center gap-1.5">
+                <section className="space-y-2.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
                     <StickyNote className="size-3.5" aria-hidden="true" />
-                    Interne Anmerkungen
+                    Interne Vermerke & Notizen
                   </h3>
-                  <div className="bg-white border border-[#c8d3d5] p-3 space-y-2">
+                  <div className="bg-white border border-[#c8d3d5] p-4 space-y-3 rounded-none shadow-2xs">
                     <textarea
                       value={adminNotes}
                       onChange={(e) => {
                         setAdminNotes(e.target.value);
                         setNotesSaved(false);
                       }}
-                      placeholder="Interne Notizen zu diesem Kunden…"
+                      placeholder="Interne Notizen zu diesem Kunden hinterlegen (z.B. Stammkunde, bevorzugte Gebinde, Absprachen)…"
                       rows={4}
-                      className="w-full text-sm text-[#1a1c1c] bg-[#f9f9f9] border border-[#c8d3d5] p-3 resize-y focus:outline-none focus:border-[#00A8BC] focus:ring-1 focus:ring-[#00A8BC]/30 placeholder:text-[#505c5f]/50 rounded-none"
+                      className="w-full text-sm text-[#1a1c1c] bg-[#f9f9f9] border border-[#c8d3d5] p-3 leading-relaxed resize-y focus:outline-none focus:border-[#00A8BC] focus:ring-1 focus:ring-[#00A8BC] placeholder:text-[#505c5f]/50 rounded-none min-h-[110px]"
                       spellCheck={true}
                     />
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] text-[#505c5f] uppercase tracking-wider">
-                        Nur für Admins sichtbar – nicht für den Kunden
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
+                      <p className="text-[11px] text-[#505c5f]">
+                        🔒 Nur für Admins sichtbar – nicht für den Kunden.
                       </p>
                       <Button
-                        size="sm"
+                        type="button"
                         onClick={handleSaveNotes}
                         disabled={notesSaving}
-                        className={`rounded-none text-xs font-bold uppercase tracking-wider h-8 px-4 transition-colors duration-150 ${
+                        className={`rounded-none text-xs font-bold uppercase tracking-wider h-10 px-5 transition-colors duration-150 shrink-0 ${
                           notesSaved
                             ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-[#0f4851] hover:bg-[#174e56] text-white"
+                            : "bg-[#00a8bc] hover:bg-[#0092a4] text-white"
                         }`}
                       >
                         {notesSaving ? (
-                          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                          <Loader2 className="size-3.5 animate-spin mr-1.5" aria-hidden="true" />
                         ) : notesSaved ? (
                           <>✓ Gespeichert</>
                         ) : (
                           <>
-                            <Save className="size-3.5 mr-1" aria-hidden="true" />
-                            Speichern
+                            <Save className="size-3.5 mr-1.5" aria-hidden="true" />
+                            Notiz speichern
                           </>
                         )}
                       </Button>
@@ -411,25 +433,25 @@ export function CustomerManager() {
                 </section>
 
                 {/* Order History */}
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] mb-3 flex items-center gap-1.5">
+                <section className="space-y-2.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
                     <Package className="size-3.5" aria-hidden="true" />
-                    Bestellhistorie
+                    Bestellhistorie ({customerOrders.length})
                   </h3>
                   {ordersLoading ? (
-                    <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center justify-center py-8 bg-white border border-[#c8d3d5]">
                       <Loader2 className="size-5 animate-spin text-[#00A8BC]" aria-hidden="true" />
                     </div>
                   ) : customerOrders.length === 0 ? (
                     <div className="bg-white border border-dashed border-[#c8d3d5] p-6 text-center">
                       <p className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
-                        Keine Bestellungen vorhanden.
+                        Bisher keine Bestellungen vorhanden.
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {customerOrders.map((order) => (
-                        <div key={order.id} className="bg-white border border-[#c8d3d5] p-4 space-y-3">
+                        <div key={order.id} className="bg-white border border-[#c8d3d5] p-4 space-y-3 shadow-2xs">
                           {/* Order header */}
                           <div className="flex items-center justify-between">
                             <span className={`rounded-none px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${getStatusColor(order.status)}`}>
@@ -441,9 +463,9 @@ export function CustomerManager() {
                           </div>
 
                           {/* Order items */}
-                          <ul className="text-xs text-[#1a1c1c] space-y-1">
+                          <ul className="text-xs text-[#1a1c1c] space-y-1.5">
                             {order.items.map((item, idx) => (
-                              <li key={idx} className="flex justify-between border-b border-[#f0f2f3] pb-1 last:border-0">
+                              <li key={idx} className="flex justify-between border-b border-[#f0f2f3] pb-1.5 last:border-0">
                                 <span>
                                   {item.quantity}× {item.productName}{" "}
                                   <span className="text-[10px] text-[#505c5f]">
@@ -460,7 +482,7 @@ export function CustomerManager() {
                           {/* Order total */}
                           {order.grandTotalCents != null && (
                             <div className="flex justify-between border-t border-[#c8d3d5] pt-2 text-xs font-bold">
-                              <span className="text-[#505c5f] uppercase tracking-wider">Gesamt</span>
+                              <span className="text-[#505c5f] uppercase tracking-wider">Gesamtbetrag</span>
                               <span className="text-[#0f4851] tabular-nums">{formatPrice(order.grandTotalCents)}</span>
                             </div>
                           )}
@@ -471,13 +493,13 @@ export function CustomerManager() {
                 </section>
 
                 {/* Delete Section */}
-                <section className="border-t border-[#c8d3d5] pt-6">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-destructive mb-3 flex items-center gap-1.5">
+                <section className="border-t border-[#c8d3d5] pt-6 space-y-2.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-destructive flex items-center gap-1.5">
                     <Trash2 className="size-3.5" aria-hidden="true" />
                     Gefahrenzone
                   </h3>
-                  <div className="bg-white border border-destructive/30 p-4">
-                    <p className="text-xs text-[#505c5f] mb-3">
+                  <div className="bg-white border border-destructive/30 p-4 space-y-3 shadow-2xs">
+                    <p className="text-xs text-[#505c5f] leading-relaxed">
                       Das Löschen eines Kunden entfernt den Firebase-Account, alle Profildaten und interne Anmerkungen unwiderruflich.
                       Bestellungen bleiben zur Nachverfolgung erhalten.
                     </p>
@@ -485,7 +507,7 @@ export function CustomerManager() {
                       <Button
                         variant="outline"
                         onClick={() => setDeleteDialogOpen(true)}
-                        className="w-full rounded-none border-destructive text-destructive hover:bg-destructive hover:text-white font-bold uppercase tracking-wider text-xs h-9 transition-colors duration-150"
+                        className="w-full rounded-none border-destructive text-destructive hover:bg-destructive hover:text-white font-bold uppercase tracking-wider text-xs h-10 transition-colors duration-150"
                       >
                         <Trash2 className="size-3.5 mr-1.5" aria-hidden="true" />
                         Kunden endgültig löschen

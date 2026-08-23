@@ -38,8 +38,8 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 12: Öffnungszeiten-Ausnahmen & Emoji-Bereinigung (Admin UI / Icon-Hygiene)**
   **Prompt:** "Konsultiere die Projektregeln und überarbeite `src/components/admin/OpeningHoursManager.tsx`: Ersetze alle rohen Emojis (`❌`, `🔄`, `⏱️`) in den Dropdown-Optionen für Ausnahmetermine durch entsprechende Icons aus `lucide-react` (`XCircle`, `CalendarSync`, `Clock`). Optimiere zudem die Uhrzeit-Eingabefelder für Mobilgeräte (`grid-cols-1 sm:grid-cols-2`), um Quetschungen auf kleinen Displays zu vermeiden."
 
-- [ ] **Task 13: Kunden-Detailansicht & Notizenfeld (CustomerManager UX)**
-  **Prompt:** "Optimiere die mobile Kunden-Detailansicht in `src/components/admin/CustomerManager.tsx`: Verbessere das Admin-Notizenfeld mit dynamischem Auto-Growing/Padding und erstelle eine strukturierte visuelle Trennung zwischen Kontaktdaten, Notizen, Bestellhistorie und dem Kunden-Löschbereich."
+- [x] **Task 13: Kunden-Detailansicht & Notizenfeld (CustomerManager UX)**
+  **Prompt:** "Nutze die Skills `emil-design-eng` und `ui-ux-pro-max`, um den Kunden-Detail-Sheet (`CustomerDetailsSheet`) in `src/components/admin/CustomerManager.tsx` zu verbessern: Optimiere das Notizfeld für administrative Vermerke (sauberes Padding, `min-h-[100px]`, responsives Layout), strukturiere Kundendaten (Kontakt, Firma, Bestellhistorie) in übersichtliche Info-Cards und stelle sicher, dass Aktionen (z.B. Notiz speichern, Kunde löschen) auf Mobilgeräten ergonomisch angeordnet sind."
 
 - [ ] **Task 14: Mobile Tastatur-Ergonomie im Auth-Modal (Auth UX)**
   **Prompt:** "Passe `src/components/auth/AuthModal.tsx` für mobile Viewports an: Stelle sicher, dass das Modal auf `< sm` als mobiles Bottom-Sheet bzw. nach oben ausgerichteter Dialog agiert, sodass bei geöffneter virtueller Smartphone-Tastatur alle Eingabefelder und Buttons barrierefrei erreichbar bleiben und nicht durch das Tastatur-Overlay abgeschnitten werden."
