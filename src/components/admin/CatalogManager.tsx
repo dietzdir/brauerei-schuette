@@ -624,213 +624,285 @@ export function CatalogManager() {
 
       {/* Editor Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="sm:max-w-2xl md:max-w-3xl overflow-y-auto w-full sm:w-[90vw] p-0">
-          <SheetHeader className="mb-6 px-4 pt-6 sm:px-6">
-            <SheetTitle>{editingProduct?.id ? "Produkt bearbeiten" : "Neues Produkt anlegen"}</SheetTitle>
-            <SheetDescription>
-              Fülle die Details für den Artikel aus. 
+        <SheetContent className="w-full sm:max-w-2xl md:max-w-3xl flex flex-col h-full bg-[#f9f9f9] border-l border-[#c8d3d5] rounded-none p-0 overflow-hidden">
+          <SheetHeader className="p-4 sm:p-6 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
+            <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">
+              {editingProduct?.id ? "Produkt bearbeiten" : "Neues Produkt anlegen"}
+            </SheetTitle>
+            <SheetDescription className="text-xs text-[#505c5f]">
+              Pflegen Sie Stammdaten, LMIV-Angaben, Gebinde und Produktbilder.
             </SheetDescription>
           </SheetHeader>
 
           {editingProduct && (
-            <div className="space-y-6 pb-20 px-4 sm:px-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                  <input
-                    type="checkbox"
-                    id="product-is-active"
-                    checked={editingProduct.isActive !== false}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, isActive: e.target.checked })}
-                    className="size-4.5 accent-amber-600 rounded cursor-pointer"
-                  />
-                  <Label htmlFor="product-is-active" className="cursor-pointer text-sm font-medium leading-snug">
-                    Artikel im Shop anzeigen (Aktiv)
-                    <span className="block text-xs font-normal text-slate-500 mt-0.5">
-                      Wenn deaktiviert, ist der Artikel für Kunden im Shop unsichtbar, bleibt im Katalog aber gespeichert.
-                    </span>
-                  </Label>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Name des Produkts</Label>
-                  <Input 
-                    value={editingProduct.name} 
-                    onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} 
-                    placeholder="z.B. Börde Pils"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Geschmacksprofil / Kurzbeschreibung</Label>
-                  <Input 
-                    value={editingProduct.flavorProfile || ""} 
-                    onChange={e => setEditingProduct({...editingProduct, flavorProfile: e.target.value})} 
-                    placeholder="z.B. Vollmundig, reiches Malzaroma, sanfte Hopfennote"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>Kategorie</Label>
-                    <Select 
-                      value={editingProduct.category} 
-                      onValueChange={(val) => {
-                        if (val === "Beer" || val === "Lemonade") {
-                          setEditingProduct({...editingProduct, category: val});
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue>
-                          {editingProduct.category === "Beer" ? "Bier" : editingProduct.category === "Lemonade" ? "Fassbrause / Limonade" : ""}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beer" label="Bier">Bier</SelectItem>
-                        <SelectItem value="Lemonade" label="Fassbrause / Limonade">Fassbrause / Limonade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Badge / Highlight</Label>
-                    <Select 
-                      value={editingProduct.badge || "none"} 
-                      onValueChange={(val) => {
-                        setEditingProduct({...editingProduct, badge: (!val || val === "none") ? "" : val});
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue>
-                          {editingProduct.badge || "Kein Badge"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Kein Badge</SelectItem>
-                        <SelectItem value="Neu">Neu</SelectItem>
-                        <SelectItem value="Bestseller">Bestseller</SelectItem>
-                        <SelectItem value="Aktion">Aktion</SelectItem>
-                        <SelectItem value="Saisonal">Saisonal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Beschreibung (optional)</Label>
-                  <textarea 
-                    className="flex min-h-[80px] w-full rounded-none border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    value={editingProduct.description || ""} 
-                    onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Zutaten & Allergene (LMIV)</Label>
-                  <Input 
-                    value={editingProduct.ingredients || ""} 
-                    onChange={e => setEditingProduct({...editingProduct, ingredients: e.target.value})} 
-                    placeholder="z.B. Brauwasser, Gerstenmalz, Hopfen, Hefe"
-                    className="rounded-none border-input"
-                  />
-                  <span className="text-[11px] text-muted-foreground">
-                    Hinweis: Allergene wie <strong>Gerstenmalz</strong>, <strong>Weizenmalz</strong> etc. werden auf der Produktkarte automatisch fett hervorgehoben.
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>Alkoholgehalt</Label>
-                    <div className="relative">
-                      <Input 
-                        value={editingProduct.alcohol || ""} 
-                        onChange={e => setEditingProduct({...editingProduct, alcohol: e.target.value})} 
-                        placeholder="z.B. 4,8"
-                        className="pr-14"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-                        % vol.
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Farbe</Label>
-                    <Input 
-                      value={editingProduct.color || ""} 
-                      onChange={e => setEditingProduct({...editingProduct, color: e.target.value})} 
-                      placeholder="z.B. Hellgold"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Produktbild</Label>
-                  <div className="flex items-center gap-4">
-                    {editingProduct.image ? (
-                      <img src={editingProduct.image} alt="Preview" className="size-16 rounded-md object-cover border" />
-                    ) : (
-                      <div className="size-16 rounded-md bg-slate-100 border flex items-center justify-center text-slate-400">
-                        <ImageIcon className="size-6" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                        <Button type="button" variant="outline" className="w-full pointer-events-none">Bild auswählen...</Button>
-                      </div>
-                      {uploadProgress !== null && (
-                        <div className="w-full bg-slate-200 h-1.5 mt-2 rounded-full overflow-hidden">
-                          <div className="bg-primary h-full" style={{ width: `${uploadProgress}%` }} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <label className="flex items-center gap-2.5 pt-1.5 cursor-pointer select-none">
+            <>
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+                {/* 1. Status-Toggle (Top-Banner) */}
+                <div className="p-4 bg-white border border-[#c8d3d5] rounded-none space-y-2 shadow-2xs">
+                  <label htmlFor="product-is-active" className="flex items-center gap-3 cursor-pointer select-none">
                     <input
                       type="checkbox"
-                      id="product-is-ai-generated"
-                      checked={editingProduct.isAiGenerated === true}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, isAiGenerated: e.target.checked })}
-                      className="size-4 accent-[#0f4851] rounded cursor-pointer"
+                      id="product-is-active"
+                      checked={editingProduct.isActive !== false}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, isActive: e.target.checked })}
+                      className="size-5 accent-[#0f4851] rounded-none cursor-pointer shrink-0"
                     />
-                    <span className="text-xs font-medium text-[#505c5f] flex items-center gap-1.5">
-                      <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-hidden="true" />
-                      Bild ist KI-generiert (Wasserzeichen „KI-Symbolbild“ auf Produktkarte einblenden)
+                    <span className="text-sm font-bold text-[#0f4851]">
+                      Artikel im Shop anzeigen (Aktiv)
                     </span>
                   </label>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold">Gebinde & Preise</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addVariant} className="gap-1 rounded-none border-[#c8d3d5]">
-                    <Plus className="size-3" /> Gebinde hinzufügen
-                  </Button>
+                  <p className="text-xs text-[#505c5f] pl-8 leading-relaxed">
+                    Wenn deaktiviert, ist der Artikel für Kunden im Shop unsichtbar, bleibt im Katalog aber gespeichert.
+                  </p>
                 </div>
 
-                <div className="space-y-3">
-                  {editingProduct.variants.map((variant, idx) => (
-                    <VariantRow
-                      key={idx}
-                      variant={variant}
-                      index={idx}
-                      updateVariant={updateVariant}
-                      removeVariant={removeVariant}
+                {/* 2. Basisdaten & Einstufung */}
+                <section className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+                    Basisdaten & Einstufung
+                  </h3>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                      Name des Produkts *
+                    </Label>
+                    <Input 
+                      id="product-name"
+                      value={editingProduct.name} 
+                      onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} 
+                      placeholder="z. B. Börde Pils"
+                      className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium"
                     />
-                  ))}
-                  
-                  {editingProduct.variants.length === 0 && (
-                    <p className="text-sm text-slate-500 italic text-center py-4">Füge mindestens ein Gebinde hinzu, damit Kunden das Produkt bestellen können.</p>
-                  )}
-                </div>
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-flavor" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                      Geschmacksprofil / Kurzbeschreibung
+                    </Label>
+                    <Input 
+                      id="product-flavor"
+                      value={editingProduct.flavorProfile || ""} 
+                      onChange={e => setEditingProduct({...editingProduct, flavorProfile: e.target.value})} 
+                      placeholder="z. B. Vollmundig, reiches Malzaroma, sanfte Hopfennote"
+                      className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Kategorie *</Label>
+                      <Select 
+                        value={editingProduct.category} 
+                        onValueChange={(val) => {
+                          if (val === "Beer" || val === "Lemonade") {
+                            setEditingProduct({...editingProduct, category: val});
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm">
+                          <SelectValue>
+                            {editingProduct.category === "Beer" ? "Bier" : editingProduct.category === "Lemonade" ? "Fassbrause / Limonade" : ""}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-none border-[#c8d3d5]">
+                          <SelectItem value="Beer" label="Bier">Bier</SelectItem>
+                          <SelectItem value="Lemonade" label="Fassbrause / Limonade">Fassbrause / Limonade</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Badge / Highlight</Label>
+                      <Select 
+                        value={editingProduct.badge || "none"} 
+                        onValueChange={(val) => {
+                          setEditingProduct({...editingProduct, badge: (!val || val === "none") ? "" : val});
+                        }}
+                      >
+                        <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm">
+                          <SelectValue>
+                            {editingProduct.badge || "Kein Badge"}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-none border-[#c8d3d5]">
+                          <SelectItem value="none">Kein Badge</SelectItem>
+                          <SelectItem value="Neu">Neu</SelectItem>
+                          <SelectItem value="Bestseller">Bestseller</SelectItem>
+                          <SelectItem value="Aktion">Aktion</SelectItem>
+                          <SelectItem value="Saisonal">Saisonal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </section>
+
+                {/* 3. Produktdetails & LMIV-Pflichtangaben */}
+                <section className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+                    Produktdetails & LMIV (Rechtliches)
+                  </h3>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-description" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                      Ausführliche Beschreibung (optional)
+                    </Label>
+                    <textarea 
+                      id="product-description"
+                      className="flex min-h-[100px] w-full rounded-none border border-[#c8d3d5] bg-white px-3 py-2.5 text-sm leading-relaxed shadow-2xs placeholder:text-[#505c5f]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00a8bc]"
+                      value={editingProduct.description || ""} 
+                      onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
+                      placeholder="z. B. Perfekt für alle, die ein geschmackvolles Bier mit angenehmer Tiefe und ausgewogener Balance schätzen."
+                    />
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-ingredients" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                      Zutaten & Allergene (LMIV)
+                    </Label>
+                    <Input 
+                      id="product-ingredients"
+                      value={editingProduct.ingredients || ""} 
+                      onChange={e => setEditingProduct({...editingProduct, ingredients: e.target.value})} 
+                      placeholder="z. B. Brauwasser, Gerstenmalz, Hopfen, Hefe"
+                      className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm"
+                    />
+                    <span className="text-[11px] text-[#505c5f] leading-snug">
+                      Hinweis: Allergene wie <strong>Gerstenmalz</strong>, <strong>Weizenmalz</strong> etc. werden auf der Produktkarte automatisch fett hervorgehoben.
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-alcohol" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                        Alkoholgehalt
+                      </Label>
+                      <div className="relative">
+                        <Input 
+                          id="product-alcohol"
+                          value={editingProduct.alcohol || ""} 
+                          onChange={e => setEditingProduct({...editingProduct, alcohol: e.target.value})} 
+                          placeholder="z. B. 4,8"
+                          className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm pr-16 tabular-nums"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#505c5f] pointer-events-none">
+                          % vol.
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-color" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                        Bierfarbe / Aussehen
+                      </Label>
+                      <Input 
+                        id="product-color"
+                        value={editingProduct.color || ""} 
+                        onChange={e => setEditingProduct({...editingProduct, color: e.target.value})} 
+                        placeholder="z. B. Hellgold, Tief bernstein"
+                        className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm"
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                {/* 4. Produktbild & Kennzeichnung */}
+                <section className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+                    Medien & Kennzeichnung
+                  </h3>
+
+                  <div className="grid gap-3">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Produktbild</Label>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white p-3.5 border border-[#c8d3d5] rounded-none">
+                      {editingProduct.image ? (
+                        <div className="relative size-20 rounded-none bg-slate-100 border border-[#c8d3d5] overflow-hidden shrink-0">
+                          <img src={editingProduct.image} alt="Vorschau" className="size-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="size-20 rounded-none bg-slate-100 border border-dashed border-[#c8d3d5] flex items-center justify-center text-slate-400 shrink-0">
+                          <ImageIcon className="size-8" />
+                        </div>
+                      )}
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="relative">
+                          <Input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                          <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] pointer-events-none h-10 text-xs font-bold uppercase tracking-wider">
+                            Bild auswählen...
+                          </Button>
+                        </div>
+                        {uploadProgress !== null && (
+                          <div className="w-full bg-slate-200 h-1.5 rounded-none overflow-hidden">
+                            <div className="bg-[#00a8bc] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <label htmlFor="product-is-ai-generated" className="flex items-center gap-3 p-3 bg-white border border-[#c8d3d5] rounded-none cursor-pointer select-none min-h-[44px]">
+                      <input
+                        type="checkbox"
+                        id="product-is-ai-generated"
+                        checked={editingProduct.isAiGenerated === true}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, isAiGenerated: e.target.checked })}
+                        className="size-4.5 accent-[#0f4851] rounded-none cursor-pointer shrink-0"
+                      />
+                      <span className="text-xs font-medium text-[#505c5f] flex items-center gap-1.5 leading-snug">
+                        <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-hidden="true" />
+                        Bild ist KI-generiert (Wasserzeichen „KI-Symbolbild“ auf Produktkarte einblenden)
+                      </span>
+                    </label>
+                  </div>
+                </section>
+
+                {/* 5. Gebinde & Preise */}
+                <section className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-[#c8d3d5] pb-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851]">
+                      Gebinde & Preise
+                    </h3>
+                    <Button type="button" variant="outline" size="sm" onClick={addVariant} className="gap-1 rounded-none border-[#c8d3d5] text-xs font-bold uppercase">
+                      <Plus className="size-3.5" /> Gebinde hinzufügen
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {editingProduct.variants.map((variant, idx) => (
+                      <VariantRow
+                        key={idx}
+                        variant={variant}
+                        index={idx}
+                        updateVariant={updateVariant}
+                        removeVariant={removeVariant}
+                      />
+                    ))}
+                    
+                    {editingProduct.variants.length === 0 && (
+                      <p className="text-xs text-[#505c5f] italic text-center py-4 bg-white border border-dashed border-[#c8d3d5]">
+                        Fügen Sie mindestens ein Gebinde hinzu, damit Kunden das Produkt bestellen können.
+                      </p>
+                    )}
+                  </div>
+                </section>
               </div>
 
-              <Button className="w-full bg-[#00a8bc] hover:bg-[#0092a4] text-white font-bold uppercase tracking-wider h-11 rounded-none shadow-xs" onClick={saveProduct} disabled={isSaving || !editingProduct.name}>
-                {isSaving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {isSaving ? "Speichere..." : "Produkt speichern"}
-              </Button>
-            </div>
+              {/* Sticky Footer Action Bar */}
+              <div className="p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 flex items-center justify-end gap-3 shadow-md">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSheetOpen(false)}
+                  className="rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider"
+                >
+                  Abbrechen
+                </Button>
+                <Button 
+                  className="bg-[#00a8bc] hover:bg-[#0092a4] text-white font-bold uppercase tracking-wider h-10 px-6 rounded-none shadow-xs" 
+                  onClick={saveProduct} 
+                  disabled={isSaving || !editingProduct.name}
+                >
+                  {isSaving && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  {isSaving ? "Speichere..." : "Produkt speichern"}
+                </Button>
+              </div>
+            </>
           )}
         </SheetContent>
       </Sheet>
