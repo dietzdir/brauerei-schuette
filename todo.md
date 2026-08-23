@@ -35,7 +35,7 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 11: Bildauswahl-Modal (ImagePickerDialog) Full-Width & Touch-Kacheln (Admin UI)**
   **Prompt:** "Optimiere den ImagePickerDialog in `src/components/admin/CatalogManager.tsx` für mobile Endgeräte: Passe den Dialog so an, dass er auf Smartphones als responsive Galerie mit optimalen 2-Spalten-Touch-Kacheln (mind. 44px Touch-Target, Bildvorschau mit sauberem Kontrast und Tastaturfokus) dargestellt wird, anstatt als starres, gequetschtes Desktop-Modal."
 
-- [ ] **Task 12: Öffnungszeiten-Ausnahmen & Emoji-Bereinigung (Admin UI / Icon-Hygiene)**
+- [x] **Task 12: Öffnungszeiten-Ausnahmen & Emoji-Bereinigung (Admin UI / Icon-Hygiene)**
   **Prompt:** "Konsultiere die Projektregeln und überarbeite `src/components/admin/OpeningHoursManager.tsx`: Ersetze alle rohen Emojis (`❌`, `🔄`, `⏱️`) in den Dropdown-Optionen für Ausnahmetermine durch entsprechende Icons aus `lucide-react` (`XCircle`, `CalendarSync`, `Clock`). Optimiere zudem die Uhrzeit-Eingabefelder für Mobilgeräte (`grid-cols-1 sm:grid-cols-2`), um Quetschungen auf kleinen Displays zu vermeiden."
 
 - [ ] **Task 13: Kunden-Detailansicht & Notizenfeld (CustomerManager UX)**

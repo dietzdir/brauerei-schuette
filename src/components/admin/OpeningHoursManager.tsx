@@ -48,6 +48,8 @@ import {
   CalendarDays,
   Sparkles,
   Info,
+  XCircle,
+  CalendarSync,
 } from "lucide-react";
 
 const WEEKDAY_OPTIONS = [
@@ -281,7 +283,7 @@ export function OpeningHoursManager() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="reg-open" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Öffnet um</Label>
                 <Input
@@ -566,24 +568,48 @@ export function OpeningHoursManager() {
               >
                 <SelectTrigger className="bg-white rounded-none border-[#c8d3d5] text-xs">
                   <SelectValue placeholder="Wählen...">
-                    {exType === "closed" && "❌ Geschlossen (z.B. Feiertag / Urlaub / Ausfall)"}
-                    {exType === "special_open" && "🔄 Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)"}
-                    {exType === "altered_hours" && "⏱️ Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)"}
+                    {exType === "closed" && (
+                      <span className="flex items-center gap-1.5">
+                        <XCircle className="size-3.5 text-rose-500 shrink-0" />
+                        <span>Geschlossen (z.B. Feiertag / Urlaub / Ausfall)</span>
+                      </span>
+                    )}
+                    {exType === "special_open" && (
+                      <span className="flex items-center gap-1.5">
+                        <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
+                        <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
+                      </span>
+                    )}
+                    {exType === "altered_hours" && (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="size-3.5 text-amber-500 shrink-0" />
+                        <span>Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)</span>
+                      </span>
+                    )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-[#c8d3d5]">
                   {isRegularDay ? (
                     <>
                       <SelectItem value="closed" className="rounded-none text-xs">
-                        ❌ Geschlossen (z.B. Feiertag / Urlaub / Ausfall)
+                        <div className="flex items-center gap-1.5">
+                          <XCircle className="size-3.5 text-rose-500 shrink-0" />
+                          <span>Geschlossen (z.B. Feiertag / Urlaub / Ausfall)</span>
+                        </div>
                       </SelectItem>
                       <SelectItem value="altered_hours" className="rounded-none text-xs">
-                        ⏱️ Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="size-3.5 text-amber-500 shrink-0" />
+                          <span>Geänderte Uhrzeit (z.B. nur 14:00 - 17:00 Uhr)</span>
+                        </div>
                       </SelectItem>
                     </>
                   ) : (
                     <SelectItem value="special_open" className="rounded-none text-xs">
-                      🔄 Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)
+                      <div className="flex items-center gap-1.5">
+                        <CalendarSync className="size-3.5 text-[#00A8BC] shrink-0" />
+                        <span>Sonderöffnung / Ersatztag (z.B. Donnerstag oder Samstag)</span>
+                      </div>
                     </SelectItem>
                   )}
                 </SelectContent>
@@ -592,7 +618,7 @@ export function OpeningHoursManager() {
 
             {/* Times (if not closed) */}
             {exType !== "closed" && (
-              <div className="grid grid-cols-2 gap-3 p-3 bg-white rounded-none border border-[#c8d3d5]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-white rounded-none border border-[#c8d3d5]">
                 <div className="space-y-1.5">
                   <Label htmlFor="ex-open" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Öffnet um</Label>
                   <Input
