@@ -15,37 +15,87 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Products: Public read, Admin-only write
+    // Helper: Validate allowed keys for users collection
+    function isValidUserFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'customerType', 'companyName', 'displayName', 'photoURL',
+        'email', 'phoneNumber', 'street', 'houseNumber', 'zipCode',
+        'city', 'isAnonymous', 'createdAt', 'lastOrderAt', 'updatedAt', 'role'
+      ]);
+    }
+
+    // Helper: Validate user document data types and constraints
+    function isValidUserDoc(userId) {
+      return isValidUserFields()
+        && request.resource.data.uid == userId
+        && (!('customerType' in request.resource.data) || request.resource.data.customerType in ['private', 'business'])
+        && (!('isAnonymous' in request.resource.data) || request.resource.data.isAnonymous is bool)
+        && (!('displayName' in request.resource.data) || (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100))
+        && (!('email' in request.resource.data) || (request.resource.data.email is string && request.resource.data.email.size() <= 120))
+        && (!('phoneNumber' in request.resource.data) || (request.resource.data.phoneNumber is string && request.resource.data.phoneNumber.size() <= 50))
+        && (!('companyName' in request.resource.data) || (request.resource.data.companyName is string && request.resource.data.companyName.size() <= 150))
+        && (!('street' in request.resource.data) || (request.resource.data.street is string && request.resource.data.street.size() <= 150))
+        && (!('houseNumber' in request.resource.data) || (request.resource.data.houseNumber is string && request.resource.data.houseNumber.size() <= 20))
+        && (!('zipCode' in request.resource.data) || (request.resource.data.zipCode is string && request.resource.data.zipCode.size() <= 20))
+        && (!('city' in request.resource.data) || (request.resource.data.city is string && request.resource.data.city.size() <= 100))
+        && (!('photoURL' in request.resource.data) || (request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 1000));
+    }
+
+    // Helper: Validate allowed keys for orders collection
+    function isValidOrderFields() {
+      return request.resource.data.keys().hasOnly([
+        'id', 'userId', 'customerName', 'customerEmail', 'customerPhone',
+        'street', 'houseNumber', 'zipCode', 'city', 'customerType',
+        'companyName', 'pickupDate', 'pickupTime', 'status', 'createdAt',
+        'items', 'rentalItems', 'itemsTotalCents', 'depositTotalCents', 'grandTotalCents'
+      ]);
+    }
+
+    // Products: Public read, Admin-only write with key whitelist
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly([
+        'id', 'name', 'category', 'variants', 'description', 'ingredients',
+        'alcohol', 'color', 'flavorProfile', 'depositInfo', 'image',
+        'isAiGenerated', 'badge', 'isActive', 'createdAt', 'updatedAt'
+      ]);
     }
 
-    // Rentals / Equipment: Public read, Admin-only write
+    // Rentals / Equipment: Public read, Admin-only write with key whitelist
     match /rentals/{rentalId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly([
+        'id', 'name', 'description', 'image', 'isAiGenerated',
+        'rentalPriceCents', 'depositCents', 'totalStock', 'isActive',
+        'createdAt', 'updatedAt'
+      ]);
     }
 
-    // Users: Owner read/write, Admin read/delete
+    // Users: Owner read/write with strict field whitelist & type validation, Admin read/delete
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
+      
       allow create: if isOwner(userId) 
-        && request.resource.data.uid == userId
+        && isValidUserDoc(userId)
         && (!('role' in request.resource.data) || request.resource.data.role != 'admin');
-      allow update: if isOwner(userId)
-        && request.resource.data.uid == userId
-        && (!('role' in request.resource.data) || request.resource.data.role == resource.data.role);
+        
+      allow update: if (
+        isOwner(userId)
+        && isValidUserDoc(userId)
+        && (!('role' in request.resource.data) || (resource.data != null && 'role' in resource.data && request.resource.data.role == resource.data.role))
+      ) || isAdmin();
+      
       allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Admin Notes: Separate collection, admin-only read/write
+    // Admin Notes: Separate collection, admin-only read/write with key whitelist
     // Ensures customer-facing clients can never see internal admin notes
     match /adminNotes/{userId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly(['uid', 'notes', 'updatedAt']);
     }
 
-    // Orders: Customer create/read, Admin full management, immutable creation rules
+    // Orders: Customer create/read, Admin full management, immutable creation rules with strict whitelist
     match /orders/{orderId} {
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
@@ -54,30 +104,46 @@ service cloud.firestore {
       );
       
       allow create: if isAuthenticated()
+        && isValidOrderFields()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.customerName is string
         && request.resource.data.customerName.size() > 0
         && request.resource.data.customerName.size() <= 120
-        && request.resource.data.customerEmail is string
-        && request.resource.data.customerEmail.size() <= 120
+        && (!('customerEmail' in request.resource.data) || (request.resource.data.customerEmail is string && request.resource.data.customerEmail.size() <= 120))
+        && (!('customerPhone' in request.resource.data) || (request.resource.data.customerPhone is string && request.resource.data.customerPhone.size() <= 50))
+        && (!('customerType' in request.resource.data) || request.resource.data.customerType in ['business', 'private'])
+        && (!('companyName' in request.resource.data) || (request.resource.data.companyName is string && request.resource.data.companyName.size() <= 150))
+        && (!('street' in request.resource.data) || (request.resource.data.street is string && request.resource.data.street.size() <= 150))
+        && (!('houseNumber' in request.resource.data) || (request.resource.data.houseNumber is string && request.resource.data.houseNumber.size() <= 20))
+        && (!('zipCode' in request.resource.data) || (request.resource.data.zipCode is string && request.resource.data.zipCode.size() <= 20))
+        && (!('city' in request.resource.data) || (request.resource.data.city is string && request.resource.data.city.size() <= 100))
+        && (!('pickupDate' in request.resource.data) || (request.resource.data.pickupDate is string && request.resource.data.pickupDate.size() <= 50))
+        && (!('pickupTime' in request.resource.data) || (request.resource.data.pickupTime is string && request.resource.data.pickupTime.size() <= 50))
         && request.resource.data.items is list
         && request.resource.data.items.size() > 0
         && request.resource.data.items.size() <= 50
+        && (!('rentalItems' in request.resource.data) || (request.resource.data.rentalItems is list && request.resource.data.rentalItems.size() <= 20))
         && request.resource.data.status in ['pending', 'ready', 'completed'];
 
-      allow update: if isAdmin();
+      allow update: if isAdmin() && isValidOrderFields();
       allow delete: if false;
     }
 
     // Settings & StoreSettings (e.g. store opening hours, exception windows)
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly([
+        'regularDayOfWeek', 'regularOpenTime', 'regularCloseTime', 'exceptions',
+        'bannerNotice', 'bannerLookaheadDays', 'updatedAt'
+      ]);
     }
 
     match /storeSettings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly([
+        'regularDayOfWeek', 'regularOpenTime', 'regularCloseTime', 'exceptions',
+        'bannerNotice', 'bannerLookaheadDays', 'updatedAt'
+      ]);
     }
   }
 }
