@@ -15,8 +15,8 @@ test.describe("Rental Multi-Quantity & Stock Limits", () => {
     const zapfanlageCard = page.locator("[data-slot='card']", { hasText: "Zapfanlage" });
     await expect(zapfanlageCard).toBeVisible({ timeout: 30000 });
 
-    // 4. Click "Zur Reservierung hinzufügen"
-    const addRentalBtn = zapfanlageCard.locator("button", { hasText: "Zur Reservierung hinzufügen" });
+    // 4. Click "In den Warenkorb"
+    const addRentalBtn = zapfanlageCard.locator("button", { hasText: "In den Warenkorb" });
     await addRentalBtn.click();
 
     // 5. Verify cart drawer opens and rental item is displayed with 1x
