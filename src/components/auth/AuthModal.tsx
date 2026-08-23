@@ -308,16 +308,16 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto bg-[#f9f9f9] rounded-none border border-[#c8d3d5] p-6 shadow-md">
-        <DialogHeader className="pb-2 border-b border-[#c8d3d5]">
+      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90dvh] sm:max-h-[90vh] flex flex-col bg-[#f9f9f9] rounded-none border border-[#c8d3d5] p-0 shadow-xl overflow-hidden">
+        <DialogHeader className="p-4 sm:p-5 pb-3 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="size-8 rounded-none bg-[#0f4851] text-white flex items-center justify-center">
+              <div className="size-8 rounded-none bg-[#0f4851] text-white flex items-center justify-center shrink-0">
                 <Hop className="size-4 text-[#00A8BC]" />
               </div>
               <DialogTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">Kundenkonto</DialogTitle>
               {!isAnonymous && (
-                <Badge variant="outline" className="text-[10px] font-bold uppercase bg-white text-[#0f4851] border-[#c8d3d5] rounded-none">
+                <Badge variant="outline" className="text-[10px] font-bold uppercase bg-white text-[#0f4851] border-[#c8d3d5] rounded-none shrink-0">
                   <UserCheck className="size-3 mr-1 text-[#00A8BC]" />
                   Registriert
                 </Badge>
@@ -331,9 +331,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {!isAnonymous ? (
-          // Profile View for registered users
-          <div className="space-y-4 mt-2">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          {!isAnonymous ? (
+            // Profile View for registered users
+            <div className="space-y-4">
             
             {successMsg && (
               <div className="p-3 bg-white border border-[#00A8BC] rounded-none flex items-center gap-2 text-xs text-[#0f4851] font-bold">
@@ -911,6 +912,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             )}
           </>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );

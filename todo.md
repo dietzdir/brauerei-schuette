@@ -41,5 +41,5 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 13: Kunden-Detailansicht & Notizenfeld (CustomerManager UX)**
   **Prompt:** "Nutze die Skills `emil-design-eng` und `ui-ux-pro-max`, um den Kunden-Detail-Sheet (`CustomerDetailsSheet`) in `src/components/admin/CustomerManager.tsx` zu verbessern: Optimiere das Notizfeld für administrative Vermerke (sauberes Padding, `min-h-[100px]`, responsives Layout), strukturiere Kundendaten (Kontakt, Firma, Bestellhistorie) in übersichtliche Info-Cards und stelle sicher, dass Aktionen (z.B. Notiz speichern, Kunde löschen) auf Mobilgeräten ergonomisch angeordnet sind."
 
-- [ ] **Task 14: Mobile Tastatur-Ergonomie im Auth-Modal (Auth UX)**
+- [x] **Task 14: Mobile Tastatur-Ergonomie im Auth-Modal (Auth UX)**
   **Prompt:** "Passe `src/components/auth/AuthModal.tsx` für mobile Viewports an: Stelle sicher, dass das Modal auf `< sm` als mobiles Bottom-Sheet bzw. nach oben ausgerichteter Dialog agiert, sodass bei geöffneter virtueller Smartphone-Tastatur alle Eingabefelder und Buttons barrierefrei erreichbar bleiben und nicht durch das Tastatur-Overlay abgeschnitten werden."
