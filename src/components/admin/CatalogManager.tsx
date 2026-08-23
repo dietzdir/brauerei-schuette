@@ -21,9 +21,147 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, Sparkles, Wrench } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, Sparkles, Wrench, Check } from "lucide-react";
 import { formatPrice, formatContainerType } from "@/lib/utils";
 import { toast } from "sonner";
+
+const PRESET_PRODUCT_IMAGES = [
+  { url: "/images/5-liter-fass.jpg", label: "5L Fass / Bierkrug", category: "Bier" },
+  { url: "/images/fassbrause.jpg", label: "Fassbrause Zitrone", category: "Limonade" },
+  { url: "/images/fassbrause2.jpg", label: "Fassbrause Himbeere", category: "Limonade" },
+  { url: "/images/hopfenwasser.jpg", label: "Hopfenwasser", category: "Erfrischung" },
+  { url: "/images/zapfanlage.jpg", label: "Profi-Zapfanlage", category: "Zubehör" },
+  { url: "/images/schuette-logo.jpg", label: "Schütte Wappen", category: "Logo" },
+];
+
+function ImagePickerDialog({
+  open,
+  onOpenChange,
+  currentImage,
+  onSelectImage,
+  onUploadCustom,
+  uploadProgress,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentImage?: string;
+  onSelectImage: (url: string) => void;
+  onUploadCustom: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  uploadProgress: number | null;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[95vw] sm:max-w-xl max-h-[85vh] flex flex-col bg-[#f9f9f9] border border-[#c8d3d5] rounded-none p-0 overflow-hidden shadow-xl">
+        <DialogHeader className="p-4 sm:p-5 bg-white border-b border-[#c8d3d5] shrink-0">
+          <DialogTitle className="font-heading text-lg sm:text-xl uppercase tracking-wider text-[#0f4851] flex items-center gap-2">
+            <ImageIcon className="size-5 text-[#00A8BC]" />
+            Produktbild auswählen
+          </DialogTitle>
+          <DialogDescription className="text-xs text-[#505c5f]">
+            Wählen Sie ein Standardbild aus der Galerie oder laden Sie ein eigenes Foto hoch.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+          {/* Custom Upload Option */}
+          <div className="bg-white p-4 border border-[#c8d3d5] rounded-none space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0f4851] block">
+              Eigenes Bild hochladen
+            </span>
+            <div className="relative">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  await onUploadCustom(e);
+                  onOpenChange(false);
+                }}
+                disabled={uploadProgress !== null}
+                className="cursor-pointer rounded-none border-[#c8d3d5] h-10 text-xs"
+              />
+            </div>
+            {uploadProgress !== null && (
+              <div className="flex items-center gap-2 text-xs text-[#00A8BC] font-semibold pt-1">
+                <Loader2 className="size-3.5 animate-spin" />
+                <span>Wird hochgeladen… {Math.round(uploadProgress)}%</span>
+              </div>
+            )}
+            <p className="text-[11px] text-[#505c5f]">
+              Wird automatisch auf WebP komprimiert (max. 800×800px).
+            </p>
+          </div>
+
+          {/* Preset Gallery Grid */}
+          <div className="space-y-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0f4851] block">
+              Standard-Galerie
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {PRESET_PRODUCT_IMAGES.map((preset) => {
+                const isSelected = currentImage === preset.url;
+                return (
+                  <button
+                    key={preset.url}
+                    type="button"
+                    onClick={() => {
+                      onSelectImage(preset.url);
+                      onOpenChange(false);
+                    }}
+                    className={`group relative flex flex-col bg-white border text-left rounded-none overflow-hidden transition-all duration-150 p-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A8BC] ${
+                      isSelected
+                        ? "border-[#00A8BC] ring-2 ring-[#00A8BC]/40 shadow-xs"
+                        : "border-[#c8d3d5] hover:border-[#0f4851]"
+                    }`}
+                  >
+                    <div className="relative aspect-4/3 w-full bg-slate-100 overflow-hidden">
+                      <img
+                        src={preset.url}
+                        alt={preset.label}
+                        className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 bg-[#00A8BC] text-white p-1 rounded-none shadow-xs">
+                          <Check className="size-3.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="pt-2 px-1 pb-1">
+                      <span className="text-xs font-bold text-[#1a1c1c] block truncate">
+                        {preset.label}
+                      </span>
+                      <span className="text-[10px] text-[#505c5f] uppercase tracking-wider">
+                        {preset.category}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter className="p-3 sm:px-5 bg-white border-t border-[#c8d3d5] shrink-0 flex items-center justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-none border-[#c8d3d5] h-9 px-4 text-xs font-bold uppercase tracking-wider text-[#505c5f]"
+          >
+            Schließen
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 
 
@@ -92,6 +230,10 @@ export function CatalogManager() {
   const [editingRental, setEditingRental] = useState<RentalItem | null>(null);
   const [isSavingRental, setIsSavingRental] = useState(false);
   const [rentalUploadProgress, setRentalUploadProgress] = useState<number | null>(null);
+
+  // Image Picker Dialog state
+  const [productImagePickerOpen, setProductImagePickerOpen] = useState(false);
+  const [rentalImagePickerOpen, setRentalImagePickerOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribeProducts = onSnapshot(getProductsCollection(db), (snapshot) => {
@@ -619,6 +761,8 @@ export function CatalogManager() {
         isSaving={isSavingRental}
         uploadProgress={rentalUploadProgress}
         onImageUpload={handleRentalImageUpload}
+        imagePickerOpen={rentalImagePickerOpen}
+        setImagePickerOpen={setRentalImagePickerOpen}
       />
 
 
@@ -822,12 +966,15 @@ export function CatalogManager() {
                         </div>
                       )}
                       <div className="flex-1 w-full space-y-2">
-                        <div className="relative">
-                          <Input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                          <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] pointer-events-none h-10 text-xs font-bold uppercase tracking-wider">
-                            Bild auswählen...
-                          </Button>
-                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setProductImagePickerOpen(true)}
+                          className="w-full rounded-none border-[#c8d3d5] h-10 text-xs font-bold uppercase tracking-wider bg-white hover:bg-[#f0f7f8] text-[#0f4851] cursor-pointer"
+                        >
+                          <ImageIcon className="size-4 mr-2 text-[#00A8BC]" />
+                          {editingProduct.image ? "Bild ändern / Galerie…" : "Bild auswählen / Galerie…"}
+                        </Button>
                         {uploadProgress !== null && (
                           <div className="w-full bg-slate-200 h-1.5 rounded-none overflow-hidden">
                             <div className="bg-[#00a8bc] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }} />
@@ -835,6 +982,16 @@ export function CatalogManager() {
                         )}
                       </div>
                     </div>
+
+                    {/* Image Picker Dialog for Product */}
+                    <ImagePickerDialog
+                      open={productImagePickerOpen}
+                      onOpenChange={setProductImagePickerOpen}
+                      currentImage={editingProduct.image}
+                      onSelectImage={(url) => setEditingProduct({ ...editingProduct, image: url })}
+                      onUploadCustom={handleImageUpload}
+                      uploadProgress={uploadProgress}
+                    />
 
                     <label htmlFor="product-is-ai-generated" className="flex items-center gap-3 p-3 bg-white border border-[#c8d3d5] rounded-none cursor-pointer select-none min-h-[44px]">
                       <input
@@ -1144,6 +1301,8 @@ interface RentalEditorSheetProps {
   isSaving: boolean;
   uploadProgress: number | null;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  imagePickerOpen: boolean;
+  setImagePickerOpen: (open: boolean) => void;
 }
 
 function RentalEditorSheet({
@@ -1155,6 +1314,8 @@ function RentalEditorSheet({
   isSaving,
   uploadProgress,
   onImageUpload,
+  imagePickerOpen,
+  setImagePickerOpen,
 }: RentalEditorSheetProps) {
   if (!rental) return null;
 
@@ -1190,62 +1351,86 @@ function RentalEditorSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl md:max-w-3xl overflow-y-auto w-full sm:w-[90vw] p-0">
-        <SheetHeader className="mb-6 px-4 pt-6 sm:px-6">
-          <SheetTitle>{rental.id ? "Mietartikel bearbeiten" : "Neuen Mietartikel anlegen"}</SheetTitle>
-          <SheetDescription>
-            Passe Bezeichnung, Mietpreis, Kaution und Bestand an.
+      <SheetContent className="w-full sm:max-w-2xl md:max-w-3xl flex flex-col h-full bg-[#f9f9f9] border-l border-[#c8d3d5] rounded-none p-0 overflow-hidden">
+        <SheetHeader className="p-4 sm:p-6 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
+          <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">
+            {rental.id ? "Mietartikel bearbeiten" : "Neuen Mietartikel anlegen"}
+          </SheetTitle>
+          <SheetDescription className="text-xs text-[#505c5f]">
+            Passe Bezeichnung, Mietpreis, Kaution, Bestand und Bild an.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 pb-20 px-4 sm:px-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          {/* 1. Status-Toggle (Top-Banner) */}
+          <div className="p-4 bg-white border border-[#c8d3d5] rounded-none space-y-2 shadow-2xs">
+            <label htmlFor="rental-is-active" className="flex items-center gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 id="rental-is-active"
                 checked={rental.isActive !== false}
                 onChange={(e) => setRental({ ...rental, isActive: e.target.checked })}
-                className="size-4.5 accent-[#00A8BC] rounded-none cursor-pointer"
+                className="size-5 accent-[#00A8BC] rounded-none cursor-pointer shrink-0"
               />
-              <Label htmlFor="rental-is-active" className="cursor-pointer text-sm font-medium leading-snug">
+              <span className="text-sm font-bold text-[#0f4851]">
                 Artikel im Shop zur Vermietung anbieten (Aktiv)
-                <span className="block text-xs font-normal text-slate-500 mt-0.5">
-                  Wenn deaktiviert, wird dieser Mietartikel für Kunden im Shop ausgeblendet.
-                </span>
-              </Label>
-            </div>
+              </span>
+            </label>
+            <p className="text-xs text-[#505c5f] pl-8 leading-relaxed">
+              Wenn deaktiviert, wird dieser Mietartikel für Kunden im Shop ausgeblendet.
+            </p>
+          </div>
 
-            <div className="grid gap-2">
-              <Label>Bezeichnung des Mietartikels *</Label>
+          {/* 2. Stammdaten */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+              Basisdaten & Beschreibung
+            </h3>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="rental-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                Bezeichnung des Mietartikels *
+              </Label>
               <Input
+                id="rental-name"
                 value={rental.name}
                 onChange={(e) => setRental({ ...rental, name: e.target.value })}
-                placeholder="z. B. Profi-Bierzapfanlage, Bierzeltgarnitur, Stehtisch"
-                className="rounded-none border-[#c8d3d5]"
+                placeholder="z. B. Profi-Bierzapfanlage mit Durchlaufkühler"
+                className="bg-white rounded-none border-[#c8d3d5] h-10 text-sm font-medium"
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label>Beschreibung & Ausstattung</Label>
+            <div className="grid gap-1.5">
+              <Label htmlFor="rental-desc" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                Beschreibung & Ausstattung
+              </Label>
               <textarea
-                className="flex min-h-[90px] w-full rounded-none border border-[#c8d3d5] bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                id="rental-desc"
+                className="flex min-h-[100px] w-full rounded-none border border-[#c8d3d5] bg-white px-3 py-2.5 text-sm leading-relaxed shadow-2xs placeholder:text-[#505c5f]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00a8bc]"
                 value={rental.description || ""}
                 onChange={(e) => setRental({ ...rental, description: e.target.value })}
                 placeholder="z. B. 1 Biertisch (220 x 50 cm) und 2 Bierbänke (220 x 25 cm), klappbar und wetterfest lasiert."
               />
             </div>
+          </section>
 
+          {/* 3. Konditionen & Bestand */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+              Konditionen & Bestand
+            </h3>
 
-            {/* Price, Deposit & Stock Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="grid gap-2">
-                <Label>Mietpreis pro Abholung (€) *</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="rental-price" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  Mietpreis (€) *
+                </Label>
                 <Input
+                  id="rental-price"
                   type="text"
                   inputMode="decimal"
                   placeholder="25,00"
-                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10"
+                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10 tabular-nums"
                   value={priceStr}
                   onFocus={() => { isPriceFocused.current = true; }}
                   onChange={(e) => {
@@ -1259,16 +1444,19 @@ function RentalEditorSheet({
                     setPriceStr(centsToDisplay(cents));
                   }}
                 />
-                <span className="text-[11px] text-muted-foreground">Wird zur Bestellsumme addiert.</span>
+                <span className="text-[11px] text-[#505c5f]">Mietpreis pro Abholung.</span>
               </div>
 
-              <div className="grid gap-2">
-                <Label>Kaution (€)</Label>
+              <div className="grid gap-1.5">
+                <Label htmlFor="rental-deposit" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  Kaution (€)
+                </Label>
                 <Input
+                  id="rental-deposit"
                   type="text"
                   inputMode="decimal"
                   placeholder="0,00"
-                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10"
+                  className="bg-white rounded-none border-[#c8d3d5] text-sm font-semibold h-10 tabular-nums"
                   value={depositStr}
                   onFocus={() => { isDepositFocused.current = true; }}
                   onChange={(e) => {
@@ -1282,12 +1470,15 @@ function RentalEditorSheet({
                     setDepositStr(centsToDisplay(cents));
                   }}
                 />
-                <span className="text-[11px] text-muted-foreground">Optional. Bei 0 € wird kein Kautionshinweis im Shop angezeigt.</span>
+                <span className="text-[11px] text-[#505c5f]">Bei 0 € entfällt Kaution.</span>
               </div>
 
-              <div className="grid gap-2">
-                <Label>Gesamtbestand (Geräte-Pool) *</Label>
+              <div className="grid gap-1.5">
+                <Label htmlFor="rental-stock" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                  Gesamtbestand *
+                </Label>
                 <Input
+                  id="rental-stock"
                   type="number"
                   min="1"
                   max="99"
@@ -1298,88 +1489,105 @@ function RentalEditorSheet({
                     setRental({ ...rental, totalStock: isNaN(val) ? 1 : Math.max(1, val) });
                   }}
                 />
-                <span className="text-[11px] text-muted-foreground">Max. Reservierungen pro Tag.</span>
+                <span className="text-[11px] text-[#505c5f]">Max. buchbar pro Tag.</span>
               </div>
             </div>
+          </section>
 
-            {/* Image upload */}
-            <div className="grid gap-2 pt-2 border-t border-[#c8d3d5]">
-              <Label>Produktbild</Label>
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          {/* 4. Produktbild & Kennzeichnung */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f4851] flex items-center gap-1.5 border-b border-[#c8d3d5] pb-2">
+              Medien & Kennzeichnung
+            </h3>
+
+            <div className="grid gap-3">
+              <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Produktbild</Label>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-white p-3.5 border border-[#c8d3d5] rounded-none">
                 {rental.image ? (
-                  <div className="relative size-24 bg-slate-100 border border-[#c8d3d5] rounded-none overflow-hidden shrink-0">
+                  <div className="relative size-20 bg-slate-100 border border-[#c8d3d5] rounded-none overflow-hidden shrink-0">
                     <img src={rental.image} alt="Vorschau" className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="size-24 bg-slate-100 border border-dashed border-[#c8d3d5] rounded-none flex items-center justify-center text-slate-400 shrink-0">
-                    <Wrench className="size-8" />
+                  <div className="size-20 bg-slate-100 border border-dashed border-[#c8d3d5] rounded-none flex items-center justify-center text-slate-400 shrink-0">
+                    <Wrench className="size-8 text-[#00A8BC]" />
                   </div>
                 )}
 
-                <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={onImageUpload}
-                      disabled={uploadProgress !== null}
-                      className="cursor-pointer rounded-none border-[#c8d3d5]"
-                    />
-                  </div>
+                <div className="space-y-2 flex-1 w-full">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setImagePickerOpen(true)}
+                    className="w-full rounded-none border-[#c8d3d5] h-10 text-xs font-bold uppercase tracking-wider bg-white hover:bg-[#f0f7f8] text-[#0f4851] cursor-pointer"
+                  >
+                    <ImageIcon className="size-4 mr-2 text-[#00A8BC]" />
+                    {rental.image ? "Bild ändern / Galerie…" : "Bild auswählen / Galerie…"}
+                  </Button>
                   {uploadProgress !== null && (
                     <div className="flex items-center gap-2 text-xs text-[#00A8BC] font-semibold">
                       <Loader2 className="size-3.5 animate-spin" />
                       <span>Bild wird hochgeladen… {Math.round(uploadProgress)}%</span>
                     </div>
                   )}
-                  <p className="text-[11px] text-muted-foreground">
-                    Das Bild wird automatisch optimiert (WebP, max 800x800px).
+                  <p className="text-[11px] text-[#505c5f]">
+                    Automatische Bildoptimierung (WebP, max. 800×800px).
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* AI Generated Watermark Toggle */}
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="checkbox"
-                id="rental-is-ai"
-                checked={rental.isAiGenerated ?? false}
-                onChange={(e) => setRental({ ...rental, isAiGenerated: e.target.checked })}
-                className="size-4 accent-[#00A8BC] rounded-none cursor-pointer"
+              {/* Image Picker Dialog for Rental */}
+              <ImagePickerDialog
+                open={imagePickerOpen}
+                onOpenChange={setImagePickerOpen}
+                currentImage={rental.image}
+                onSelectImage={(url) => setRental({ ...rental, image: url })}
+                onUploadCustom={onImageUpload}
+                uploadProgress={uploadProgress}
               />
-              <Label htmlFor="rental-is-ai" className="cursor-pointer text-xs font-medium flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-amber-500" />
-                Als KI-Symbolbild kennzeichnen (Badge einblenden)
-              </Label>
-            </div>
-          </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-[#c8d3d5]">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-none border-[#c8d3d5] text-xs font-bold uppercase tracking-wider text-[#505c5f]"
-            >
-              Abbrechen
-            </Button>
-            <Button
-              type="button"
-              onClick={onSave}
-              disabled={isSaving || !rental.name?.trim()}
-              className="bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs px-6 shadow-xs"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="size-3.5 mr-2 animate-spin" />
-                  Speichere…
-                </>
-              ) : (
-                "Mietartikel speichern"
-              )}
-            </Button>
-          </div>
+              {/* AI Generated Watermark Toggle */}
+              <label htmlFor="rental-is-ai" className="flex items-center gap-3 p-3 bg-white border border-[#c8d3d5] rounded-none cursor-pointer select-none min-h-[44px]">
+                <input
+                  type="checkbox"
+                  id="rental-is-ai"
+                  checked={rental.isAiGenerated ?? false}
+                  onChange={(e) => setRental({ ...rental, isAiGenerated: e.target.checked })}
+                  className="size-4.5 accent-[#00A8BC] rounded-none cursor-pointer shrink-0"
+                />
+                <span className="text-xs font-medium text-[#505c5f] flex items-center gap-1.5 leading-snug">
+                  <Sparkles className="size-3.5 text-amber-500 shrink-0" />
+                  Bild ist KI-generiert (Wasserzeichen „KI-Symbolbild“ auf Produktkarte einblenden)
+                </span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        {/* Sticky Footer Action Bar */}
+        <div className="p-4 sm:px-6 bg-white border-t border-[#c8d3d5] shrink-0 flex items-center justify-end gap-3 shadow-md">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-none border-[#c8d3d5] h-10 px-4 text-xs font-bold uppercase tracking-wider text-[#505c5f]"
+          >
+            Abbrechen
+          </Button>
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving || !rental.name?.trim()}
+            className="bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-10 px-6 shadow-xs"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="size-3.5 mr-2 animate-spin" />
+                Speichere…
+              </>
+            ) : (
+              "Mietartikel speichern"
+            )}
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
