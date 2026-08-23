@@ -5,7 +5,7 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 1: Firestore Field-Whitelisting (Sicherheit)**
   **Prompt:** "Nutze den Skill `firebase-security-rules-auditor`, um die `firestore.rules` um striktes `hasOnly`-Field-Whitelisting zu erweitern. Stelle bei allen schreibenden Zugriffen (create/update für z.B. users und orders) sicher, dass Clients ausschließlich die explizit erlaubten Felder schreiben können, um Injection von fremden Feldern zu verhindern. Behalte alle bestehenden Validierungen bei."
 
-- [ ] **Task 2: Startseite als Server Component & Instant Shell (Performanz)**
+- [x] **Task 2: Startseite als Server Component & Instant Shell (Performanz)**
   **Prompt:** "Nutze den Skill `next-cache-components-adoption`, um `src/app/page.tsx` von einer globalen Client Component zu einer Server Component umzubauen. Isoliere die Realtime-Logik (z.B. `subscribeStoreSettings`) und interaktive Drawer-States in separierte Client-Komponenten, die idealerweise in `Suspense`-Boundaries gewrappt sind, sodass der statische Großteil der Seite als Instant-Shell ausgeliefert wird."
 
 - [ ] **Task 3: Micro-Animationen ergänzen (UX/UI)**
