@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useCart } from "@/lib/cart/CartContext";
@@ -17,6 +17,14 @@ interface HeaderProps {
 export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
   const { user, profile } = useAuth();
   const { totalCount, openCart } = useCart();
+  const [isBumping, setIsBumping] = useState(false);
+
+  useEffect(() => {
+    if (totalCount === 0) return;
+    setIsBumping(true);
+    const timer = setTimeout(() => setIsBumping(false), 320);
+    return () => clearTimeout(timer);
+  }, [totalCount]);
 
   const handleOpenCart = onOpenCart || openCart;
 
@@ -90,12 +98,19 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             size="sm"
             onClick={handleOpenCart}
             aria-label="Warenkorb öffnen"
-            className="relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-colors duration-150"
+            className={`relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+              isBumping ? "ring-2 ring-[#0f4851]/40" : ""
+            }`}
           >
-            <ShoppingCart className="size-4" aria-hidden="true" />
+            <ShoppingCart className={`size-4 transition-transform duration-150 ${isBumping ? "scale-110" : ""}`} aria-hidden="true" />
             <span className="hidden sm:inline">Warenkorb</span>
             {totalCount > 0 && (
-              <span className="inline-flex items-center justify-center size-5 text-[11px] font-black rounded-none bg-[#0f4851] text-white ml-0.5 animate-in zoom-in-75 duration-200 tabular-nums">
+              <span
+                key={totalCount}
+                className={`inline-flex items-center justify-center size-5 text-[11px] font-black rounded-none bg-[#0f4851] text-white ml-0.5 tabular-nums transition-transform ${
+                  isBumping ? "animate-badge-bump" : "animate-in zoom-in-75 duration-200"
+                }`}
+              >
                 {totalCount}
               </span>
             )}

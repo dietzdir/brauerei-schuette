@@ -8,10 +8,10 @@ Hier sind die abgeleiteten Verbesserungen als ausführbare Prompts für KI-Agent
 - [x] **Task 2: Startseite als Server Component & Instant Shell (Performanz)**
   **Prompt:** "Nutze den Skill `next-cache-components-adoption`, um `src/app/page.tsx` von einer globalen Client Component zu einer Server Component umzubauen. Isoliere die Realtime-Logik (z.B. `subscribeStoreSettings`) und interaktive Drawer-States in separierte Client-Komponenten, die idealerweise in `Suspense`-Boundaries gewrappt sind, sodass der statische Großteil der Seite als Instant-Shell ausgeliefert wird."
 
-- [ ] **Task 3: Micro-Animationen ergänzen (UX/UI)**
+- [x] **Task 3: Micro-Animationen ergänzen (UX/UI)**
   **Prompt:** "Nutze die Skills `find-animation-opportunities` und `improve-animations`, um gezielt visuelles Feedback zu ergänzen: Implementiere einen visuellen Bounce-Effekt für das Cart-Badge im Header, wenn Artikel in den Warenkorb gelegt werden. Füge außerdem sanfte Layout-Übergänge für Statusänderungen (z.B. von 'pending' zu 'ready') in der `CompletedOrdersList` im Admin-Bereich hinzu."
 
-- [ ] **Task 4: Konsistente Toast-Notifications im Admin (Code-Hygiene)**
+- [x] **Task 4: Konsistente Toast-Notifications im Admin (Code-Hygiene)**
   **Prompt:** "Konsultiere den Skill `ask-sonner` und überarbeite `src/components/admin/OpeningHoursManager.tsx`. Entferne die dortige lokale Error/Success-State-Logik (`successMessage`, `error`) und ersetze sie global durch die `toast.success()` / `toast.error()` Funktionen von Sonner. Ziel ist eine 100%ige Konsistenz beim User-Feedback im gesamten Admin-Bereich."
 
 - [ ] **Task 5: Accessibility & Keyboard-Navigation (A11y)**

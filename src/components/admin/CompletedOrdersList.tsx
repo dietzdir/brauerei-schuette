@@ -188,7 +188,7 @@ export function CompletedOrdersList() {
             <button
               key={order.id}
               onClick={() => handleSelectOrder(order)}
-              className="w-full flex items-center gap-4 p-4 text-left hover:bg-[#f9f9f9] transition-colors duration-150 group"
+              className="w-full flex items-center gap-4 p-4 text-left hover:bg-[#f9f9f9] active:scale-[0.99] transition-all duration-150 group"
             >
               <div className="size-10 shrink-0 rounded-full bg-[#0f4851]/10 flex items-center justify-center">
                 <Package className="size-5 text-[#0f4851]" aria-hidden="true" />

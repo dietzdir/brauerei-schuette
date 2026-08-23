@@ -190,10 +190,13 @@ export default function AdminDashboard() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {orders.map((order) => (
-              <div key={order.id} className="flex flex-col justify-between rounded-none border border-[#c8d3d5] bg-white p-6 shadow-xs">
+              <div
+                key={order.id}
+                className="flex flex-col justify-between rounded-none border border-[#c8d3d5] bg-white p-6 shadow-xs transition-all duration-300 ease-out hover:border-[#00A8BC]/60 hover:shadow-sm"
+              >
                 <div>
                   <div className="mb-4 flex items-center justify-between">
-                    <span className={`rounded-none px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                    <span className={`rounded-none px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest transition-colors duration-200 ${
                       order.status === "ready" 
                         ? "bg-[#00A8BC] text-white" 
                         : "bg-[#0f4851] text-white"
@@ -283,7 +286,7 @@ export default function AdminDashboard() {
                 <div className="mt-4 flex flex-col gap-2 border-t border-[#c8d3d5] pt-4">
                   {order.status === "pending" ? (
                     <Button 
-                      className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs" 
+                      className="w-full bg-[#00A8BC] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider text-xs h-9 shadow-xs transition-all duration-150 active:scale-[0.98]" 
                       onClick={() => updateOrderStatus(order.id, "ready")}
                     >
                       Als Abholbereit markieren
@@ -291,7 +294,7 @@ export default function AdminDashboard() {
                   ) : (
                     <Button 
                       variant="outline"
-                      className="w-full rounded-none border-[#c8d3d5] bg-white text-[#0f4851] hover:bg-[#eeeeee] font-bold uppercase tracking-wider text-xs h-9" 
+                      className="w-full rounded-none border-[#c8d3d5] bg-white text-[#0f4851] hover:bg-[#eeeeee] font-bold uppercase tracking-wider text-xs h-9 transition-all duration-150 active:scale-[0.98]" 
                       onClick={() => updateOrderStatus(order.id, "pending")}
                     >
                       Zurück auf OFFEN setzen
@@ -299,7 +302,7 @@ export default function AdminDashboard() {
                   )}
                   <Button 
                     variant="outline"
-                    className="w-full rounded-none border-[#0f4851] bg-[#0f4851] text-white hover:bg-[#174e56] font-bold uppercase tracking-wider text-xs h-9" 
+                    className="w-full rounded-none border-[#0f4851] bg-[#0f4851] text-white hover:bg-[#174e56] font-bold uppercase tracking-wider text-xs h-9 transition-all duration-150 active:scale-[0.98]" 
                     onClick={() => updateOrderStatus(order.id, "completed")}
                   >
                     Als Abgeschlossen markieren

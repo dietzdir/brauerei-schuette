@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -44,7 +45,6 @@ import {
   Trash2,
   Pencil,
   AlertCircle,
-  CheckCircle2,
   CalendarDays,
   Sparkles,
   Info,
@@ -64,8 +64,6 @@ export function OpeningHoursManager() {
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [globalError, setGlobalError] = useState<string | null>(null);
 
   // Form State for regular hours & banner
   const [regularDayOfWeek, setRegularDayOfWeek] = useState<number>(5);
@@ -113,11 +111,6 @@ export function OpeningHoursManager() {
     }
   }, [isRegularDay, sheetOpen]);
 
-  const showSuccess = (msg: string) => {
-    setSuccessMessage(msg);
-    setTimeout(() => setSuccessMessage(null), 4000);
-  };
-
   const handleSaveGeneralSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -130,10 +123,10 @@ export function OpeningHoursManager() {
         bannerLookaheadDays,
       };
       await saveStoreSettings(updated);
-      showSuccess("Reguläre Öffnungszeiten erfolgreich gespeichert!");
+      toast.success("Reguläre Öffnungszeiten erfolgreich gespeichert!");
     } catch (err: any) {
       console.error(err);
-      setGlobalError("Fehler beim Speichern: " + err.message);
+      toast.error("Fehler beim Speichern: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -214,13 +207,14 @@ export function OpeningHoursManager() {
 
       await saveStoreSettings(updatedSettings);
       setSheetOpen(false);
-      showSuccess(
+      toast.success(
         editingExceptionId
           ? "Ausnahmetermin aktualisiert."
           : "Neuer Ausnahmetermin hinzugefügt."
       );
     } catch (err: any) {
       console.error(err);
+      toast.error("Fehler beim Speichern: " + err.message);
       setFormError("Fehler beim Speichern: " + err.message);
     } finally {
       setSaving(false);
@@ -234,10 +228,10 @@ export function OpeningHoursManager() {
         ...settings,
         exceptions: updatedExceptions,
       });
-      showSuccess("Ausnahmetermin entfernt.");
+      toast.success("Ausnahmetermin entfernt.");
     } catch (err: any) {
       console.error(err);
-      setGlobalError("Fehler beim Löschen: " + err.message);
+      toast.error("Fehler beim Löschen: " + err.message);
     }
   };
 
@@ -254,23 +248,6 @@ export function OpeningHoursManager() {
 
   return (
     <div className="space-y-8">
-      {globalError && (
-        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-2 text-sm font-medium">
-          <AlertCircle className="size-5 shrink-0" />
-          <span>{globalError}</span>
-          <Button variant="ghost" size="sm" className="ml-auto text-destructive hover:bg-destructive/20 h-7 px-2" onClick={() => setGlobalError(null)}>
-            X
-          </Button>
-        </div>
-      )}
-      
-      {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2 text-sm font-medium">
-          <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       {/* Top Banner Notice & Regular Hours */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Regular Hours Settings */}
@@ -411,9 +388,9 @@ export function OpeningHoursManager() {
                    if (bannerLookaheadDays !== (settings.bannerLookaheadDays ?? 14)) {
                      try {
                        await saveStoreSettings({ ...settings, bannerLookaheadDays });
-                       showSuccess("Anzeigezeitraum gespeichert!");
+                       toast.success("Anzeigezeitraum gespeichert!");
                      } catch (err: any) {
-                       setGlobalError("Fehler beim Speichern des Zeitraums.");
+                       toast.error("Fehler beim Speichern des Zeitraums.");
                      }
                    }
                 }}

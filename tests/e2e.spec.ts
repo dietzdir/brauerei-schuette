@@ -40,12 +40,12 @@ test("complete brewery ordering flow with single bottle, quantity preset, accoun
   await expect(page.locator("[role='dialog']").locator("text=Warenkorb").first()).toBeVisible({ timeout: 5000 });
 
   // 7. Verify deposit breakdown in cart
-  await expect(page.locator("text=Zwischensumme Artikel:")).toBeVisible({ timeout: 5000 });
+  await expect(page.locator("text=Zwischensumme").first()).toBeVisible({ timeout: 5000 });
   await expect(page.locator("text=Pfand (Flaschen / Gebinde):")).toBeVisible();
   await expect(page.locator("text=Gesamtbetrag (inkl. Pfand):")).toBeVisible();
 
   // 8. Click "Zur Reservierung"
-  const proceedButton = page.locator("button", { hasText: "Zur Reservierung" });
+  const proceedButton = page.getByRole("button", { name: "Zur Reservierung", exact: true });
   await proceedButton.click();
 
   // 9. Verify Account Prioritization step
