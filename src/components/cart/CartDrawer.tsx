@@ -547,16 +547,18 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     handleCloseAndReset();
                     onOpenOrders();
                   }}
-                  className="w-full h-10 font-bold uppercase tracking-wider rounded-none bg-[#0f4851] hover:bg-[#174e56] text-white"
+                  className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none bg-[#0f4851] hover:bg-[#174e56] text-white shadow-xs transition-colors duration-150 cursor-pointer"
                 >
-                  Zur Bestellhistorie
+                  <span>Zur Bestellhistorie</span>
+                  <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleCloseAndReset}
-                  className="w-full h-10 font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851]"
+                  className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none border-[#c8d3d5] bg-white text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150 cursor-pointer"
                 >
-                  Weiter einkaufen
+                  <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
+                  <span>Weiter einkaufen</span>
                 </Button>
               </div>
             </div>
@@ -797,18 +799,19 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       <div className="flex flex-col gap-2">
                         <Button
                           onClick={handleProceedToCheckout}
-                          className="w-full py-6 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150"
+                          className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none shadow-xs transition-colors duration-150 cursor-pointer"
                         >
                           <span>Zur Reservierung</span>
-                          <ArrowRight className="size-4" aria-hidden="true" />
+                          <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
                         </Button>
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => handleOpenChange(false)}
-                          className="w-full h-10 text-xs font-bold uppercase tracking-wider rounded-none border-[#c8d3d5] text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150"
+                          className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none border-[#c8d3d5] bg-white text-[#0f4851] hover:bg-[#eeeeee] transition-colors duration-150 cursor-pointer"
                         >
-                          Weiter einkaufen
+                          <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
+                          <span>Weiter einkaufen</span>
                         </Button>
                       </div>
                     </div>
