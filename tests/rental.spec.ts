@@ -19,19 +19,20 @@ test.describe("Rental Multi-Quantity & Stock Limits", () => {
     const addRentalBtn = zapfanlageCard.locator("button", { hasText: "In den Warenkorb" });
     await addRentalBtn.click();
 
-    // 5. Verify cart drawer opens and rental item is displayed with 1x
+    // 5. Verify cart drawer opens and rental item is displayed
     await expect(page.locator("text=Mietartikel").first()).toBeVisible({ timeout: 5000 });
-    await expect(page.locator("text=1x Reservierung")).toBeVisible();
+    const qtySpan = page.locator("[aria-label*='Aktuelle Menge' i]").first();
+    await expect(qtySpan).toHaveText("1");
 
     // 6. Test stepper in cart: increase to 2x then decrease to 1x
     const cartPlusBtn = page.getByRole("button", { name: /Menge für .* erhöhen/i });
     if (await cartPlusBtn.isVisible()) {
       await cartPlusBtn.click();
-      await expect(page.locator("text=2x Reservierung")).toBeVisible();
+      await expect(qtySpan).toHaveText("2");
 
       const cartMinusBtn = page.getByRole("button", { name: /Menge für .* verringern/i });
       await cartMinusBtn.click();
-      await expect(page.locator("text=1x Reservierung")).toBeVisible();
+      await expect(qtySpan).toHaveText("1");
     }
 
     // 7. Proceed to checkout

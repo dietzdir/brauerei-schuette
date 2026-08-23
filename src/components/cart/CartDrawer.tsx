@@ -683,9 +683,6 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                         <Wrench className="size-2.5 mr-1 inline" aria-hidden="true" />
                                         Mietartikel
                                       </Badge>
-                                      <span className="text-[10px] text-[#00A8BC] font-bold tabular-nums">
-                                        {rental.quantity}x Reservierung
-                                      </span>
                                     </div>
                                     <h4 className="font-heading text-base tracking-wide uppercase text-[#0f4851] leading-snug">
                                       {rental.rentalName}
@@ -734,6 +731,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                                     <span
                                       className="w-7 text-center text-xs font-bold text-[#0f4851] tabular-nums select-none"
                                       aria-live="polite"
+                                      aria-label={`Aktuelle Menge für ${rental.rentalName}: ${rental.quantity}`}
                                     >
                                       {rental.quantity}
                                     </span>
