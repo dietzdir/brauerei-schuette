@@ -22,9 +22,13 @@ export async function deleteCustomer(uid: string): Promise<{ success: boolean; e
 
     let decodedClaims;
     try {
-      decodedClaims = await adminAuth.verifyIdToken(sessionCookie, true);
+      decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
     } catch {
-      return { success: false, error: "Ungültige Sitzung." };
+      try {
+        decodedClaims = await adminAuth.verifyIdToken(sessionCookie, true);
+      } catch {
+        return { success: false, error: "Ungültige Sitzung." };
+      }
     }
 
     if (!decodedClaims.admin) {

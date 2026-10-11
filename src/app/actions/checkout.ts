@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb, adminAuth } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { ContainerType, Order, OrderItem, OrderRentalItem, Product, RentalItem } from "@/types";
 import { initialProducts, initialRentals } from "@/lib/firebase/seed";
@@ -18,6 +18,7 @@ export interface CheckoutInputRentalItem {
 }
 
 export interface CheckoutInput {
+  idToken?: string;
   userId: string;
   customerName: string;
   customerEmail: string;
@@ -65,8 +66,20 @@ export async function createOrderAction(
       rentalItemId,
     } = input;
 
+    let verifiedUserId = userId?.trim();
+    if (input.idToken) {
+      try {
+        const decodedToken = await adminAuth.verifyIdToken(input.idToken);
+        verifiedUserId = decodedToken.uid;
+      } catch (authErr) {
+        console.warn("verifyIdToken rejected during checkout:", authErr);
+        return { success: false, error: "Ihre Sitzung ist ungültig oder abgelaufen. Bitte laden Sie die Seite neu." };
+      }
+    } else if (process.env.NODE_ENV === "production") {
+      return { success: false, error: "Authentifizierung erforderlich. Bitte laden Sie die Seite neu." };
+    }
 
-    if (!userId || !userId.trim()) {
+    if (!verifiedUserId) {
       return { success: false, error: "Ungültige Benutzer-ID (nicht authentifiziert)." };
     }
 
@@ -305,7 +318,7 @@ export async function createOrderAction(
     const orderId = "ord_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now().toString(36);
     const newOrder: Order = {
       id: orderId,
-      userId,
+      userId: verifiedUserId,
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim().toLowerCase(),
       customerPhone: customerPhone.trim(),
@@ -326,32 +339,65 @@ export async function createOrderAction(
       grandTotalCents,
     };
 
-
-    // Save to Firestore via Admin SDK with timeout guard for local dev environments
+    // Save to Firestore via Admin SDK atomically
     try {
-      const orderWritePromise = adminDb.collection("orders").doc(orderId).set(newOrder);
+      if (requestedRentals.length > 0 && pickupDate) {
+        await adminDb.runTransaction(async (transaction) => {
+          // Re-query existing orders for pickupDate inside transaction to ensure atomic stock check
+          const existingOrdersSnapshot = await transaction.get(
+            adminDb
+              .collection("orders")
+              .where("pickupDate", "==", pickupDate.trim())
+              .where("status", "in", ["pending", "ready"])
+          );
 
-      // Only update lastOrderAt — do NOT overwrite profile fields (displayName,
-      // email, phone, address) from checkout form data. The checkout form captures
-      // order-specific contact info which may differ from the user's stored profile
-      // (e.g. ordering on behalf of someone else). Overwriting causes cross-user
-      // data contamination when auth state is shared across browser tabs.
-      const userUpdatePromise = adminDb
-        .collection("users")
-        .doc(userId)
-        .set(
-          {
-            lastOrderAt: Timestamp.now(),
-          },
+          for (const reqRental of requestedRentals) {
+            let reservedCount = 0;
+            existingOrdersSnapshot.forEach((docSnap) => {
+              const ord = docSnap.data() as Order;
+              if (ord.rentalItems && ord.rentalItems.length > 0) {
+                ord.rentalItems.forEach((r) => {
+                  if (r.rentalId === reqRental.rentalId) {
+                    reservedCount += typeof r.quantity === "number" && r.quantity > 0 ? r.quantity : 1;
+                  }
+                });
+              }
+            });
+
+            const rentalDoc = await transaction.get(adminDb.collection("rentals").doc(reqRental.rentalId));
+            const totalStock =
+              rentalDoc.exists && typeof rentalDoc.data()?.totalStock === "number"
+                ? rentalDoc.data()!.totalStock
+                : 1;
+
+            if (reservedCount + reqRental.quantity > totalStock) {
+              const rentalName = rentalDoc.exists && rentalDoc.data()?.name ? rentalDoc.data()!.name : reqRental.rentalId;
+              throw new Error(`Für den gewählten Abholtermin ist „${rentalName}“ leider nicht mehr in der gewünschten Menge verfügbar.`);
+            }
+          }
+
+          transaction.set(adminDb.collection("orders").doc(orderId), newOrder);
+          transaction.set(
+            adminDb.collection("users").doc(verifiedUserId),
+            { lastOrderAt: Timestamp.now() },
+            { merge: true }
+          );
+        });
+      } else {
+        await adminDb.collection("orders").doc(orderId).set(newOrder);
+        await adminDb.collection("users").doc(verifiedUserId).set(
+          { lastOrderAt: Timestamp.now() },
           { merge: true }
         );
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Local dev metadata timeout")), 1500)
-      );
-      await Promise.race([Promise.all([orderWritePromise, userUpdatePromise]), timeoutPromise]);
-    } catch (writeErr) {
-      console.warn("Admin SDK direct write skipped/timeout in dev:", writeErr);
+      }
+    } catch (writeErr: any) {
+      console.error("Admin SDK order write error:", writeErr);
+      return {
+        success: false,
+        error: writeErr?.message && writeErr.message.includes("nicht mehr in der gewünschten Menge")
+          ? writeErr.message
+          : "Die Reservierung konnte leider nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      };
     }
 
     // Trigger confirmation email

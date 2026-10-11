@@ -20,9 +20,13 @@ export async function deleteOrder(orderId: string): Promise<{ success: boolean; 
 
     let decodedClaims;
     try {
-      decodedClaims = await adminAuth.verifyIdToken(sessionCookie, true);
+      decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
     } catch {
-      return { success: false, error: "Ungültige Sitzung." };
+      try {
+        decodedClaims = await adminAuth.verifyIdToken(sessionCookie, true);
+      } catch {
+        return { success: false, error: "Ungültige Sitzung." };
+      }
     }
 
     if (!decodedClaims.admin) {

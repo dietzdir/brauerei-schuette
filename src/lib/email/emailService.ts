@@ -1,5 +1,5 @@
 import { Order } from "@/types";
-import { formatContainerType, formatPrice } from "@/lib/utils";
+import { formatContainerType, formatPrice, escapeHtml } from "@/lib/utils";
 
 export interface EmailSendResult {
   success: boolean;
@@ -17,14 +17,14 @@ export function generateOrderConfirmationHtml(order: Order): string {
     order.items.reduce((s, i) => s + (i.depositPrice || 0) * i.quantity, 0);
   const grandTotal = order.grandTotalCents ?? itemsSum + depositSum;
 
-  const orderRows = order.items
+    const orderRows = order.items
     .map(
       (item) => `
       <tr style="border-bottom: 1px solid #e5e7eb;">
         <td style="padding: 12px 8px; font-weight: 700; color: #0F4851; font-size: 13px;">
-          ${item.productName}
+          ${escapeHtml(item.productName)}
           <div style="font-size: 11px; font-weight: 500; color: #505c5f; margin-top: 2px;">
-            ${formatContainerType(item.variantType)}
+            ${escapeHtml(formatContainerType(item.variantType))}
           </div>
         </td>
         <td style="padding: 12px 8px; text-align: center; color: #0F4851; font-weight: 700; font-size: 13px;">
@@ -57,7 +57,7 @@ export function generateOrderConfirmationHtml(order: Order): string {
         return `
       <tr style="border-bottom: 1px solid #e5e7eb; background-color: #f0fdf4;">
         <td style="padding: 12px 8px; font-weight: 700; color: #0F4851; font-size: 13px;">
-          ${rental.rentalName}
+          ${escapeHtml(rental.rentalName)}
           <div style="font-size: 11px; font-weight: 600; color: #00A8BC; margin-top: 2px;">
             Mietartikel / Verleih
           </div>
@@ -119,7 +119,7 @@ export function generateOrderConfirmationHtml(order: Order): string {
             Vielen Dank für Ihre Vorbestellung!
           </h2>
           <p style="margin: 0; font-size: 14px; color: #505c5f; line-height: 1.6;">
-            Hallo <strong>${order.customerName}</strong>,<br>
+            Hallo <strong>${escapeHtml(order.customerName)}</strong>,<br>
             wir haben Ihren Auftrag erhalten und stellen Ihre frischen Bierspezialitäten zur Abholung bereit.
           </p>
         </div>
@@ -133,9 +133,9 @@ export function generateOrderConfirmationHtml(order: Order): string {
             Gewählter Abholtermin:
           </div>
           <div style="font-size: 16px; font-weight: 800; color: #0F4851;">
-            ${order.pickupDate} ${
+            ${escapeHtml(order.pickupDate)} ${
                 order.pickupTime
-                  ? `<span style="font-size: 14px; font-weight: 600; color: #00A8BC;">(${order.pickupTime})</span>`
+                  ? `<span style="font-size: 14px; font-weight: 600; color: #00A8BC;">(${escapeHtml(order.pickupTime)})</span>`
                   : ""
               }
           </div>
@@ -149,14 +149,14 @@ export function generateOrderConfirmationHtml(order: Order): string {
             <tr>
               <td style="color: #505c5f; padding: 5px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Reservierungsnummer:</td>
               <td style="text-align: right; font-weight: 800; font-family: monospace; color: #0F4851; font-size: 14px;">
-                #${order.id.slice(0, 8).toUpperCase()}
+                #${escapeHtml(order.id.slice(0, 8).toUpperCase())}
               </td>
             </tr>
             <tr>
               <td style="color: #505c5f; padding: 5px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Kundentyp:</td>
               <td style="text-align: right; font-weight: 600; color: #1a1c1c;">
                 ${order.customerType === "business" ? "Geschäftskunde" : "Privatkunde"}
-                ${order.companyName ? ` (${order.companyName})` : ""}
+                ${order.companyName ? ` (${escapeHtml(order.companyName)})` : ""}
               </td>
             </tr>
             ${
@@ -164,7 +164,7 @@ export function generateOrderConfirmationHtml(order: Order): string {
                 ? `<tr>
               <td style="color: #505c5f; padding: 5px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Telefon:</td>
               <td style="text-align: right; font-weight: 600; color: #1a1c1c;">
-                ${order.customerPhone}
+                ${escapeHtml(order.customerPhone)}
               </td>
             </tr>`
                 : ""
@@ -174,8 +174,8 @@ export function generateOrderConfirmationHtml(order: Order): string {
                 ? `<tr>
               <td style="color: #505c5f; padding: 5px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Adresse:</td>
               <td style="text-align: right; font-weight: 600; color: #1a1c1c;">
-                ${order.street} ${order.houseNumber || ""}<br>
-                ${order.zipCode || ""} ${order.city || ""}
+                ${escapeHtml(order.street)} ${escapeHtml(order.houseNumber || "")}<br>
+                ${escapeHtml(order.zipCode || "")} ${escapeHtml(order.city || "")}
               </td>
             </tr>`
                 : ""

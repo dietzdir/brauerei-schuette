@@ -65,3 +65,6 @@ __pycache__/
 # Playwright
 node_modules/
 /playwright/.auth/
+
+# Local tools
+.aider-desk/

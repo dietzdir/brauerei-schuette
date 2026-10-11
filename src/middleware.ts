@@ -40,7 +40,10 @@ export async function middleware(request: NextRequest) {
       const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'brauerei-schuette';
 
       const { payload } = await jwtVerify(sessionCookie, publicKey, {
-        issuer: `https://securetoken.google.com/${projectId}`,
+        issuer: [
+          `https://session.firebase.google.com/${projectId}`,
+          `https://securetoken.google.com/${projectId}`,
+        ],
         audience: projectId,
         algorithms: ['RS256'],
       });

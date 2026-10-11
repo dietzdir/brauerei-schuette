@@ -379,6 +379,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // into onAuthStateChanged handlers (which fire across all tabs).
     setProfile(null);
     setUser(null);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("schuette_user_orders");
+        localStorage.removeItem("brauerei_schuette_cart_v2");
+        localStorage.removeItem("brauerei_schuette_rental_v2");
+        localStorage.removeItem("brauerei_schuette_rental_v1");
+      } catch (e) {
+        console.warn("Failed to clear localStorage on logout", e);
+      }
+    }
     await signOut(auth);
     try {
       await fetch("/api/auth/logout", { method: "POST" });

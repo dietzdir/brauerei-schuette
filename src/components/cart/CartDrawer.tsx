@@ -224,6 +224,15 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
     setIsSubmitting(true);
     setError(null);
 
+    let idToken: string | undefined = undefined;
+    if (user) {
+      try {
+        idToken = await user.getIdToken();
+      } catch (tokenErr) {
+        console.warn("Could not retrieve idToken for checkout:", tokenErr);
+      }
+    }
+
     const userId = user?.uid || "guest-" + Date.now();
     const chosenSlot = pickupSlots.find((s) => s.dateStr === selectedPickupSlotDate) || pickupSlots[0];
     const pickupDate = chosenSlot ? chosenSlot.formattedDate : undefined;
@@ -232,6 +241,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
     try {
       const result = await createOrderAction({
+        idToken,
         userId,
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim().toLowerCase(),
@@ -260,62 +270,6 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
         setOrderSuccessId(result.orderId);
         setSubmittedEmail(customerEmail.trim().toLowerCase());
         setConfirmedPickupInfo(pickupDisplay);
-
-        // Write directly to Firestore using authenticated client SDK
-        try {
-          if (user?.uid) {
-            const orderDocRef = doc(db, "orders", result.orderId);
-            await setDoc(orderDocRef, {
-              id: result.orderId,
-              userId: user.uid,
-              customerName: customerName.trim(),
-              customerEmail: customerEmail.trim().toLowerCase(),
-              customerPhone: customerPhone.trim(),
-              customerType,
-              companyName: customerType === "business" ? companyName.trim() : null,
-              street: street.trim() || null,
-              houseNumber: houseNumber.trim() || null,
-              zipCode: zipCode.trim() || null,
-              city: city.trim() || null,
-              pickupDate: pickupDate || null,
-              pickupTime: pickupTime || null,
-              status: "pending",
-              createdAt: serverTimestamp(),
-              items: items.map((i) => ({
-                productId: i.productId,
-                productName: i.productName,
-                variantType: i.variantType,
-                quantity: i.quantity,
-                unitPrice: i.unitPrice,
-                depositPrice: i.depositPrice || 0,
-              })),
-              rentalItems: rentalItems.map((r) => ({
-                rentalId: r.rentalId,
-                rentalName: r.rentalName,
-                rentalPriceCents: r.rentalPriceCents,
-                depositCents: r.depositCents || 0,
-                quantity: r.quantity,
-              })),
-              itemsTotalCents,
-              depositTotalCents,
-              grandTotalCents,
-            });
-
-            await updateProfileData({
-              displayName: customerName.trim(),
-              email: customerEmail.trim().toLowerCase(),
-              phoneNumber: customerPhone.trim(),
-              customerType,
-              companyName: customerType === "business" ? companyName.trim() || undefined : undefined,
-              street: customerType === "business" ? street.trim() || undefined : undefined,
-              houseNumber: customerType === "business" ? houseNumber.trim() || undefined : undefined,
-              zipCode: customerType === "business" ? zipCode.trim() || undefined : undefined,
-              city: customerType === "business" ? city.trim() || undefined : undefined,
-            });
-          }
-        } catch (fsErr) {
-          console.warn("Client Firestore write fallback:", fsErr);
-        }
 
         // Optimistically cache order locally
         try {
