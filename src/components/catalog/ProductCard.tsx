@@ -59,9 +59,9 @@ export function ProductCard({ product }: ProductCardProps) {
     : null;
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-[border-color,box-shadow] duration-200 border border-[#c8d3d5] hover:border-[#0f4851] bg-white rounded-none group shadow-xs p-0 gap-0">
+    <Card className="flex flex-col h-full overflow-hidden transition-[border-color,box-shadow] duration-200 border border-border hover:border-primary bg-card rounded-none group shadow-xs p-0 gap-0">
       {/* Product Image Header (Always 16:9 for uniform grid alignment) */}
-      <div className="relative w-full aspect-16/9 bg-[#f4f6f7] overflow-hidden border-b border-[#c8d3d5] shrink-0 flex items-center justify-center">
+      <div className="relative w-full aspect-16/9 bg-muted overflow-hidden border-b border-border shrink-0 flex items-center justify-center">
         {product.image ? (
           <ViewTransition name={`product-img-${product.id}`} share="morph">
             <div className="relative w-full h-full">
@@ -91,7 +91,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.badge && (
             <Badge
               variant="secondary"
-              className="bg-[#00A8BC] text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
+              className="bg-accent text-white border-0 font-bold uppercase tracking-wider text-[10px] rounded-none px-2 py-0.5"
             >
               <Hop className="size-3 mr-1 inline" aria-hidden="true" />
               {product.badge}
@@ -99,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
 
           {product.alcohol && (
-            <Badge variant="outline" className="text-[11px] font-bold bg-white text-[#0f4851] border-[#c8d3d5] rounded-none tabular-nums">
+            <Badge variant="outline" className="text-[11px] font-bold bg-card text-primary border-border rounded-none tabular-nums">
               {product.alcohol.includes("%") ? product.alcohol : `${product.alcohol} % vol.`}
             </Badge>
           )}
@@ -284,7 +284,7 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
 
           {/* LMIV & Allergen information */}
-          <div className="pt-2 border-t border-border text-xs text-muted-foreground leading-relaxed">
+          <div className="pt-2 border-t border-border text-[11px] text-muted-foreground leading-normal">
             <p>
               <span className="font-semibold text-foreground">Zutaten:</span>{" "}
               {(() => {

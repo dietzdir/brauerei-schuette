@@ -472,7 +472,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     <Button
                       type="submit"
                       size="sm"
-                      className="w-full bg-primary hover:bg-[#165a65] text-primary-foreground font-bold uppercase tracking-wider text-xs h-9 rounded-none"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs h-9 rounded-none"
                       disabled={isLinkingAccount}
                     >
                       {isLinkingAccount ? (
@@ -501,7 +501,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                     handleCloseAndReset();
                     onOpenOrders();
                   }}
-                  className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none bg-primary hover:bg-[#165a65] text-primary-foreground shadow-xs transition-colors duration-150 cursor-pointer"
+                  className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs transition-colors duration-150 cursor-pointer"
                 >
                   <span>Zur Bestellhistorie</span>
                   <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
@@ -751,7 +751,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       <div className="flex flex-col gap-2">
                         <Button
                           onClick={handleProceedToCheckout}
-                          className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                          className="w-full h-12 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <span>Zur Reservierung</span>
                           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
@@ -804,7 +804,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
                     <Button
                       onClick={() => setAuthModalOpen(true)}
-                      className="w-full font-bold uppercase tracking-wider text-xs h-10 bg-primary text-primary-foreground hover:bg-[#165a65] rounded-none mt-2 shadow-xs transition-colors duration-150 cursor-pointer"
+                      className="w-full font-bold uppercase tracking-wider text-xs h-10 bg-primary text-primary-foreground hover:bg-primary/90 rounded-none mt-2 shadow-xs transition-colors duration-150 cursor-pointer"
                     >
                       <UserPlus className="size-4 mr-2 text-accent" aria-hidden="true" />
                       Konto anlegen oder Anmelden
@@ -864,6 +864,45 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
                       <span>Angemeldet als <strong>{user?.email}</strong></span>
                     </div>
                   )}
+
+                  {/* Compact Order Review (Memory Bridge) */}
+                  <div className="p-3 rounded-none border border-border bg-white space-y-2 shadow-2xs">
+                    <div className="flex items-center justify-between text-xs pb-1.5 border-b border-border/60">
+                      <span className="font-heading uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
+                        <ShoppingBag className="size-3.5 text-accent" aria-hidden="true" />
+                        <span>Ihre Reservierung ({items.reduce((s, i) => s + i.quantity, 0) + rentalItems.reduce((s, r) => s + r.quantity, 0)} {items.reduce((s, i) => s + i.quantity, 0) + rentalItems.reduce((s, r) => s + r.quantity, 0) === 1 ? "Artikel" : "Artikel"})</span>
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStep("cart")}
+                        className="h-6 px-1.5 text-[11px] font-bold text-accent hover:text-primary uppercase tracking-wider rounded-none cursor-pointer"
+                        title="Warenkorb bearbeiten"
+                      >
+                        Bearbeiten
+                      </Button>
+                    </div>
+                    <div className="text-xs space-y-1 divide-y divide-border/40">
+                      {items.map((i) => (
+                        <div key={i.id} className="flex justify-between items-center pt-1 first:pt-0">
+                          <span className="text-foreground truncate max-w-[210px]">
+                            <strong className="tabular-nums">{i.quantity}x</strong> {i.productName}{" "}
+                            <span className="text-[10px] text-muted-foreground">({formatContainerType(i.variantType)})</span>
+                          </span>
+                          <span className="font-bold text-primary tabular-nums shrink-0 ml-2">{formatPrice(i.unitPrice * i.quantity)}</span>
+                        </div>
+                      ))}
+                      {rentalItems.map((r) => (
+                        <div key={r.rentalId} className="flex justify-between items-center pt-1 first:pt-0">
+                          <span className="text-foreground truncate max-w-[210px]">
+                            <strong className="tabular-nums">{r.quantity}x</strong> {r.rentalName}
+                          </span>
+                          <span className="font-bold text-primary tabular-nums shrink-0 ml-2">{formatPrice(r.rentalPriceCents * r.quantity)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
                   <form onSubmit={handleCheckoutSubmit} className="space-y-3.5">
                     {/* Name */}
@@ -1138,7 +1177,7 @@ export function CartDrawer({ open, onOpenChange, onOpenOrders }: CartDrawerProps
 
                     <Button
                       type="submit"
-                      className="w-full py-6 text-sm font-bold uppercase tracking-wider mt-2 flex flex-col items-center justify-center gap-0.5 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                      className="w-full py-6 text-sm font-bold uppercase tracking-wider mt-2 flex flex-col items-center justify-center gap-0.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                       disabled={isSubmitting || (items.length === 0 && rentalItems.length === 0)}
                     >
                       {isSubmitting ? (

@@ -308,14 +308,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90dvh] sm:max-h-[90vh] flex flex-col bg-[#f9f9f9] rounded-none border border-[#c8d3d5] p-0 shadow-xl overflow-hidden">
-        <DialogHeader className="p-4 sm:p-5 pb-3 bg-white border-b border-[#c8d3d5] shrink-0 pr-12">
+      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90dvh] sm:max-h-[90vh] flex flex-col bg-background rounded-none border border-border p-0 shadow-xl overflow-hidden">
+        <DialogHeader className="p-4 sm:p-5 pb-3 bg-card border-b border-border shrink-0 pr-12">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="size-8 rounded-none bg-[#0f4851] text-white flex items-center justify-center shrink-0">
-                <Hop className="size-4 text-[#00A8BC]" />
+              <div className="size-8 rounded-none bg-primary text-white flex items-center justify-center shrink-0">
+                <Hop className="size-4 text-accent" />
               </div>
-              <DialogTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">Kundenkonto</DialogTitle>
+              <DialogTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-primary">Kundenkonto</DialogTitle>
               {!isAnonymous && (
                 <Badge variant="outline" className="text-[10px] font-bold uppercase bg-white text-primary border-border rounded-none shrink-0">
                   <UserCheck className="size-3 mr-1 text-accent" />
@@ -606,7 +606,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                    className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                     disabled={loading}
                   >
                     {loading ? "Wird gesendet..." : "Link zum Zurücksetzen anfordern"}
@@ -829,7 +829,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       </Label>
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
+                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
                       {loading ? "Wird verarbeitet…" : "Konto erstellen"}
                     </Button>
                   </form>
@@ -903,7 +903,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       />
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
+                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
                       {loading ? "Anmeldung läuft…" : "Anmelden"}
                     </Button>
                   </form>

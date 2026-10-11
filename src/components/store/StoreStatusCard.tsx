@@ -128,17 +128,17 @@ export function StoreStatusCard() {
 
 export function StoreStatusCardSkeleton() {
   return (
-    <div className="bg-white border border-[#c8d3d5] rounded-none shadow-xs flex flex-col overflow-hidden animate-pulse">
+    <div className="bg-card border border-border rounded-none shadow-xs flex flex-col overflow-hidden animate-pulse">
       <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 text-left">
-          <div className="size-10 sm:size-12 rounded-none bg-[#0f4851]/10 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0" />
+          <div className="size-10 sm:size-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0" />
           <div className="min-w-0 space-y-2">
-            <div className="h-6 w-64 bg-gray-200" />
-            <div className="h-3 w-80 bg-gray-100" />
+            <div className="h-6 w-64 bg-muted" />
+            <div className="h-3 w-80 bg-muted/60" />
           </div>
         </div>
         <div className="hidden sm:block shrink-0">
-          <div className="h-9 w-60 bg-gray-100 border border-[#c8d3d5]" />
+          <div className="h-9 w-60 bg-muted border border-border" />
         </div>
       </div>
     </div>

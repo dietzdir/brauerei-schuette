@@ -98,7 +98,7 @@ export function Header({ onOpenAuth, onOpenCart, onOpenOrders }: HeaderProps) {
             size="sm"
             onClick={handleOpenCart}
             aria-label={totalCount > 0 ? `Warenkorb öffnen, ${totalCount} ${totalCount === 1 ? "Artikel" : "Artikel"} enthalten` : "Warenkorb öffnen, aktuell leer"}
-            className={`relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none shadow-xs uppercase tracking-wider transition-all duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none ${
+            className={`relative flex items-center gap-1.5 text-xs font-bold h-9 px-3 sm:px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none shadow-xs uppercase tracking-wider transition-all duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none ${
               isBumping ? "ring-2 ring-primary/40" : ""
             }`}
           >

@@ -276,7 +276,7 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
                     ? "bg-emerald-800 text-white"
                     : isStockLimitReached
                     ? "bg-muted text-muted-foreground border border-border cursor-not-allowed"
-                    : "bg-primary hover:bg-[#165a65] text-primary-foreground"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
                 }`}
               >
                 {justAdded ? (
