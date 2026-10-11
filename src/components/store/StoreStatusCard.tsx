@@ -39,26 +39,26 @@ export function StoreStatusCard() {
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-    <div className={`bg-white border ${nextSlot?.isSpecial ? 'border-[#00A8BC]' : 'border-[#c8d3d5]'} rounded-none shadow-xs flex flex-col overflow-hidden`}>
+    <div className={`bg-white border ${nextSlot?.isSpecial ? 'border-accent' : 'border-border'} rounded-none shadow-xs flex flex-col overflow-hidden`}>
       {/* Top Section: Next Sale */}
       <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 text-left">
-          <div className="size-10 sm:size-12 rounded-none bg-[#0f4851] text-[#00A8BC] flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
+          <div className="size-10 sm:size-12 rounded-none bg-primary text-accent flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
             <Clock className="size-5 sm:size-6" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-heading text-lg sm:text-2xl tracking-wide uppercase text-[#1a1c1c] leading-tight">
+            <h3 className="font-heading text-lg sm:text-2xl tracking-wide uppercase text-foreground leading-tight">
               {nextSlot ? (
                 <>
-                  Nächster Verkauf: <span className="text-[#00A8BC]">{nextSlot.formattedDate}</span> ({nextSlot.timeRange})
+                  Nächster Verkauf: <span className="text-accent font-bold">{nextSlot.formattedDate}</span> ({nextSlot.timeRange})
                 </>
               ) : (
                 `Immer ${regularHoursText}`
               )}
             </h3>
-            <p className="text-xs text-[#505c5f] mt-1 font-medium leading-normal">
+            <p className="text-xs text-muted-foreground mt-1 font-medium leading-normal">
               {nextSlot?.note ? (
-                <span className="font-bold text-[#0f4851] mr-2">
+                <span className="font-bold text-primary mr-2">
                   ★ {nextSlot.note}
                 </span>
               ) : null}
@@ -67,8 +67,8 @@ export function StoreStatusCard() {
           </div>
         </div>
         <div className="hidden sm:block shrink-0">
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0f4851] bg-[#eeeeee] px-4 py-2.5 rounded-none border border-[#c8d3d5]">
-            <Beer className="size-4 text-[#00A8BC]" />
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary bg-muted px-4 py-2.5 rounded-none border border-border">
+            <Beer className="size-4 text-accent" />
             Online reservieren & vor Ort abholen
           </span>
         </div>
@@ -76,10 +76,10 @@ export function StoreStatusCard() {
 
       {/* Bottom Section: Upcoming Exceptions (Only visible if exceptions exist) */}
       {upcomingExceptions.length > 0 && (
-        <div className="bg-[#f9f9f9] border-t border-[#c8d3d5] p-4 sm:px-6 sm:py-5">
+        <div className="bg-muted/30 border-t border-border p-4 sm:px-6 sm:py-5">
           <div className="flex items-center gap-2 mb-3">
-            <AlertCircle className="size-4 text-[#00A8BC]" />
-            <h4 className="font-bold text-sm tracking-wider uppercase text-[#0f4851]">
+            <AlertCircle className="size-4 text-accent" />
+            <h4 className="font-bold text-sm tracking-wider uppercase text-primary">
               Anstehende Änderungen
             </h4>
           </div>
@@ -96,23 +96,23 @@ export function StoreStatusCard() {
               if (ex.type === "closed") {
                 badge = <Badge variant="destructive" className="rounded-none text-[10px] uppercase font-bold tracking-wider">Geschlossen</Badge>;
               } else if (ex.type === "special_open") {
-                badge = <Badge className="bg-[#00A8BC] text-white rounded-none text-[10px] uppercase font-bold tracking-wider">Sonderöffnung</Badge>;
+                badge = <Badge className="bg-accent text-white rounded-none text-[10px] uppercase font-bold tracking-wider">Sonderöffnung</Badge>;
                 timeText = ex.openTime && ex.closeTime ? `${ex.openTime} - ${ex.closeTime} Uhr` : "";
               } else {
-                badge = <Badge className="bg-[#0f4851] text-white rounded-none text-[10px] uppercase font-bold tracking-wider">Geänderte Zeit</Badge>;
+                badge = <Badge className="bg-primary text-primary-foreground rounded-none text-[10px] uppercase font-bold tracking-wider">Geänderte Zeit</Badge>;
                 timeText = ex.openTime && ex.closeTime ? `${ex.openTime} - ${ex.closeTime} Uhr` : "";
               }
 
               const details = [timeText, ex.note].filter(Boolean).join(", ");
               
               return (
-                <div key={ex.id} className="bg-white border border-[#c8d3d5] p-3 rounded-none shadow-2xs flex flex-col gap-1.5">
+                <div key={ex.id} className="bg-white border border-border p-3 rounded-none shadow-2xs flex flex-col gap-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-sm text-[#1a1c1c]">{dateFormatted}</span>
+                    <span className="font-bold text-sm text-foreground">{dateFormatted}</span>
                     {badge}
                   </div>
                   {details && (
-                    <div className="text-xs text-[#505c5f] font-medium leading-snug">
+                    <div className="text-xs text-muted-foreground font-medium leading-snug">
                       {details}
                     </div>
                   )}

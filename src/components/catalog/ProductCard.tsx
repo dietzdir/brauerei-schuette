@@ -116,12 +116,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <CardHeader className="p-4 pb-2 space-y-1 shrink-0 min-h-[4.5rem]">
-        <CardTitle className="font-heading text-2xl tracking-wide uppercase text-[#0f4851] text-pretty">
+        <CardTitle className="font-heading text-2xl tracking-wide uppercase text-primary text-pretty">
           {product.name}
         </CardTitle>
 
         {product.flavorProfile && (
-          <p className="text-xs font-semibold text-[#00A8BC] leading-snug">
+          <p className="text-xs font-semibold text-accent leading-snug">
             {product.flavorProfile}
           </p>
         )}
@@ -130,37 +130,37 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className="px-4 space-y-4 pb-4 flex-1 flex flex-col justify-between">
         <div className="space-y-2 min-h-[5.5rem]">
           {product.description && (
-            <p className="text-xs text-[#505c5f] leading-relaxed font-normal">
+            <p className="text-xs text-muted-foreground leading-relaxed font-normal">
               {product.description}
             </p>
           )}
 
           {product.color && (
-            <div className="flex items-center gap-1.5 text-[11px] text-[#505c5f] font-medium pt-1">
-              <Droplets className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium pt-1">
+              <Droplets className="size-3.5 text-accent shrink-0" aria-hidden="true" />
               <span>Farbe: {product.color}</span>
             </div>
           )}
         </div>
 
-        <div className="p-3 bg-[#f9f9f9] rounded-none space-y-3 border border-[#c8d3d5]">
+        <div className="p-3 bg-muted/30 rounded-none space-y-3 border border-border">
           <div className="flex items-baseline justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#505c5f] block">Einzelpreis</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Einzelpreis</span>
               {activeVariant && (
-                <span className="text-[11px] text-[#505c5f] font-medium tabular-nums">
+                <span className="text-[11px] text-muted-foreground font-medium tabular-nums">
                   {formatBasePrice(activeVariant.price, activeVariant.type)}
                 </span>
               )}
             </div>
-            <span className="font-heading text-3xl tracking-wide text-[#0f4851] tabular-nums">
+            <span className="font-heading text-3xl tracking-wide text-primary tabular-nums">
               {formattedPrice}
             </span>
           </div>
 
           {/* Container Select */}
           <div className="space-y-1">
-            <label htmlFor={`variant-select-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f] block">
+            <label htmlFor={`variant-select-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
               Gebinde / Größe:
             </label>
             <Select
@@ -171,22 +171,22 @@ export function ProductCard({ product }: ProductCardProps) {
                 }
               }}
             >
-              <SelectTrigger id={`variant-select-${product.id}`} className="w-full bg-white h-9 text-xs rounded-none border-[#c8d3d5] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none">
+              <SelectTrigger id={`variant-select-${product.id}`} className="w-full bg-white h-9 text-xs rounded-none border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none">
                 <SelectValue placeholder="Gebinde wählen">
                   {formatContainerType(selectedVariantType)}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="rounded-none border-[#c8d3d5]">
+              <SelectContent className="rounded-none border-border">
                 {availableVariants.map((v) => (
                   <SelectItem key={v.type} value={v.type} className="text-xs rounded-none">
                     <div className="flex justify-between w-full gap-4 items-center">
                       <div>
                         <span className="font-medium">{formatContainerType(v.type)}</span>
-                        <span className="text-[10px] text-[#505c5f] ml-1.5 tabular-nums">
+                        <span className="text-[10px] text-muted-foreground ml-1.5 tabular-nums">
                           ({formatBasePrice(v.price, v.type)})
                         </span>
                       </div>
-                      <span className="font-bold text-[#0f4851] ml-2 tabular-nums">
+                      <span className="font-bold text-primary ml-2 tabular-nums">
                         {formatPrice(v.price)}
                       </span>
                     </div>
@@ -199,24 +199,24 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Quantity Stepper & Presets */}
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between">
-              <label htmlFor={`quantity-input-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-[#505c5f]">
+              <label htmlFor={`quantity-input-${product.id}`} className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Bestellmenge:
               </label>
               {quantity > 1 && activeVariant && (
-                <span className="text-[11px] font-bold text-[#00A8BC] tabular-nums">
+                <span className="text-[11px] font-bold text-primary tabular-nums">
                   Summe: {formatPrice(activeVariant.price * quantity)}
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center border border-[#c8d3d5] rounded-none bg-white overflow-hidden shadow-2xs focus-within:ring-2 focus-within:ring-[#00A8BC]">
+              <div className="flex items-center border border-border rounded-none bg-white overflow-hidden shadow-2xs focus-within:ring-2 focus-within:ring-ring">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   aria-label={`Menge für ${product.name} verringern (aktuell: ${quantity})`}
-                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
+                  className="size-8 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
                   disabled={quantity <= 1}
                 >
@@ -238,14 +238,14 @@ export function ProductCard({ product }: ProductCardProps) {
                     if (!isNaN(val) && val >= 1) setQuantity(val);
                     else if (e.target.value === "") setQuantity(1);
                   }}
-                  className="w-12 text-center text-xs font-bold bg-transparent outline-none focus-visible:bg-[#f0f7f8] py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-12 text-center text-xs font-bold bg-transparent outline-none focus-visible:bg-muted py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   aria-label={`Menge für ${product.name} erhöhen (aktuell: ${quantity})`}
-                  className="size-8 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none"
+                  className="size-8 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   onClick={() => setQuantity((prev) => prev + 1)}
                 >
                   <Plus className="size-3.5" aria-hidden="true" />
@@ -264,8 +264,8 @@ export function ProductCard({ product }: ProductCardProps) {
                       aria-label={`${cnt} Stück (${cnt === 6 ? "6er Kasten" : `${cnt}er`}) für ${product.name} auswählen`}
                       aria-pressed={quantity === cnt}
                       onClick={() => setQuantity(cnt)}
-                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase tabular-nums focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:ring-offset-1 focus-visible:outline-none ${
-                        quantity === cnt ? "bg-[#0f4851] text-white" : "border-[#c8d3d5] text-[#0f4851]"
+                      className={`h-8 px-2 text-[11px] font-bold rounded-none uppercase tabular-nums focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none ${
+                        quantity === cnt ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border-border text-primary hover:bg-muted"
                       }`}
                     >
                       {cnt === 6 ? "6er Kasten" : `${cnt}er`}
@@ -277,16 +277,16 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {depositText && (
-            <div className="flex items-center gap-1 text-[11px] text-[#505c5f] pt-0.5 font-medium">
-              <Info className="size-3 text-[#00A8BC] shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground pt-0.5 font-medium">
+              <Info className="size-3 text-accent shrink-0" aria-hidden="true" />
               <span className="tabular-nums">{depositText}</span>
             </div>
           )}
 
           {/* LMIV & Allergen information */}
-          <div className="pt-2 border-t border-[#c8d3d5] text-xs text-[#505c5f] leading-relaxed">
+          <div className="pt-2 border-t border-border text-xs text-muted-foreground leading-relaxed">
             <p>
-              <span className="font-semibold text-[#1a1c1c]">Zutaten:</span>{" "}
+              <span className="font-semibold text-foreground">Zutaten:</span>{" "}
               {(() => {
                 const rawIngredients = product.ingredients?.trim() || (isBeer
                   ? "Brauwasser, Gerstenmalz, Hopfen, Hefe."
@@ -295,7 +295,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 const parts = rawIngredients.split(allergenRegex);
                 return parts.map((part, i) =>
                   allergenRegex.test(part) ? (
-                    <strong key={i} className="font-bold text-[#1a1c1c]">
+                    <strong key={i} className="font-bold text-foreground">
                       {part}
                     </strong>
                   ) : (
@@ -308,14 +308,14 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-2 border-t border-[#c8d3d5] bg-[#f9f9f9]">
+      <CardFooter className="pt-2 border-t border-border bg-muted/30">
         <Button
           onClick={handleAddToCart}
           aria-label={justAdded ? `${quantity}x ${product.name} im Warenkorb` : `${quantity}x ${product.name} in den Warenkorb legen`}
           className={`w-full font-bold uppercase tracking-wider transition-colors duration-150 h-10 rounded-none shadow-xs ${
             justAdded
-              ? "bg-[#0f4851] text-white"
-              : "bg-[#00a8bc] hover:bg-[#0092a4] text-white"
+              ? "bg-emerald-800 hover:bg-emerald-900 text-white"
+              : "bg-primary hover:bg-primary/90 text-primary-foreground"
           }`}
           disabled={!activeVariant}
         >

@@ -68,3 +68,6 @@ node_modules/
 
 # Local tools
 .aider-desk/
+.codex/
+*.exe
+.agents/**/bin/

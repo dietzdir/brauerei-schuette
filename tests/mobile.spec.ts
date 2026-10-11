@@ -57,7 +57,7 @@ test.describe("Mobile Viewport Tests (iPhone 14 / 390x844)", () => {
     await continueBtn.click();
 
     // Check cart counter in header
-    const cartBadge = page.locator("header button").locator("span.bg-\\[\\#0f4851\\]");
+    const cartBadge = page.locator("header button").locator("span.tabular-nums");
     await expect(cartBadge).toBeVisible();
   });
 

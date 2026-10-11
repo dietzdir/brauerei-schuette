@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Clock, CheckCircle2, PackageCheck, History, Calendar } from "lucide-react";
+import { Clock, CheckCircle2, PackageCheck, History, Calendar as CalendarIcon } from "lucide-react";
 import { formatContainerType, formatPrice, formatOrderDateTime, getOrderTimestamp } from "@/lib/utils";
 
 interface OrdersDrawerProps {
@@ -134,22 +134,22 @@ export function OrdersDrawer({ open, onOpenChange }: OrdersDrawerProps) {
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" className="bg-white text-[#0f4851] border-[#c8d3d5] flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
-            <Clock className="size-3 text-[#00A8BC]" aria-hidden="true" />
+          <Badge variant="outline" className="bg-card text-primary border-border flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
+            <Clock className="size-3 text-accent" aria-hidden="true" />
             In Bearbeitung
           </Badge>
         );
       case "ready":
         return (
-          <Badge variant="outline" className="bg-[#00A8BC]/15 text-[#0f4851] border-[#00A8BC] flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
-            <PackageCheck className="size-3 text-[#00A8BC]" aria-hidden="true" />
+          <Badge variant="outline" className="bg-accent/15 text-primary border-accent flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
+            <PackageCheck className="size-3 text-accent" aria-hidden="true" />
             Abholbereit
           </Badge>
         );
       case "completed":
         return (
-          <Badge variant="outline" className="bg-[#0f4851] text-white border-[#0f4851] flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
-            <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
+          <Badge variant="outline" className="bg-primary text-primary-foreground border-primary flex items-center gap-1 text-[11px] font-bold uppercase rounded-none">
+            <CheckCircle2 className="size-3 text-primary-foreground" aria-hidden="true" />
             Abgeschlossen
           </Badge>
         );
@@ -160,27 +160,27 @@ export function OrdersDrawer({ open, onOpenChange }: OrdersDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-[#f9f9f9] p-6 rounded-none border-l border-[#c8d3d5]">
-        <SheetHeader className="pb-4 border-b border-[#c8d3d5] pr-8">
+      <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-background p-6 rounded-none border-l border-border">
+        <SheetHeader className="pb-4 border-b border-border pr-8">
           <div className="flex items-center gap-2">
-            <History className="size-5 text-[#00A8BC]" aria-hidden="true" />
-            <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">Ihre Reservierungen</SheetTitle>
+            <History className="size-5 text-accent" aria-hidden="true" />
+            <SheetTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-primary">Ihre Reservierungen</SheetTitle>
           </div>
-          <SheetDescription className="text-xs text-[#505c5f]">
+          <SheetDescription className="text-xs text-muted-foreground">
             Übersicht aller getätigten Vorbestellungen und deren Status.
           </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-[#505c5f] space-y-2">
-              <Clock className="size-8 animate-spin text-[#00A8BC]" aria-hidden="true" />
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground space-y-2">
+              <Clock className="size-8 animate-spin text-accent" aria-hidden="true" />
               <p className="text-xs font-bold uppercase tracking-wider">Reservierungen werden geladen…</p>
             </div>
           ) : orders.length === 0 ? (
-            <div className="text-center py-12 text-[#505c5f] space-y-3">
-              <History className="size-12 mx-auto text-[#c8d3d5]" aria-hidden="true" />
-              <p className="font-heading text-lg uppercase tracking-wide text-[#0f4851]">Keine Reservierungen gefunden</p>
+            <div className="text-center py-12 text-muted-foreground space-y-3">
+              <History className="size-12 mx-auto text-muted-foreground/40" aria-hidden="true" />
+              <p className="font-heading text-lg uppercase tracking-wide text-primary">Keine Reservierungen gefunden</p>
               <p className="text-xs">
                 Sie haben bisher noch keine Vorbestellungen aufgegeben oder sind als Gast unterwegs.
               </p>
@@ -204,42 +204,42 @@ export function OrdersDrawer({ open, onOpenChange }: OrdersDrawerProps) {
               return (
                 <ViewTransition key={order.id}>
                   <div
-                    className="p-4 rounded-none border border-[#c8d3d5] bg-white shadow-2xs space-y-3"
+                    className="p-4 rounded-none border border-border bg-card shadow-2xs space-y-3"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="font-mono text-xs text-[#505c5f] block font-bold tabular-nums">
+                        <span className="font-mono text-xs text-muted-foreground block font-bold tabular-nums">
                           Bestell-Nr: #{order.id.slice(0, 8).toUpperCase()}
                         </span>
-                        <span className="text-xs text-[#505c5f] tabular-nums">{orderDate}</span>
+                        <span className="text-xs text-muted-foreground tabular-nums">{orderDate}</span>
                       </div>
                       {getStatusBadge(order.status)}
                     </div>
 
-                    <div className="text-xs text-[#505c5f]">
-                      Besteller: <strong className="text-[#1a1c1c]">{order.customerName}</strong> (
+                    <div className="text-xs text-muted-foreground">
+                      Besteller: <strong className="text-foreground">{order.customerName}</strong> (
                       {order.customerType === "business" ? "Geschäftskunde" : "Privatkunde"})
                     </div>
 
                     {order.pickupDate && (
-                      <div className="p-2.5 rounded-none bg-[#f9f9f9] border border-[#c8d3d5] flex items-center gap-2 text-xs font-bold text-[#0f4851]">
-                        <Calendar className="size-3.5 text-[#00A8BC] shrink-0" aria-hidden="true" />
+                      <div className="p-2.5 rounded-none bg-muted/60 border border-border flex items-center gap-2 text-xs font-bold text-primary">
+                        <CalendarIcon className="size-3.5 text-accent shrink-0" aria-hidden="true" />
                         <span className="tabular-nums">Abholtermin: {order.pickupDate} {order.pickupTime ? `(${order.pickupTime})` : ""}</span>
                       </div>
                     )}
 
-                    <Separator className="border-[#c8d3d5]" />
+                    <Separator className="border-border" />
 
                     <div className="space-y-1.5">
                       {order.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-xs">
-                          <span className="text-[#1a1c1c] font-medium">
+                          <span className="text-foreground font-medium">
                             <span className="tabular-nums">{item.quantity}x</span> {item.productName}{" "}
-                            <span className="text-[10px] text-[#505c5f]">
+                            <span className="text-[10px] text-muted-foreground">
                               ({formatContainerType(item.variantType)})
                             </span>
                           </span>
-                          <span className="font-bold text-[#0f4851] tabular-nums">
+                          <span className="font-bold text-primary tabular-nums">
                             {formatPrice(item.unitPrice * item.quantity)}
                           </span>
                         </div>
@@ -247,17 +247,17 @@ export function OrdersDrawer({ open, onOpenChange }: OrdersDrawerProps) {
                     </div>
 
                     {depositSum > 0 && (
-                      <div className="flex justify-between text-xs text-[#00A8BC]">
+                      <div className="flex justify-between text-xs text-accent font-semibold">
                         <span>Pfand (Gebinde/Flaschen):</span>
                         <span className="font-bold tabular-nums">+ {formatPrice(depositSum)}</span>
                       </div>
                     )}
 
-                    <Separator className="border-[#c8d3d5]" />
+                    <Separator className="border-border" />
 
                     <div className="flex justify-between items-center font-bold text-xs pt-1">
-                      <span className="uppercase tracking-wider text-[#505c5f]">Gesamtsumme:</span>
-                      <span className="font-heading text-xl text-[#0f4851] tabular-nums">
+                      <span className="uppercase tracking-wider text-muted-foreground">Gesamtsumme:</span>
+                      <span className="font-heading text-xl text-primary tabular-nums">
                         {formatPrice(grandSum)}
                       </span>
                     </div>

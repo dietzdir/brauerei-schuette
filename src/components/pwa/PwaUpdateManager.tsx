@@ -97,10 +97,10 @@ export function PwaUpdateManager() {
       className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-md animate-in fade-in slide-in-from-bottom-5 duration-300 pointer-events-auto"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="bg-[#0f4851] text-white border border-[#00A8BC]/40 shadow-2xl p-3.5 sm:p-4 rounded-none flex items-center justify-between gap-3">
+      <div className="bg-primary text-primary-foreground border border-accent/40 shadow-2xl p-3.5 sm:p-4 rounded-none flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="size-8 rounded-none bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
-            <Sparkles className="size-4 text-[#00A8BC] animate-pulse" aria-hidden="true" />
+            <Sparkles className="size-4 text-amber-300 animate-pulse" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wider text-white truncate">
@@ -117,7 +117,7 @@ export function PwaUpdateManager() {
             size="sm"
             onClick={handleApplyUpdate}
             disabled={isUpdating}
-            className="bg-[#00A8BC] hover:bg-[#0092a4] text-white text-xs font-bold uppercase tracking-wider h-8 px-3 rounded-none shadow-xs cursor-pointer flex items-center gap-1.5"
+            className="bg-white hover:bg-white/90 text-primary text-xs font-bold uppercase tracking-wider h-8 px-3 rounded-none shadow-xs cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-ring"
           >
             <RotateCw className={`size-3.5 ${isUpdating ? "animate-spin" : ""}`} aria-hidden="true" />
             <span>{isUpdating ? "Lädt…" : "Laden"}</span>

@@ -70,7 +70,7 @@ export default function RootLayout({
       lang="de"
       className={`${firaSans.variable} ${anton.variable} ${jetbrainsMono.variable} h-full antialiased font-sans overflow-x-hidden`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans selection:bg-[#00A8BC]/20 selection:text-[#0F4851] overflow-x-hidden w-full">
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans selection:bg-amber-100 selection:text-amber-900 overflow-x-hidden w-full">
         <AuthProvider>
           <CartProvider>{children}</CartProvider>
         </AuthProvider>

@@ -51,25 +51,25 @@ export function RentalSection() {
   }
 
   return (
-    <section className="space-y-4 pt-6 border-t border-[#c8d3d5]">
+    <section className="space-y-4 pt-6 border-t border-border">
       <div>
-        <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851]">
+        <h3 className="font-heading text-3xl uppercase tracking-wider text-primary">
           Zubehör & Verleih
         </h3>
-        <p className="text-xs text-[#505c5f] mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Ergänzen Sie Ihre Reservierung mit unserem Verleihangebot.
         </p>
       </div>
 
       {loading ? (
-        <div className="border border-[#c8d3d5] bg-white p-6 animate-pulse rounded-none">
+        <div className="border border-border bg-white p-6 animate-pulse rounded-none">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-5 aspect-16/9 bg-[#f4f6f7]" />
+            <div className="md:col-span-5 aspect-16/9 bg-muted/40" />
             <div className="md:col-span-7 space-y-3">
-              <div className="h-6 w-2/3 bg-[#f4f6f7]" />
-              <div className="h-4 w-full bg-[#f4f6f7]" />
-              <div className="h-4 w-4/5 bg-[#f4f6f7]" />
-              <div className="h-10 w-48 bg-[#f4f6f7] mt-4" />
+              <div className="h-6 w-2/3 bg-muted/40" />
+              <div className="h-4 w-full bg-muted/40" />
+              <div className="h-4 w-4/5 bg-muted/40" />
+              <div className="h-10 w-48 bg-muted/40 mt-4" />
             </div>
           </div>
         </div>
@@ -133,13 +133,13 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
     <Card
       className={`overflow-hidden rounded-none border transition-all duration-200 bg-white shadow-xs p-0 ${
         inCartQty > 0
-          ? "border-[#00A8BC] ring-1 ring-[#00A8BC]"
-          : "border-[#c8d3d5] hover:border-[#0f4851]"
+          ? "border-accent ring-1 ring-accent"
+          : "border-border hover:border-primary"
       }`}
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch">
         {/* Left: Image (16:9 on mobile, fills column on desktop) */}
-        <div className="md:col-span-5 relative bg-[#f4f6f7] overflow-hidden flex items-center justify-center min-h-[220px] md:min-h-full border-b md:border-b-0 md:border-r border-[#c8d3d5]">
+        <div className="md:col-span-5 relative bg-muted/30 overflow-hidden flex items-center justify-center min-h-[220px] md:min-h-full border-b md:border-b-0 md:border-r border-border">
           {rental.image ? (
             <ViewTransition name={`rental-img-${rental.id}`} share="morph">
               <div className="relative w-full h-full aspect-16/9 md:aspect-auto min-h-[220px]">
@@ -154,8 +154,8 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
               </div>
             </ViewTransition>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#505c5f]">
-              <Wrench className="size-12 text-[#0f4851]/40 mb-2" />
+            <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+              <Wrench className="size-12 text-primary/40 mb-2" />
               <span className="text-xs font-semibold">Brauerei Schütte Verleih</span>
             </div>
           )}
@@ -177,42 +177,42 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 {inCartQty > 0 && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#00A8BC]/10 text-[#00A8BC] text-[10px] font-bold uppercase rounded-none border border-[#00A8BC]/30 tabular-nums">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-bold uppercase rounded-none border border-accent/30 tabular-nums">
                     <Check className="size-3 shrink-0" />
                     {inCartQty}x im Warenkorb
                   </span>
                 )}
               </div>
-              <span className="text-[11px] font-semibold text-[#505c5f] tabular-nums">
+              <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
                 Bestand: {rental.totalStock} Stück
               </span>
             </div>
 
-            <h4 className="font-heading text-xl sm:text-2xl uppercase tracking-wide text-[#0f4851] mt-2 leading-tight">
+            <h4 className="font-heading text-xl sm:text-2xl uppercase tracking-wide text-primary mt-2 leading-tight">
               {rental.name}
             </h4>
 
             {rental.description && (
-              <p className="text-xs text-[#505c5f] mt-1.5 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
                 {rental.description}
               </p>
             )}
           </div>
 
           {/* Price & Action Section */}
-          <div className="pt-4 border-t border-[#c8d3d5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#f9f9f9] -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 mt-4">
+          <div className="pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/40 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 mt-4">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Mietgebühr:
                 </span>
-                <span className="font-heading text-3xl tracking-wide text-[#0f4851] tabular-nums">
+                <span className="font-heading text-3xl tracking-wide text-primary tabular-nums">
                   {formatPrice(rental.rentalPriceCents)}
                 </span>
               </div>
               {rental.depositCents > 0 && (
-                <p className="text-[11px] text-[#505c5f] flex items-center gap-1 font-medium mt-0.5">
-                  <Info className="size-3 text-[#00A8BC] shrink-0" aria-hidden="true" />
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
+                  <Info className="size-3 text-accent shrink-0" aria-hidden="true" />
                   <span>zzgl. {formatPrice(rental.depositCents)} Kaution bei Abholung</span>
                 </p>
               )}
@@ -220,7 +220,7 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
 
             {/* Stepper + In den Warenkorb Button */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="flex items-center border border-[#c8d3d5] bg-white rounded-none h-10 shadow-2xs focus-within:ring-2 focus-within:ring-[#00A8BC]">
+              <div className="flex items-center border border-border bg-white rounded-none h-10 shadow-2xs focus-within:ring-2 focus-within:ring-ring">
                 <Button
                   type="button"
                   variant="ghost"
@@ -228,7 +228,7 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
                   aria-label={`Menge für Mietartikel ${rental.name} verringern (aktuell: ${quantity})`}
                   disabled={quantity <= 1 || isStockLimitReached}
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="size-9 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                  className="size-9 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
                 >
                   <Minus className="size-3.5" aria-hidden="true" />
                 </Button>
@@ -251,7 +251,7 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
                       setQuantity(1);
                     }
                   }}
-                  className="w-10 text-center text-xs font-bold text-[#0f4851] bg-transparent outline-none focus-visible:bg-[#f0f7f8] py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
+                  className="w-10 text-center text-xs font-bold text-primary bg-transparent outline-none focus-visible:bg-muted py-1.5 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
                 />
                 <Button
                   type="button"
@@ -260,7 +260,7 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
                   aria-label={`Menge für Mietartikel ${rental.name} erhöhen (aktuell: ${quantity})`}
                   disabled={quantity >= remainingStock || isStockLimitReached}
                   onClick={() => setQuantity((prev) => Math.min(prev + 1, remainingStock))}
-                  className="size-9 rounded-none text-[#505c5f] hover:text-[#1a1c1c] hover:bg-[#eeeeee] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#00A8BC] focus-visible:outline-none cursor-pointer"
+                  className="size-9 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
                 >
                   <Plus className="size-3.5" aria-hidden="true" />
                 </Button>
@@ -271,12 +271,12 @@ function RentalCardItem({ rental, cartItem, onAddToCart }: RentalCardItemProps) 
                 onClick={handleAdd}
                 disabled={isStockLimitReached}
                 aria-label={justAdded ? `${quantity}x ${rental.name} im Warenkorb` : `${quantity}x ${rental.name} in den Warenkorb legen`}
-                className={`flex-1 sm:flex-none font-bold uppercase tracking-wider text-xs h-10 px-5 rounded-none shadow-xs transition-colors duration-150 flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 sm:flex-none font-bold uppercase tracking-wider text-xs h-10 px-5 rounded-none shadow-xs transition-colors duration-150 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring ${
                   justAdded
-                    ? "bg-[#0f4851] text-white"
+                    ? "bg-emerald-800 text-white"
                     : isStockLimitReached
-                    ? "bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed"
-                    : "bg-[#00a8bc] hover:bg-[#0092a4] text-white"
+                    ? "bg-muted text-muted-foreground border border-border cursor-not-allowed"
+                    : "bg-primary hover:bg-[#165a65] text-primary-foreground"
                 }`}
               >
                 {justAdded ? (

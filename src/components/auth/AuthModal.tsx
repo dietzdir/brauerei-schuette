@@ -317,14 +317,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
               <DialogTitle className="font-heading text-xl sm:text-2xl uppercase tracking-wider text-[#0f4851]">Kundenkonto</DialogTitle>
               {!isAnonymous && (
-                <Badge variant="outline" className="text-[10px] font-bold uppercase bg-white text-[#0f4851] border-[#c8d3d5] rounded-none shrink-0">
-                  <UserCheck className="size-3 mr-1 text-[#00A8BC]" />
+                <Badge variant="outline" className="text-[10px] font-bold uppercase bg-white text-primary border-border rounded-none shrink-0">
+                  <UserCheck className="size-3 mr-1 text-accent" />
                   Registriert
                 </Badge>
               )}
             </div>
           </div>
-          <DialogDescription className="text-xs text-[#505c5f]">
+          <DialogDescription className="text-xs text-muted-foreground">
             {isAnonymous
               ? "Melden Sie sich an oder erstellen Sie ein neues Kundenkonto."
               : "Verwalten Sie Ihre Anmeldedaten und Kundeneinstellungen."}
@@ -337,8 +337,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             <div className="space-y-4">
             
             {successMsg && (
-              <div className="p-3 bg-white border border-[#00A8BC] rounded-none flex items-center gap-2 text-xs text-[#0f4851] font-bold">
-                <UserCheck className="size-4 shrink-0 text-[#00A8BC]" />
+              <div className="p-3 bg-white border border-accent/40 rounded-none flex items-center gap-2 text-xs text-primary font-bold">
+                <UserCheck className="size-4 shrink-0 text-accent" />
                 <span>{successMsg}</span>
               </div>
             )}
@@ -349,31 +349,31 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
             )}
 
-            <div className="p-4 bg-white border border-[#c8d3d5] rounded-none space-y-3 shadow-2xs">
+            <div className="p-4 bg-white border border-border rounded-none space-y-3 shadow-2xs">
               {isEditingProfile ? (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="edit-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Name</Label>
-                    <Input id="edit-name" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} className="h-9 text-xs bg-white rounded-none border-[#c8d3d5]" />
+                    <Label htmlFor="edit-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Name</Label>
+                    <Input id="edit-name" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} className="h-9 text-xs bg-white rounded-none border-border" />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="edit-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Telefon</Label>
-                    <Input id="edit-phone" value={editPhoneNumber} onChange={(e) => setEditPhoneNumber(e.target.value)} className="h-9 text-xs bg-white rounded-none border-[#c8d3d5]" />
+                    <Label htmlFor="edit-phone" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Telefon</Label>
+                    <Input id="edit-phone" value={editPhoneNumber} onChange={(e) => setEditPhoneNumber(e.target.value)} className="h-9 text-xs bg-white rounded-none border-border" />
                   </div>
                   <div className="space-y-1.5 pt-1">
-                    <Label htmlFor="edit-customer-type" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Kundentyp</Label>
+                    <Label htmlFor="edit-customer-type" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Kundentyp</Label>
                     <Select
                       value={editCustomerType}
                       onValueChange={(val) => {
                         if (val) setEditCustomerType(val as "private" | "business");
                       }}
                     >
-                      <SelectTrigger id="edit-customer-type" className="w-full bg-white h-9 text-xs font-medium rounded-none border-[#c8d3d5]">
+                      <SelectTrigger id="edit-customer-type" className="w-full bg-white h-9 text-xs font-medium rounded-none border-border">
                         <SelectValue placeholder="Kundentyp wählen">
                           {editCustomerType === "business" ? "Geschäftskunde (Firma / Gastro)" : "Privatkunde"}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-none border-[#c8d3d5]">
+                      <SelectContent className="rounded-none border-border">
                         <SelectItem value="private" label="Privatkunde" className="rounded-none">
                           Privatkunde
                         </SelectItem>
@@ -429,7 +429,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <div className="pt-3 border-t border-destructive/20 mt-4">
                     {showDeleteConfirm ? (
-                      <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl space-y-2.5 text-center animate-in fade-in zoom-in-95 duration-150">
+                      <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none space-y-2.5 text-center animate-in fade-in zoom-in-95 duration-150">
                         <p className="text-xs font-semibold text-destructive">
                           Möchten Sie Ihr Kundenkonto wirklich unwiderruflich löschen?
                         </p>
@@ -438,7 +438,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                             type="button"
                             size="sm"
                             variant="destructive"
-                            className="w-full h-8 text-xs font-bold"
+                            className="w-full h-8 text-xs font-bold rounded-none"
                             onClick={handleDeleteAccount}
                             disabled={loading}
                           >
@@ -448,7 +448,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="w-full h-8 text-xs font-medium"
+                            className="w-full h-8 text-xs font-medium rounded-none"
                             onClick={() => setShowDeleteConfirm(false)}
                             disabled={loading}
                           >
@@ -461,7 +461,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-8"
+                        className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-8 rounded-none"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={loading}
                       >
@@ -477,10 +477,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <img
                         src={profile.photoURL}
                         alt="Profile"
-                        className="size-12 rounded-full border-2 border-primary/20 object-cover"
+                        className="size-12 rounded-none border-2 border-primary/20 object-cover"
                       />
                     ) : (
-                      <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                      <div className="size-12 rounded-none bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                         {profile?.displayName ? profile.displayName.charAt(0).toUpperCase() : "K"}
                       </div>
                     )}
@@ -532,12 +532,12 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         size="sm"
                         onClick={handleProfileResetPassword}
                         disabled={loading}
-                        className="h-8 text-xs font-semibold rounded-none border-[#c8d3d5] text-[#0f4851] hover:bg-[#eeeeee]"
+                        className="h-8 text-xs font-semibold rounded-none border-border text-primary hover:bg-muted"
                       >
                         Passwort ändern
                       </Button>
                     )}
-                    <Button variant="ghost" size="sm" onClick={handleEditProfile} className="h-8 text-xs font-medium ml-auto">
+                    <Button variant="ghost" size="sm" onClick={handleEditProfile} className="h-8 text-xs font-medium ml-auto rounded-none">
                       Profil bearbeiten
                     </Button>
                   </div>
@@ -548,7 +548,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             {!isEditingProfile && (
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full rounded-none"
                 onClick={handleLogout}
               >
                 <LogOut className="size-4 mr-2" />
@@ -560,14 +560,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           // Login / Register View for Anonymous / Guests
           <>
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-xs text-destructive">
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-center gap-2 text-xs text-destructive">
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2 text-xs text-emerald-800">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-none flex items-center gap-2 text-xs text-emerald-800">
                 <UserCheck className="size-4 shrink-0 text-emerald-600" />
                 <span>{successMsg}</span>
               </div>
@@ -576,8 +576,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             {viewMode === "forgot_password" ? (
               <div className="space-y-4 pt-1">
                 <div className="text-left space-y-1">
-                  <h3 className="font-heading text-xl uppercase tracking-wider text-[#0f4851]">Passwort zurücksetzen</h3>
-                  <p className="text-xs text-[#505c5f]">
+                  <h3 className="font-heading text-xl uppercase tracking-wider text-primary">Passwort zurücksetzen</h3>
+                  <p className="text-xs text-muted-foreground">
                     Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen sicheren Link per E-Mail, mit dem Sie ein neues Passwort festlegen können.
                   </p>
                 </div>
@@ -590,7 +590,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   className="space-y-3 pt-2"
                 >
                   <div className="space-y-1">
-                    <Label htmlFor="reset-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">
+                    <Label htmlFor="reset-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       E-Mail-Adresse
                     </Label>
                     <Input
@@ -600,13 +600,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                      className="bg-white rounded-none border-border h-9 text-xs"
                     />
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs"
+                    className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                     disabled={loading}
                   >
                     {loading ? "Wird gesendet..." : "Link zum Zurücksetzen anfordern"}
@@ -615,7 +615,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="w-full text-xs font-bold uppercase tracking-wider text-[#505c5f] hover:text-[#0f4851] rounded-none"
+                    className="w-full text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary rounded-none cursor-pointer"
                     onClick={() => {
                       setViewMode("tabs");
                       setError(null);
@@ -627,18 +627,18 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
             ) : (
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full mt-2">
-                <TabsList className="grid w-full grid-cols-2 bg-[#eeeeee] border border-[#c8d3d5] rounded-none p-1">
-                  <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors duration-150">
+                <TabsList className="grid w-full grid-cols-2 bg-muted border border-border rounded-none p-1">
+                  <TabsTrigger value="login" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground hover:text-primary transition-colors duration-150">
                     Anmelden
                   </TabsTrigger>
-                  <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-[#0f4851] data-[state=active]:text-white transition-colors duration-150">
+                  <TabsTrigger value="register" className="rounded-none font-bold uppercase tracking-wider text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground hover:text-primary transition-colors duration-150">
                     Neu registrieren
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="register" className="mt-4 space-y-4">
                   <div className="space-y-2">
-                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee] transition-colors duration-150" onClick={handleGoogleLogin} disabled={loading}>
+                    <Button type="button" variant="outline" className="w-full rounded-none border-border bg-white font-bold uppercase tracking-wider text-xs h-9 text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer" onClick={handleGoogleLogin} disabled={loading}>
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -651,16 +651,16 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-[#c8d3d5]" />
+                      <span className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-                      <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
+                      <span className="bg-background px-2 text-muted-foreground">oder mit E-Mail</span>
                     </div>
                   </div>
 
                   <form onSubmit={handleRegisterOrLink} className="space-y-3">
                     <div className="space-y-1">
-                      <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse *</Label>
+                      <Label htmlFor="reg-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">E-Mail-Adresse *</Label>
                       <Input
                         id="reg-email"
                         name="email"
@@ -672,13 +672,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        className="bg-white rounded-none border-border h-9 text-xs"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label htmlFor="reg-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort *</Label>
+                        <Label htmlFor="reg-pass" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Passwort *</Label>
                         <Input
                           id="reg-pass"
                           name="new-password"
@@ -689,11 +689,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           minLength={6}
-                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                          className="bg-white rounded-none border-border h-9 text-xs"
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="reg-pass-confirm" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Wiederholen *</Label>
+                        <Label htmlFor="reg-pass-confirm" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Wiederholen *</Label>
                         <Input
                           id="reg-pass-confirm"
                           name="new-password-confirm"
@@ -704,14 +704,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           onChange={(e) => setPasswordConfirm(e.target.value)}
                           required
                           minLength={6}
-                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                          className="bg-white rounded-none border-border h-9 text-xs"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label htmlFor="reg-name" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Vollständiger Name *</Label>
+                        <Label htmlFor="reg-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Vollständiger Name *</Label>
                         <Input
                           id="reg-name"
                           name="name"
@@ -720,11 +720,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
                           required
-                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                          className="bg-white rounded-none border-border h-9 text-xs"
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="reg-phone" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Telefonnummer *</Label>
+                        <Label htmlFor="reg-phone" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Telefonnummer *</Label>
                         <Input
                           id="reg-phone"
                           name="tel"
@@ -735,18 +735,18 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           required
-                          className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs tabular-nums"
+                          className="bg-white rounded-none border-border h-9 text-xs tabular-nums"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <Label htmlFor="reg-type" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Kundentyp</Label>
+                      <Label htmlFor="reg-type" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Kundentyp</Label>
                       <Select value={customerType} onValueChange={(v) => setCustomerType(v as any)}>
-                        <SelectTrigger id="reg-type" className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs">
+                        <SelectTrigger id="reg-type" className="bg-white rounded-none border-border h-9 text-xs">
                           <SelectValue placeholder="Kundentyp auswählen" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-none border-[#c8d3d5]">
+                        <SelectContent className="rounded-none border-border">
                           <SelectItem value="private">Privatkunde</SelectItem>
                           <SelectItem value="business">Geschäftskunde</SelectItem>
                         </SelectContent>
@@ -754,9 +754,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </div>
 
                     {customerType === "business" && (
-                      <div className="space-y-3 pt-2 border-t border-[#c8d3d5]">
+                      <div className="space-y-3 pt-2 border-t border-border">
                         <div className="space-y-1">
-                          <Label htmlFor="reg-company" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Firmenname *</Label>
+                          <Label htmlFor="reg-company" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Firmenname *</Label>
                           <Input
                             id="reg-company"
                             name="organization"
@@ -765,11 +765,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             required
-                            className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                            className="bg-white rounded-none border-border h-9 text-xs"
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Rechnungsadresse *</Label>
+                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Rechnungsadresse *</Label>
                           <div className="grid grid-cols-[3fr_1fr] gap-2">
                             <Input
                               name="address-line1"
@@ -778,7 +778,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                               value={street}
                               onChange={(e) => setStreet(e.target.value)}
                               required
-                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                              className="bg-white rounded-none border-border h-9 text-xs"
                             />
                             <Input
                               name="house-number"
@@ -787,7 +787,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                               value={houseNumber}
                               onChange={(e) => setHouseNumber(e.target.value)}
                               required
-                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                              className="bg-white rounded-none border-border h-9 text-xs"
                             />
                           </div>
                           <div className="grid grid-cols-[1fr_2fr] gap-2">
@@ -799,7 +799,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                               value={zipCode}
                               onChange={(e) => setZipCode(e.target.value)}
                               required
-                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs tabular-nums"
+                              className="bg-white rounded-none border-border h-9 text-xs tabular-nums"
                             />
                             <Input
                               name="address-level2"
@@ -808,7 +808,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                               value={city}
                               onChange={(e) => setCity(e.target.value)}
                               required
-                              className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                              className="bg-white rounded-none border-border h-9 text-xs"
                             />
                           </div>
                         </div>
@@ -821,15 +821,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="agb"
                         checked={agbAccepted}
                         onChange={(e) => setAgbAccepted(e.target.checked)}
-                        className="mt-1 size-4 rounded-none border-[#c8d3d5] text-[#00A8BC] focus:ring-[#00A8BC]"
+                        className="mt-1 size-4 rounded-none border-border text-primary focus:ring-ring"
                         required
                       />
-                      <Label htmlFor="agb" className="text-xs text-[#505c5f] leading-tight">
+                      <Label htmlFor="agb" className="text-xs text-muted-foreground leading-tight">
                         Ich habe die Allgemeinen Geschäftsbedingungen sowie die Datenschutzerklärung gelesen und akzeptiere diese. *
                       </Label>
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150" disabled={loading}>
+                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
                       {loading ? "Wird verarbeitet…" : "Konto erstellen"}
                     </Button>
                   </form>
@@ -837,7 +837,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                 <TabsContent value="login" className="mt-4 space-y-4">
                   <div className="space-y-2">
-                    <Button type="button" variant="outline" className="w-full rounded-none border-[#c8d3d5] bg-white font-bold uppercase tracking-wider text-xs h-9 text-[#1a1c1c] hover:bg-[#eeeeee] transition-colors duration-150" onClick={handleGoogleLogin} disabled={loading}>
+                    <Button type="button" variant="outline" className="w-full rounded-none border-border bg-white font-bold uppercase tracking-wider text-xs h-9 text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer" onClick={handleGoogleLogin} disabled={loading}>
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -850,16 +850,16 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-[#c8d3d5]" />
+                      <span className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-                      <span className="bg-[#f9f9f9] px-2 text-[#505c5f]">oder mit E-Mail</span>
+                      <span className="bg-background px-2 text-muted-foreground">oder mit E-Mail</span>
                     </div>
                   </div>
 
                   <form onSubmit={handleLogin} className="space-y-3">
                     <div className="space-y-1">
-                      <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">E-Mail-Adresse</Label>
+                      <Label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">E-Mail-Adresse</Label>
                       <Input
                         id="login-email"
                         name="email"
@@ -871,13 +871,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        className="bg-white rounded-none border-border h-9 text-xs"
                       />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex justify-between items-center">
-                        <Label htmlFor="login-pass" className="text-xs font-bold uppercase tracking-wider text-[#505c5f]">Passwort</Label>
+                        <Label htmlFor="login-pass" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Passwort</Label>
                         <button
                           type="button"
                           onClick={() => {
@@ -885,7 +885,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                             setSuccessMsg(null);
                             setViewMode("forgot_password");
                           }}
-                          className="text-[10px] sm:text-xs text-[#00A8BC] hover:underline font-bold uppercase tracking-wider"
+                          className="text-[10px] sm:text-xs text-accent hover:underline font-bold uppercase tracking-wider cursor-pointer"
                           disabled={loading}
                         >
                           Passwort vergessen?
@@ -899,11 +899,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="bg-white rounded-none border-[#c8d3d5] h-9 text-xs"
+                        className="bg-white rounded-none border-border h-9 text-xs"
                       />
                     </div>
 
-                    <Button type="submit" className="w-full mt-4 bg-[#00a8bc] hover:bg-[#0092a4] text-white rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150" disabled={loading}>
+                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-[#165a65] text-primary-foreground rounded-none font-bold uppercase tracking-wider h-10 shadow-xs transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring" disabled={loading}>
                       {loading ? "Anmeldung läuft…" : "Anmelden"}
                     </Button>
                   </form>

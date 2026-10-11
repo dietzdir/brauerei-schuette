@@ -24,11 +24,11 @@ export default function Home() {
 
         {/* Product Catalog Grid */}
         <div className="space-y-4 pt-2">
-          <div className="border-b border-[#c8d3d5] pb-2">
-            <h3 className="font-heading text-3xl uppercase tracking-wider text-[#0f4851]">
+          <div className="border-b border-border pb-2">
+            <h3 className="font-heading text-3xl uppercase tracking-wider text-primary">
               Unser Sortiment
             </h3>
-            <p className="text-xs text-[#505c5f]">
+            <p className="text-xs text-muted-foreground">
               Wählen Sie Ihre Sorte und das gewünschte Gebinde aus.
             </p>
           </div>
